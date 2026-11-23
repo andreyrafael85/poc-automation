@@ -68,11 +68,6 @@ A setup guide walks the SE through seven readiness steps (customer, logo, scope,
 dashboard, the team's hourly cost). While the PoC is being prepared the menu stays hidden; the whole app opens at
 five of the seven steps.
 
-<p align="center">
-  <img src="docs/images/executive-summary.png" alt="PoC Automation 3.0 — the Executive summary for the fictitious company ACME Corp: the verdict of the PoC, Day 0 against today and the measured figures with their provenance" width="900">
-</p>
-<p align="center"><em>The Executive summary — stage 6 (fictitious company, synthetic data).</em></p>
-
 ### The PoC Builder — build on the tenant, one click at a time
 
 Everything the Builder creates is listed in a **Register** with its link, and the **end-of-PoC clean-up** removes
@@ -324,7 +319,7 @@ marcadores de lugar).
   repository; the app runs and builds its decks on a neutral theme without them.
 - **No customer data.** This repository contains no customer data, no tenant ids and no credentials. Validation
   notes in the query catalog refer to an internal lab environment only by that description.
-- **Example screens.** The screenshots show a fictitious company, **ACME Corp**, with synthetic data produced by the
+- **Example screens.** The screenshot shows a fictitious company, **ACME Corp**, with synthetic data produced by the
   visual harness.
 
 ## License
