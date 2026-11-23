@@ -1,0 +1,61 @@
+# DT APP files
+.dt-app/*
+!/.dt-app/deployment.json
+
+# Compiled output
+/dist
+/build
+/tmp
+
+# Deployment artifact
+/out
+
+# Offline visual harness output (screenshots, reports, Vite cache)
+/.visual-qa
+
+# Dependencies
+/node_modules
+node_modules/
+
+# IDEs and editors
+/.idea
+*.iml
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.history/
+
+# IDE - VSCode
+/.vscode/*
+!/.vscode/settings.json
+!/.vscode/tasks.json
+!/.vscode/launch.json
+!/.vscode/extensions.json
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# app-settings plugin local files
+/settings/local-mock-data/secrets.json
+/settings/local-mock-data/persistence/
+
+# --- Project additions: keep tenant URLs and local secrets out of Git ---
+# deployment.json records the environment this app was deployed to, i.e. a
+# tenant URL. It must never be committed.
+/.dt-app/deployment.json
+
+# Local environment overrides. Keep the real environment URL out of the repo and
+# pass it at deploy time with: dt-app deploy --environment-url <url>
+.env
+.env.*
+!.env.example
+app.config.local.json
+
+# Test and coverage output
+/coverage
+*.metafile.json
+esbuild-bundle-information.json

@@ -1,0 +1,132 @@
+{
+  "$schema": "./.dt-app/app.config.schema.json",
+  "environmentUrl": "https://YOUR-ENVIRONMENT-ID.apps.dynatrace.com/",
+  "app": {
+    "name": "PoC Automation 3.0",
+    "version": "3.7.8",
+    "description": "All in One, automated Dynatrace PoC: coverage, evidence, value and Tech Wrapup",
+    "id": "my.poc.automation",
+    "scopes": [
+      {
+        "name": "storage:entities:read",
+        "comment": "Inventory of hosts, services, applications, processes, Kubernetes and synthetic monitors (entity model reads, 0 bytes scanned)."
+      },
+      {
+        "name": "storage:smartscape:read",
+        "comment": "Smartscape on Grail (smartscapeNodes): cloud service families and Kubernetes pods. Required by the platform for smartscapeNodes/smartscapeEdges; without it those two queries are refused."
+      },
+      {
+        "name": "storage:events:read",
+        "comment": "Problems (dt.davis.problems), Kubernetes operational events and synthetic events."
+      },
+      {
+        "name": "storage:system:read",
+        "comment": "dt.system.events: billing usage, workflow and query execution events, platform adoption and the billing of the app's own queries."
+      },
+      {
+        "name": "storage:buckets:read",
+        "comment": "dt.system.buckets: retention, volume and has_access for the coverage matrix."
+      },
+      {
+        "name": "storage:logs:read",
+        "comment": "Log volume, levels and data-quality signals. Always bucket-scoped and scan-limited."
+      },
+      {
+        "name": "storage:metrics:read",
+        "comment": "Timeseries for host, service, Kubernetes and real-user trends, SLO indicators and the GenAI metrics of AI Observability."
+      },
+      {
+        "name": "storage:bizevents:read",
+        "comment": "Business observability. Validated: 1,099,009 records / 24h."
+      },
+      {
+        "name": "storage:security.events:read",
+        "comment": "Vulnerabilities and runtime risk. Without it the app shows an explicit no-permission state."
+      },
+      {
+        "name": "storage:user.sessions:read",
+        "comment": "Real user monitoring sessions. Without access the app shows an explicit gap state."
+      },
+      {
+        "name": "state:app-states:read",
+        "comment": "Reads the PoC configuration saved on the tenant (customer, scope, logos, pillars, partner access). Shared by every user of the app."
+      },
+      {
+        "name": "state:app-states:write",
+        "comment": "Saves the PoC configuration on the tenant so it is still there when the app is reopened."
+      },
+      {
+        "name": "state:app-states:delete",
+        "comment": "\"New PoC\": deletes the saved configuration."
+      },
+      {
+        "name": "state:user-app-states:read",
+        "comment": "Reads the user's own working figures (rates, price-table setting, baseline, language). Readable only by that user."
+      },
+      {
+        "name": "state:user-app-states:write",
+        "comment": "Saves the user's own working figures."
+      },
+      {
+        "name": "state:user-app-states:delete",
+        "comment": "\"New PoC\": deletes the user's own saved figures."
+      },
+      {
+        "name": "document:documents:write",
+        "comment": "Since 3.2.5: creates and updates the dashboards, the investigation notebook and the launchpad of the PoC Builder, only when the SE clicks and confirms; never at deploy or on its own. Since 3.2.7 the real-prints tab (SE Report) also keeps two private documents of the SE's own: the print set (JSON) and a ZIP of the SE's screenshots; \"New PoC\" overwrites both with an empty tombstone. Since 3.7.7 the weekly workflow action writes the week's report notebook with the workflow actor's permissions."
+      },
+      {
+        "name": "document:documents:delete",
+        "comment": "Since 3.6.9: the PoC Builder's end-of-PoC clean-up removes the dashboards, the notebook and the launchpad this PoC created — only the documents in the PoC's register, only after the SE ticks them and confirms; never on its own."
+      },
+      {
+        "name": "slo:slos:read",
+        "comment": "Since 3.6.9: reads the current version of an SLO this PoC created, which the platform needs before removing it (optimistic lock)."
+      },
+      {
+        "name": "slo:slos:write",
+        "comment": "Since 3.6.9: creates the availability, performance and fleet SLOs the SE picks on the PoC Builder (indicators from the query catalog) and removes them in the end-of-PoC clean-up — only on the SE's click."
+      },
+      {
+        "name": "document:documents:read",
+        "comment": "Since 3.2.5: reads the version of a document this app created, so updating it replaces the same document instead of creating a copy; reads back the SE's own private print set and screenshot ZIP of the real-prints tab."
+      },
+      {
+        "name": "environment-api:synthetic:read",
+        "comment": "Since 3.7.3: lists the environment's public synthetic locations, so the SE picks where the PoC's HTTP and Browser monitors run."
+      },
+      {
+        "name": "environment-api:synthetic-monitors:write",
+        "comment": "Since 3.7.3: creates the HTTP and Browser monitors of the customer's addresses the SE confirms on the PoC Builder, and removes them in the end-of-PoC clean-up — only on the SE's click."
+      },
+      {
+        "name": "settings:objects:write",
+        "comment": "Since 3.7.4: creates the OpenPipeline logs pipeline that gives a level to logs written without one (builtin:openpipeline.logs.pipelines) and writes back the logs routing with the PoC's route — only on the SE's click — and removes them, and detectors the PoC registered, in the end-of-PoC clean-up."
+      },
+      {
+        "name": "settings:objects:read",
+        "comment": "Since 3.7.6: reads the OpenPipeline logs routing (builtin:openpipeline.logs.routing) — one settings object whose list of routes other pipelines share — so the PoC Builder adds the PoC pipeline's route at the top, and the clean-up removes it, without touching the other routes."
+      }
+    ],
+    "csp": {
+      "img-src": [
+        {
+          "value": "blob:",
+          "comment": "Real-prints tab: the print thumbnails, the print editor and the crop dialog show the SE's own screenshots from in-memory Blobs (object URLs); nothing is loaded from another origin."
+        }
+      ]
+    },
+    "actions": [
+      {
+        "name": "poc-triage",
+        "title": "PoC Automation · Triage",
+        "description": "Reads a problem, its logs around the incident and the callers of its root cause, and returns a summary to send."
+      },
+      {
+        "name": "poc-weekly",
+        "title": "PoC Automation · Weekly",
+        "description": "Reads the last seven days of problems against the week before and returns a weekly PoC summary to send."
+      }
+    ]
+  }
+}

@@ -1,0 +1,103 @@
+/*
+ * Group C pages (experience, cloud, infrastructure, topology, value, roadmap,
+ * opportunities): the few classes the engine does not already provide.
+ *
+ * Same rules as engine.css: Strato `--dt-*` tokens and `--pvs-*` variables only, no
+ * gradient, shadow or blur, layout answers to the content area (`@container
+ * pvs-page`).
+ *
+ * 3.2.1: the provider logos left this sheet. They were raster brand PNGs on a fixed
+ * white matte (this group's one raw colour); providers are now drawn with the
+ * official monochrome glyphs of the Dynatrace icon gallery (`ProviderMark`, styled
+ * in spectrum.css), which follow the theme like every other icon.
+ */
+
+/* ───────────────────────── numbered steps (an ordered list) ───────────────────────── */
+
+/* The number is a visible `pvs-step` badge, so the list keeps its semantics and its
+   reading order without relying on list markers. */
+.pvs-c-steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pvs-gap-group);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Side-by-side steps that drop to one column by themselves. */
+.pvs-c-steps[data-layout='grid'] {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+}
+
+.pvs-c-steps__item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--pvs-gap-tight);
+  min-width: 0;
+}
+
+.pvs-c-steps__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: var(--dt-spacings-size-4);
+  min-width: 0;
+}
+
+/* ───────────────────────── small compositions ───────────────────────── */
+
+/* A figure with its label under it. */
+.pvs-c-metric {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dt-spacings-size-2);
+  min-width: 0;
+}
+
+/* Label above value, one pair per row: reads well in a narrow card. */
+.pvs-c-defs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pvs-gap-tight);
+  margin: 0;
+}
+
+.pvs-c-defs dt {
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: var(--dt-typography-heading-level-6-size);
+  font-weight: var(--dt-typography-heading-level-6-weight);
+}
+
+.pvs-c-defs dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+/* A measured value in a label/value row; a value that was not observed is plain and muted. */
+.pvs-c-value {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.pvs-c-value[data-missing='true'] {
+  color: var(--dt-colors-text-neutral-subdued);
+  font-weight: normal;
+}
+
+/* An operator input with its label: as wide as a number needs, never wider than the card. */
+.pvs-c-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dt-spacings-size-4);
+  max-width: min(100%, 24rem);
+}
+
+/* ───────────────────────── forced colours ───────────────────────── */
+
+@media (forced-colors: active) {
+  .pvs-provider {
+    border-color: CanvasText;
+  }
+}

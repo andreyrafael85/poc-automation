@@ -1,0 +1,289 @@
+/*
+ * The print editor and the crop dialog (3.2.7, spec §7.2). Every colour and width is a Strato
+ * token; lengths inside an SVG are in its own units (print pixels on the editor's stage, image
+ * pixels on the crop's, where strokes do not scale). Every interactive SVG element carries its own
+ * focus outline: a ring drawn on a child is invisible to the accessibility check.
+ */
+
+/* ------------------------------------------------------------------ editor stage */
+
+.pvs-ped-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1720 / 1080;
+  /* On a short window the print is letterboxed instead of pushing the tools out of view: the
+     image is contained and the SVG meets, so both letterbox alike and the pointer still maps. */
+  max-height: 62vh;
+  overflow: hidden;
+  border-radius: var(--dt-borders-radius-container-subdued);
+  border: var(--dt-borders-width-default) var(--dt-borders-style-default) var(--dt-colors-border-neutral-default);
+  background: var(--dt-colors-background-container-neutral-subdued);
+}
+
+.pvs-ped-stage__image,
+.pvs-ped-stage__svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.pvs-ped-stage__image {
+  object-fit: contain;
+  user-select: none;
+  pointer-events: none;
+}
+
+.pvs-ped-stage__svg {
+  touch-action: none;
+  user-select: none;
+  cursor: crosshair;
+  overflow: visible;
+}
+
+/* Pins */
+.pvs-ped-pin {
+  cursor: grab;
+}
+
+.pvs-ped-pin circle {
+  fill: var(--dt-colors-background-container-primary-accent);
+  stroke: var(--dt-colors-text-primary-on-accent-default);
+  stroke-width: 3;
+}
+
+.pvs-ped-pin circle.pvs-ped-pin__hit {
+  fill: transparent;
+  stroke: none;
+}
+
+.pvs-ped-pin[data-origin='template'] circle:not(.pvs-ped-pin__hit) {
+  stroke-dasharray: 8 6;
+}
+
+.pvs-ped-pin.is-selected circle:not(.pvs-ped-pin__hit) {
+  stroke: var(--dt-colors-border-primary-accent);
+  stroke-width: 8;
+}
+
+.pvs-ped-pin text {
+  fill: var(--dt-colors-text-primary-on-accent-default);
+  font-size: 28px;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.pvs-ped-pin.is-inert {
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+/* Masks: a solid fill only (the fill colour is MASK_FILL, set on the element). While masks are
+   being edited, a thin outline shows where they are on a dark screen; the bake draws the fill only. */
+.pvs-ped-mask {
+  cursor: move;
+}
+
+.pvs-ped-mask rect {
+  stroke: var(--dt-colors-border-neutral-accent);
+  stroke-width: 2;
+}
+
+.pvs-ped-suggestion {
+  pointer-events: none;
+}
+
+.pvs-ped-suggestion rect {
+  fill: none;
+  stroke: var(--dt-colors-charts-status-warning-default);
+  stroke-width: 4;
+  stroke-dasharray: 12 8;
+}
+
+.pvs-ped-suggestion text {
+  fill: var(--dt-colors-charts-status-warning-default);
+  stroke: var(--dt-colors-background-surface-default);
+  stroke-width: 6;
+  paint-order: stroke;
+  font-size: 30px;
+  font-weight: 600;
+}
+
+/* The lupa region and a rectangle being drawn */
+.pvs-ped-focus,
+.pvs-ped-focus rect,
+.pvs-ped-draft {
+  fill: none;
+  stroke: var(--dt-colors-border-primary-accent);
+  stroke-width: 4;
+  stroke-dasharray: 16 10;
+}
+
+.pvs-ped-focus:not(.is-active),
+.pvs-ped-draft {
+  pointer-events: none;
+}
+
+.pvs-ped-focus.is-active {
+  fill: none;
+  stroke: none;
+  cursor: move;
+}
+
+.pvs-ped-focus.is-active rect {
+  fill: transparent;
+  stroke-width: 6;
+}
+
+.pvs-ped-pin:focus-visible,
+.pvs-ped-mask:focus-visible,
+.pvs-ped-focus.is-active:focus-visible {
+  outline: var(--dt-borders-width-emphasized) solid var(--dt-colors-border-primary-accent);
+  outline-offset: 4px;
+}
+
+/* The enlarged detail, previewed at the region's own aspect */
+.pvs-ped-zoom {
+  display: block;
+  width: 100%;
+  max-width: 520px;
+  height: auto;
+  border-radius: var(--dt-borders-radius-container-subdued);
+  border: var(--dt-borders-width-default) var(--dt-borders-style-default) var(--dt-colors-border-neutral-default);
+  background: var(--dt-colors-background-container-neutral-subdued);
+}
+
+.pvs-ped-list {
+  margin: 0;
+  padding-inline-start: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--dt-spacings-size-8);
+}
+
+.pvs-ped-list > li {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.pvs-ped-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--dt-spacings-size-24);
+  height: var(--dt-spacings-size-24);
+  border-radius: var(--dt-borders-radius-container-default);
+  background: var(--dt-colors-background-container-primary-accent);
+  color: var(--dt-colors-text-primary-on-accent-default);
+  font-weight: 600;
+}
+
+.pvs-ped-badge--mask {
+  background: var(--dt-colors-background-container-neutral-accent);
+  color: var(--dt-colors-text-neutral-on-accent-default);
+}
+
+/* ------------------------------------------------------------------ crop dialog */
+
+.pvs-ped-crop {
+  position: relative;
+  width: 100%;
+  max-height: 62vh;
+  overflow: hidden;
+  border-radius: var(--dt-borders-radius-container-subdued);
+  background: var(--dt-colors-background-container-neutral-subdued);
+}
+
+.pvs-ped-crop__image,
+.pvs-ped-crop__svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.pvs-ped-crop__image {
+  object-fit: contain;
+  user-select: none;
+  pointer-events: none;
+}
+
+.pvs-ped-crop__svg {
+  touch-action: none;
+  user-select: none;
+  overflow: visible;
+}
+
+.pvs-ped-crop__shade {
+  fill: var(--dt-colors-background-surface-backdrop);
+  fill-rule: evenodd;
+  pointer-events: none;
+}
+
+.pvs-ped-crop__frame {
+  fill: none;
+  stroke: var(--dt-colors-border-primary-accent);
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+.pvs-ped-crop__edge {
+  outline: none;
+}
+
+.pvs-ped-crop__edge[data-edge='left'],
+.pvs-ped-crop__edge[data-edge='right'] {
+  cursor: ew-resize;
+}
+
+.pvs-ped-crop__edge[data-edge='top'],
+.pvs-ped-crop__edge[data-edge='bottom'] {
+  cursor: ns-resize;
+}
+
+.pvs-ped-crop__hit {
+  fill: transparent;
+}
+
+.pvs-ped-crop__grip {
+  fill: var(--dt-colors-background-container-primary-accent);
+  stroke: var(--dt-colors-text-primary-on-accent-default);
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+}
+
+.pvs-ped-crop__edge:focus-visible {
+  outline: var(--dt-borders-width-emphasized) solid var(--dt-colors-border-primary-accent);
+  outline-offset: 2px;
+}
+
+.pvs-ped-crop__edge:focus-visible .pvs-ped-crop__grip,
+.pvs-ped-crop__edge.is-dragging .pvs-ped-crop__grip {
+  fill: var(--dt-colors-border-primary-accent);
+}
+
+/* The resulting 1720 × 1080 print */
+.pvs-ped-result {
+  display: block;
+  width: 100%;
+  max-width: 560px;
+  height: auto;
+  aspect-ratio: 1720 / 1080;
+  border-radius: var(--dt-borders-radius-container-subdued);
+  border: var(--dt-borders-width-default) var(--dt-borders-style-default) var(--dt-colors-border-neutral-default);
+}
+
+.pvs-ped-result__pad {
+  fill: var(--dt-colors-background-container-neutral-subdued);
+}
+
+@media (forced-colors: active) {
+  .pvs-ped-pin:focus-visible,
+  .pvs-ped-mask:focus-visible,
+  .pvs-ped-focus.is-active:focus-visible,
+  .pvs-ped-crop__edge:focus-visible {
+    outline-color: Highlight;
+  }
+}

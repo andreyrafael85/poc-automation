@@ -1,0 +1,1775 @@
+/*
+ * 3.5.8 — the visual proposal v6, wave 1 (approved by the owner on 2026-11-21: "encontramos o modelo do app com a
+ * brand da Dynatrace. Aprovado!!!"; docs/v3.4/design/proposta-visual/v6-paineis-de-referencia.html). Loaded after
+ * spectrum.css. Tokens only; weights 400/500/600; no text under 12 px (tests/v3416.test.tsx).
+ *
+ *   - the dark theme on neutral near-black surfaces with quiet borders (the light theme stays Strato's own neutral);
+ *   - the side menu: small uppercase stage headings, compact items with line icons, the current page on a quiet fill
+ *     with a turquoise edge;
+ *   - the number cards: the label with its icon in a box at the right, the number large, a change chip when a measured
+ *     "before" exists (Day 0), a context line, the evidence at the foot; flat — the colour lives on the marks.
+ */
+
+/* ------------------------------------------------------------------ surfaces (dark, screen only) */
+/* Strato's darkest backgrounds (the shell, background 10/20, neutral 10/20) darkened towards black — no raw colour:
+   the page a near-black, the cards a step above it, quiet borders. */
+@media screen {
+  :root[data-theme='dark'] {
+    --dt-colors-background-base-default: color-mix(in srgb, var(--dt-colors-theme-background-shell-default) 62%, black);
+    --dt-colors-background-surface-default: color-mix(in srgb, var(--dt-colors-theme-background-10) 78%, black);
+    --dt-colors-background-container-neutral-subdued: color-mix(in srgb, var(--dt-colors-theme-background-20) 76%, black);
+    --dt-colors-background-container-neutral-default: color-mix(in srgb, var(--dt-colors-theme-neutral-10) 92%, black);
+    --dt-colors-border-neutral-default: color-mix(in srgb, var(--dt-colors-theme-neutral-20) 92%, black);
+    --pvs-v6-box: color-mix(in srgb, var(--dt-colors-theme-neutral-10) 82%, black);
+  }
+}
+
+:root {
+  --pvs-v6-box: var(--dt-colors-background-container-neutral-default);
+  --pvs-v6-edge: var(--dt-colors-charts-categorical-vivid-color-01-default);
+}
+
+/* ------------------------------------------------------------------ the side menu */
+.pvs-nav {
+  gap: var(--dt-spacings-size-12);
+  padding: var(--dt-spacings-size-12) 10px var(--dt-spacings-size-16);
+}
+
+.pvs-nav__stage-title {
+  gap: var(--dt-spacings-size-6);
+  padding: var(--dt-spacings-size-4) var(--dt-spacings-size-8) var(--dt-spacings-size-2);
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* The stage's number reads as part of its heading, not as a boxed badge. */
+.pvs-nav__stage-title .pvs-step {
+  min-width: 0;
+  height: auto;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--dt-colors-text-neutral-default);
+  font-size: 12px;
+  letter-spacing: 0;
+}
+
+.pvs-nav__stage {
+  gap: 1px;
+}
+
+.pvs-nav__link {
+  gap: var(--dt-spacings-size-8);
+  padding: 5px var(--dt-spacings-size-8) 5px 10px;
+  border-radius: 7px;
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.pvs-nav__link:hover {
+  background: var(--dt-colors-background-container-neutral-default);
+}
+
+.pvs-nav__link[aria-current='page'] {
+  background: var(--dt-colors-background-container-neutral-default);
+  color: var(--dt-colors-text-neutral-default);
+  font-weight: 600;
+  box-shadow: inset 2px 0 0 var(--pvs-v6-edge);
+}
+
+.pvs-nav__link[aria-current='page'] .pvs-nav__icon {
+  color: var(--pvs-v6-edge);
+}
+
+/* ------------------------------------------------------------------ the number cards */
+.pvs-skpi.pvs-panel {
+  gap: var(--dt-spacings-size-6);
+}
+
+.pvs-skpi__head {
+  justify-content: space-between;
+  min-height: 32px;
+}
+
+.pvs-skpi__label {
+  order: 1;
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+/* The icon in a quiet box at the card's right (v6), in place of the coloured badge before the label (3.5.2). */
+.pvs-skpi .pvs-skpi__badge {
+  order: 2;
+  margin-inline-start: auto;
+  width: 30px;
+  height: 30px;
+  box-sizing: border-box;
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  border-radius: 8px;
+  background: var(--pvs-v6-box);
+  color: var(--dt-colors-text-neutral-default);
+}
+
+.pvs-skpi .pvs-skpi__badge svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* Flat cards: the 3.5.2 accent line and wash give way to the marks' own colour. */
+.pvs-skpi-row > .pvs-skpi::after,
+.pvs-skpi[data-accent]::after {
+  content: none;
+}
+
+.pvs-skpi-row > .pvs-skpi:not([data-missing='true']),
+.pvs-skpi[data-accent]:not([data-missing='true']) {
+  background-image: none;
+}
+
+.pvs-skpi__valuerow {
+  display: flex;
+  align-items: center;
+  gap: var(--dt-spacings-size-8);
+  min-width: 0;
+}
+
+.pvs-skpi__valuerow > .pvs-skpi__value {
+  flex: 1 1 auto;
+}
+
+/* The change since a measured "before" (Day 0): an arrow and a signed number in a small chip, its tone from whether
+   the change is good, with the words beside it for assistive technology. */
+.pvs-skpi__delta {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  border: 1px solid color-mix(in srgb, var(--pvs-delta) 40%, transparent);
+  background: color-mix(in srgb, var(--pvs-delta) 14%, transparent);
+  color: var(--pvs-delta);
+}
+
+.pvs-skpi__delta[data-tone='good'] {
+  --pvs-delta: var(--dt-colors-text-success-default);
+}
+
+.pvs-skpi__delta[data-tone='bad'] {
+  --pvs-delta: var(--dt-colors-text-critical-default);
+}
+
+.pvs-skpi__delta[data-tone='neutral'] {
+  --pvs-delta: var(--dt-colors-text-neutral-subdued);
+}
+
+@media print {
+  .pvs-skpi__delta {
+    background: none;
+  }
+}
+
+/* ------------------------------------------------------------------ 3.5.9 — wave 2: charts */
+
+/* The period selector over a series (StratoTimeseries `periods`): at the chart's top right, with its note. */
+.pvs-sts__periods {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--dt-spacings-size-8);
+  margin-bottom: var(--dt-spacings-size-6);
+}
+
+/* The donut's legend as a table: a header row, then rows split by hairlines. */
+.pvs-sdonut__head {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) auto 4.5em;
+  gap: var(--dt-spacings-size-8);
+  padding-bottom: var(--dt-spacings-size-4);
+  border-bottom: 1px solid var(--dt-colors-border-neutral-default);
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.pvs-sdonut__head > span:nth-child(n + 3) {
+  text-align: end;
+}
+
+.pvs-sdonut__legend {
+  gap: 0;
+}
+
+.pvs-sdonut__row {
+  padding-block: 6px;
+  border-bottom: 1px solid var(--dt-colors-border-neutral-default);
+}
+
+.pvs-sdonut__row:last-child {
+  border-bottom: none;
+}
+
+/* Segment bars ("x of y", StratoTicks): one small tick per step, filled up to the share. */
+.pvs-sticks {
+  display: grid;
+  grid-template-columns: repeat(var(--pvs-ticks, 24), minmax(0, 1fr));
+  gap: 2px;
+  height: 12px;
+}
+
+.pvs-sticks__tick {
+  border-radius: 2px;
+  background: var(--dt-colors-background-container-neutral-default);
+  border: 1px solid var(--dt-colors-border-neutral-default);
+}
+
+.pvs-sticks__tick[data-on='true'] {
+  background: var(--pvs-ticks-color, var(--dt-colors-charts-categorical-vivid-color-01-default));
+  border-color: transparent;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+/* ------------------------------------------------------------------ 3.6.0 — the goal bar (StratoGoal) */
+.pvs-sgoal {
+  display: grid;
+  gap: 4px;
+}
+
+.pvs-sgoal__track {
+  position: relative;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--dt-colors-background-container-neutral-default);
+}
+
+/* 3.6.0 (owner: one look for every card's bar): the same height and ends as the platform's meter bars beside it. */
+.pvs-sgoal__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 2px;
+  background: var(--pvs-goal);
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.pvs-sgoal__line {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 0;
+  border-left: 2px solid var(--dt-colors-text-neutral-default);
+}
+
+.pvs-sgoal__label {
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: 12px;
+}
+
+.pvs-sgoal[data-tone='good'] {
+  --pvs-goal: var(--dt-colors-charts-status-ideal-default, var(--dt-colors-charts-status-good-default));
+}
+
+.pvs-sgoal[data-tone='warning'] {
+  --pvs-goal: var(--dt-colors-charts-status-warning-default);
+}
+
+.pvs-sgoal[data-tone='critical'] {
+  --pvs-goal: var(--dt-colors-charts-status-critical-default);
+}
+
+/* ------------------------------------------------------------------ 3.6.0 — wave 3: the console, the neutral heat map */
+
+/* Recent problems as console lines (ProblemConsole): time, status, category, name and id, reach, duration. */
+.pvs-console__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--dt-spacings-size-8);
+}
+
+.pvs-console__live {
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: 12px;
+}
+
+.pvs-console {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.pvs-console__row {
+  display: grid;
+  grid-template-columns: 9.5rem 5rem 9rem minmax(14rem, 1.4fr) minmax(10rem, 1fr) 5rem;
+  gap: var(--dt-spacings-size-12);
+  align-items: center;
+  min-width: 52rem;
+  padding: 7px var(--dt-spacings-size-8);
+  border-bottom: 1px solid var(--dt-colors-border-neutral-default);
+  font-size: 13px;
+}
+
+.pvs-console__row:last-child {
+  border-bottom: none;
+}
+
+.pvs-console__time,
+.pvs-console__duration {
+  font-family: var(--dt-typography-code-small-default-family);
+  font-variant-numeric: tabular-nums;
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.pvs-console__duration {
+  text-align: end;
+}
+
+.pvs-console__status {
+  justify-self: start;
+  padding: 1px 7px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid color-mix(in srgb, var(--pvs-console-tone) 45%, transparent);
+  background: color-mix(in srgb, var(--pvs-console-tone) 14%, transparent);
+  color: var(--pvs-console-tone);
+}
+
+.pvs-console__row[data-open='true'] {
+  --pvs-console-tone: var(--dt-colors-text-critical-default);
+}
+
+.pvs-console__row[data-open='false'] {
+  --pvs-console-tone: var(--dt-colors-text-success-default);
+}
+
+.pvs-console__category,
+.pvs-console__affected {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-console__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--dt-colors-text-neutral-default);
+}
+
+.pvs-console__id {
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: 12px;
+}
+
+/* The heat calendar in the reference dashboards' neutral tones: the ink of the theme over the surface, the busiest
+   cell outlined in the menu's turquoise. */
+.pvs-heatcal__cell {
+  background: color-mix(in srgb, var(--dt-colors-text-neutral-default) calc(var(--pvs-heat) * 32%), var(--dt-colors-background-surface-default));
+}
+
+.pvs-heatcal__cell[data-peak='true'] {
+  box-shadow: inset 0 0 0 2px var(--pvs-v6-edge);
+}
+
+/* In a number card the caption says where the value sits against the line; the bar keeps only its mark. */
+.pvs-skpi .pvs-sgoal__label {
+  display: none;
+}
+
+/* ------------------------------------------------------------------ 3.6.1 — the RCA propagation v4 (RcaPropagationGraph) */
+.pvs-rgraph__scroll {
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.pvs-rgraph {
+  display: block;
+  width: 100%;
+  min-width: 900px;
+  height: auto;
+}
+
+.pvs-rgraph__col {
+  fill: var(--dt-colors-text-neutral-subdued);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.pvs-rgraph__link {
+  fill: none;
+  stroke: color-mix(in srgb, var(--dt-colors-charts-status-critical-default) 55%, var(--dt-colors-border-neutral-default));
+  stroke-width: 2;
+}
+
+.pvs-rgraph__spark {
+  fill: var(--dt-colors-charts-status-critical-default);
+}
+
+.pvs-rgraph__node rect {
+  fill: var(--dt-colors-background-surface-default);
+  stroke: var(--dt-colors-border-neutral-accent);
+  stroke-width: 1;
+}
+
+.pvs-rgraph__node[data-column='cause'] rect {
+  stroke: var(--dt-colors-charts-status-critical-default);
+  stroke-width: 2;
+}
+
+.pvs-rgraph__node[data-column='users'] rect {
+  stroke: var(--pvs-v6-edge);
+}
+
+.pvs-rgraph__node[data-column='also'] rect {
+  stroke-dasharray: 4 3;
+}
+
+.pvs-rgraph__name {
+  fill: var(--dt-colors-text-neutral-default);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pvs-rgraph__kind,
+.pvs-rgraph__more {
+  fill: var(--dt-colors-text-neutral-subdued);
+  font-size: 12px;
+}
+
+.pvs-rgraph__time {
+  fill: var(--dt-colors-text-neutral-subdued);
+  font-family: var(--dt-typography-code-small-default-family);
+  font-size: 12px;
+}
+
+.pvs-rgraph__ruler {
+  display: grid;
+  gap: 4px;
+}
+
+.pvs-rgraph__track {
+  position: relative;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--dt-colors-background-container-neutral-default);
+}
+
+.pvs-rgraph__tick {
+  position: absolute;
+  top: -4px;
+  width: 2px;
+  height: 12px;
+  background: var(--dt-colors-charts-status-critical-default);
+}
+
+.pvs-rgraph__tick[data-mark='start'] {
+  background: var(--dt-colors-text-neutral-default);
+}
+
+.pvs-rgraph__marks {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--dt-spacings-size-8);
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pvs-rgraph__spark {
+    display: none;
+  }
+
+  /* 3.6.4: the presentation mode's fading. */
+  .pvs-presenting [data-present-step] {
+    transition: none;
+  }
+}
+
+@media print {
+  .pvs-rgraph__spark {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------------ 3.6.1 — Day 0 × today (Day0VsToday) */
+.pvs-d0 {
+  display: grid;
+  gap: var(--dt-spacings-size-12);
+}
+
+.pvs-d0__row {
+  display: grid;
+  grid-template-columns: minmax(10rem, 0.8fr) minmax(0, 2fr) auto;
+  gap: var(--dt-spacings-size-16);
+  align-items: center;
+  padding-bottom: var(--dt-spacings-size-8);
+  border-bottom: 1px solid var(--dt-colors-border-neutral-default);
+}
+
+.pvs-d0__row:last-child {
+  border-bottom: none;
+}
+
+.pvs-d0__head {
+  display: grid;
+  gap: 2px;
+}
+
+.pvs-d0__label {
+  color: var(--dt-colors-text-neutral-default);
+  font-weight: 600;
+}
+
+.pvs-d0__hint {
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: 12px;
+}
+
+.pvs-d0__bars {
+  display: grid;
+  grid-template-columns: 3.5rem minmax(0, 1fr) 4rem;
+  gap: 4px var(--dt-spacings-size-8);
+  align-items: center;
+}
+
+.pvs-d0__tag {
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: 12px;
+}
+
+.pvs-d0__track {
+  position: relative;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--dt-colors-background-container-neutral-default);
+}
+
+.pvs-d0__bar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 2px;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.pvs-d0__bar[data-side='day0'] {
+  background: var(--dt-colors-charts-status-neutral-default);
+}
+
+.pvs-d0__bar[data-side='today'] {
+  background: var(--pvs-v6-edge);
+}
+
+.pvs-d0__value {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+  color: var(--dt-colors-text-neutral-default);
+}
+
+@media (max-width: 640px) {
+  .pvs-d0__row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ------------------------------------------------------------------ 3.6.2 — the arc of segments (StratoArc) */
+/* The owner: "os gauges serão reestilizados também … o atual está bem antigo". Every dial of the app (the Overview's
+   header, Dynatrace Intelligence's posture, every GaugeRing) is an arc of segments, the v6 tick bars bent into a dial. */
+.pvs-sarc {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.pvs-sarc__seg {
+  fill: none;
+  stroke: color-mix(in srgb, var(--dt-colors-border-neutral-default) 70%, transparent);
+}
+
+.pvs-sarc[data-animate='true'] .pvs-sarc__seg[data-on='true'] {
+  animation: pvs-sarc-in var(--dt-timings-fast-default) var(--dt-easings-decelerate) both;
+  animation-delay: calc(var(--pvs-seg, 0) * 18ms);
+}
+
+@keyframes pvs-sarc-in {
+  from {
+    opacity: 0.12;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.pvs-sgauge__arc,
+.pvs-gauge__arc {
+  position: relative;
+  width: min(100%, 184px);
+  margin-inline: auto;
+}
+
+/* The reading sits at the arc's centre (two thirds down the drawing). */
+.pvs-sgauge__reading,
+.pvs-gauge .pvs-gauge__reading {
+  position: absolute;
+  inset: 30% 0 0;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  font-size: var(--dt-typography-heading-level-3-size);
+  font-weight: 600;
+  line-height: 1;
+  color: var(--dt-colors-text-neutral-default);
+  font-variant-numeric: proportional-nums;
+  pointer-events: none;
+}
+
+.pvs-sgauge__label {
+  color: var(--dt-colors-text-neutral-default);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pvs-sarc__seg {
+    animation: none !important;
+  }
+}
+
+@media print {
+  .pvs-sarc__seg {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+}
+
+/* The Core Web Vitals' half dial (ThresholdGauge) in the same segments: each segment in its published zone's status
+   colour, lit up to the reading, the rest a faint trace of its zone. */
+.pvs-tgauge__seg {
+  fill: none;
+  stroke: var(--pvs-rate);
+  stroke-width: 12;
+  opacity: 0.2;
+}
+
+.pvs-tgauge__seg[data-on='true'] {
+  opacity: 1;
+}
+
+.pvs-tgauge__seg[data-missing='true'] {
+  stroke: var(--dt-colors-border-neutral-default);
+  opacity: 0.45;
+}
+
+/* ------------------------------------------------------------------ 3.6.2 — the older value cards, flat (ValueCard) */
+/* Experience, AIOps & RCA, Competitors and Value & ROI: the same flat card as StratoKpi (wave 1), no wash, no edge. */
+.pvs-panel.pvs-kpi:not([data-toned='true']) {
+  background: var(--dt-colors-background-surface-default);
+}
+
+.pvs-kpi__edge {
+  display: none;
+}
+
+/* ------------------------------------------------------------------ 3.6.2 — the Experience funnel */
+.pvs-funnel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--dt-spacings-size-12);
+  flex-wrap: wrap;
+}
+
+.pvs-funnel__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--dt-spacings-size-32);
+  align-items: start;
+}
+
+.pvs-funnel__unit {
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.pvs-funnel {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--dt-spacings-size-8);
+}
+
+.pvs-funnel__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 4.5rem;
+  grid-template-areas:
+    'drop drop drop'
+    'label count share'
+    'track track track';
+  align-items: center;
+  column-gap: var(--dt-spacings-size-12);
+  row-gap: var(--dt-spacings-size-4);
+}
+
+.pvs-funnel__drop {
+  grid-area: drop;
+  justify-self: start;
+  padding: 1px var(--dt-spacings-size-8);
+  border-radius: var(--dt-borders-radius-field-emphasized);
+  color: var(--dt-colors-text-neutral-subdued);
+  background: var(--dt-colors-background-container-neutral-subdued);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.pvs-funnel__label {
+  grid-area: label;
+  color: var(--dt-colors-text-neutral-default);
+}
+
+.pvs-funnel__track {
+  grid-area: track;
+  position: relative;
+  height: 18px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--dt-colors-border-neutral-default) 35%, transparent);
+  overflow: hidden;
+}
+
+.pvs-funnel__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 4px;
+}
+
+.pvs-funnel__count {
+  grid-area: count;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--dt-colors-text-neutral-default);
+}
+
+.pvs-funnel__share {
+  grid-area: share;
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-funnel__note {
+  color: var(--dt-colors-text-neutral-default);
+}
+
+@media (max-width: 960px) {
+  .pvs-funnel__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+
+/* ------------------------------------------------------------------ 3.6.3 — v6 finishing touches */
+/* The app's own areas (SpectrumArea: the Executive story, the PoC timeline, Value) in one hue, as the platform's
+   timeseries: identity, never a family colour per chart. Specific enough to win over the themes' family rules
+   (`:root[data-theme='dark'] [data-spectrum='…']`). 3.6.8: the owner compared them with the platform's area and kept this
+   gradient ("Desses dois prefiro manter o primeiro degradê"). */
+:root .pvs-area.pvs-area[data-spectrum] {
+  --pvs-sp-from: var(--dt-colors-charts-categorical-vivid-color-01-default);
+  --pvs-sp-to: var(--dt-colors-charts-categorical-vivid-color-01-default);
+}
+
+/* Logs: each bucket's volume and retention as bars (BucketRetention). */
+.pvs-quota {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--dt-spacings-size-8);
+}
+
+.pvs-quota__row {
+  display: grid;
+  grid-template-columns: minmax(8rem, 14rem) minmax(0, 1fr) 5.5rem 4.5rem 5rem auto;
+  align-items: center;
+  column-gap: var(--dt-spacings-size-12);
+}
+
+.pvs-quota__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--dt-colors-text-neutral-default);
+}
+
+.pvs-quota__track {
+  position: relative;
+  height: 10px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--dt-colors-border-neutral-default) 35%, transparent);
+  overflow: hidden;
+}
+
+.pvs-quota__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 3px;
+  background: var(--dt-colors-charts-categorical-vivid-color-01-default);
+}
+
+.pvs-quota__row[data-readable='false'] .pvs-quota__fill {
+  background: var(--dt-colors-border-neutral-default);
+}
+
+.pvs-quota__size,
+.pvs-quota__share,
+.pvs-quota__ret {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.pvs-quota__size {
+  font-weight: 600;
+  color: var(--dt-colors-text-neutral-default);
+}
+
+.pvs-quota__share,
+.pvs-quota__ret {
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-quota__lock {
+  padding: 1px var(--dt-spacings-size-8);
+  border-radius: var(--dt-borders-radius-field-emphasized);
+  color: var(--dt-colors-text-neutral-subdued);
+  background: var(--dt-colors-background-container-neutral-subdued);
+  font-size: 12px;
+}
+
+@media (max-width: 640px) {
+  .pvs-quota__row {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      'name name size'
+      'track track track'
+      'share ret lock';
+    row-gap: var(--dt-spacings-size-4);
+  }
+
+  .pvs-quota__name {
+    grid-area: name;
+  }
+
+  .pvs-quota__track {
+    grid-area: track;
+  }
+
+  .pvs-quota__size {
+    grid-area: size;
+  }
+
+  .pvs-quota__share {
+    grid-area: share;
+    text-align: start;
+  }
+
+  .pvs-quota__ret {
+    grid-area: ret;
+  }
+
+  .pvs-quota__lock {
+    grid-area: lock;
+  }
+}
+
+/* ------------------------------------------------------------------ 3.6.4 — status rows, the log console */
+/* Dynatrace Intelligence: one row per category, one bar per 3-hour slot (StatusRows). */
+.pvs-status {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--dt-spacings-size-12);
+}
+
+.pvs-status__row {
+  display: grid;
+  grid-template-columns: minmax(8rem, 11rem) minmax(0, 1fr) 4rem 7.5rem;
+  align-items: center;
+  column-gap: var(--dt-spacings-size-12);
+}
+
+.pvs-status__name {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dt-spacings-size-8);
+  color: var(--dt-colors-text-neutral-default);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.pvs-status__dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.pvs-status__bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 26px;
+  min-width: 0;
+}
+
+.pvs-status__bar {
+  flex: 1 1 0;
+  min-width: 2px;
+  height: 18%;
+  border-radius: 1px;
+  background: color-mix(in srgb, var(--dt-colors-border-neutral-default) 55%, transparent);
+}
+
+.pvs-status__count {
+  text-align: end;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--dt-colors-text-neutral-default);
+}
+
+.pvs-status__open {
+  justify-self: start;
+  padding: 1px 7px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--dt-colors-text-neutral-subdued);
+  background: var(--dt-colors-background-container-neutral-subdued);
+}
+
+.pvs-status__open[data-open='true'] {
+  color: var(--dt-colors-text-critical-default);
+  background: color-mix(in srgb, var(--dt-colors-text-critical-default) 12%, transparent);
+}
+
+.pvs-status__axis {
+  display: flex;
+  justify-content: space-between;
+  margin-inline-start: calc(min(11rem, 30%) + var(--dt-spacings-size-12));
+  margin-inline-end: calc(11.5rem + 2 * var(--dt-spacings-size-12));
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: 12px;
+}
+
+@media (max-width: 640px) {
+  .pvs-status__row {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    row-gap: var(--dt-spacings-size-4);
+  }
+
+  .pvs-status__bars {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .pvs-status__axis {
+    margin-inline: 0;
+  }
+}
+
+/* Logs: the console of the most recently seen errors (ErrorConsole) — last seen, level, origin, message and, since
+   3.6.8, how many times each appeared in the selected window. */
+.pvs-console--logs .pvs-console__row {
+  grid-template-columns: 9rem 4.5rem minmax(10rem, 16rem) minmax(16rem, 1fr) 6rem;
+  min-width: 50rem;
+}
+
+.pvs-console--logs .pvs-console__row--head {
+  padding-block: 4px;
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.pvs-console__count {
+  justify-self: end;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--dt-colors-text-neutral-default);
+  white-space: nowrap;
+}
+
+.pvs-console__row--head .pvs-console__count {
+  font-weight: 500;
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-console--logs .pvs-console__name {
+  font-family: var(--dt-typography-code-small-default-family);
+  font-size: 12px;
+}
+
+/* ------------------------------------------------------------------ 3.6.4 — the presentation mode */
+/* The panel under discussion keeps its ink; the other panels of the page fade. Screen only. */
+@media screen {
+  .pvs-presenting [data-present-step]:not([data-present-focus]) {
+    opacity: 0.32;
+    transition: opacity var(--dt-timings-fast-default) var(--dt-easings-decelerate);
+  }
+
+  .pvs-presenting [data-present-focus] {
+    outline: 2px solid var(--pvs-v6-edge);
+    outline-offset: 4px;
+    border-radius: var(--dt-borders-radius-container-default);
+  }
+
+  .pvs-presenting .pvs-main {
+    padding-bottom: 72px;
+  }
+}
+
+.pvs-present {
+  position: fixed;
+  left: 50%;
+  bottom: var(--dt-spacings-size-16);
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: var(--dt-spacings-size-12);
+  width: min(920px, calc(100vw - 32px));
+  padding: var(--dt-spacings-size-8) var(--dt-spacings-size-12);
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  border-radius: var(--dt-borders-radius-container-default);
+  background: var(--dt-colors-background-surface-default);
+  box-shadow: var(--dt-box-shadows-surface-floating-rest);
+}
+
+.pvs-present__phrase {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--dt-colors-text-neutral-default);
+  font-weight: 600;
+}
+
+.pvs-present__now {
+  color: var(--dt-colors-text-neutral-subdued);
+  font-weight: 400;
+}
+
+.pvs-present__step {
+  flex: none;
+  color: var(--dt-colors-text-neutral-subdued);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+}
+
+.pvs-present__keys {
+  flex: none;
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: 12px;
+}
+
+@media (max-width: 640px) {
+  .pvs-present__keys {
+    display: none;
+  }
+}
+
+@media print {
+  .pvs-present {
+    display: none !important;
+  }
+}
+
+/* ------------------------------------------------------------------ 3.6.4 — Coverage: the depth map */
+.pvs-depth__legend {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: var(--dt-spacings-size-8) var(--dt-spacings-size-16);
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: 13px;
+}
+
+.pvs-depth__key {
+  display: flex;
+  align-items: baseline;
+  gap: var(--dt-spacings-size-8);
+}
+
+.pvs-depth__key strong {
+  font-weight: 600;
+  color: var(--dt-colors-text-neutral-default);
+}
+
+.pvs-depth__swatch,
+.pvs-depth__sq {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--pvs-depth-ink);
+}
+
+[data-mode='FULL_STACK'] {
+  --pvs-depth-ink: var(--dt-colors-charts-categorical-vivid-color-01-default);
+}
+
+[data-mode='INFRASTRUCTURE'] {
+  --pvs-depth-ink: var(--dt-colors-charts-categorical-vivid-color-06-default);
+}
+
+[data-mode='DISCOVERY'] {
+  --pvs-depth-ink: var(--dt-colors-charts-categorical-vivid-color-02-default);
+}
+
+[data-mode='UNKNOWN'] {
+  --pvs-depth-ink: color-mix(in srgb, var(--dt-colors-border-neutral-default) 80%, transparent);
+}
+
+.pvs-depth__groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: var(--dt-spacings-size-16);
+}
+
+.pvs-depth__group {
+  display: grid;
+  gap: var(--dt-spacings-size-8);
+  align-content: start;
+  padding: var(--dt-spacings-size-12);
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  border-radius: var(--dt-borders-radius-container-default);
+}
+
+.pvs-depth__name {
+  font-weight: 600;
+  color: var(--dt-colors-text-neutral-default);
+}
+
+.pvs-depth__count {
+  font-weight: 400;
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-depth__squares {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.pvs-depth__sq {
+  width: 14px;
+  height: 14px;
+}
+
+@media print {
+  .pvs-depth__sq,
+  .pvs-depth__swatch {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}
+
+/* ------------------------------------------------------------------ 3.6.6 — the PoC builder */
+.pvs-builder__summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: var(--dt-spacings-size-24);
+  align-items: center;
+}
+
+.pvs-builder__count {
+  font-weight: 600;
+  color: var(--dt-colors-text-neutral-default);
+}
+
+.pvs-builder__ticks {
+  display: flex;
+  gap: 4px;
+}
+
+.pvs-builder__ticks span {
+  width: 28px;
+  height: 8px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--dt-colors-border-neutral-default) 60%, transparent);
+}
+
+.pvs-builder__ticks span[data-on='true'] {
+  background: var(--pvs-v6-edge);
+}
+
+.pvs-builder__logo {
+  display: flex;
+  align-items: center;
+  gap: var(--dt-spacings-size-16);
+  padding: var(--dt-spacings-size-12) var(--dt-spacings-size-16);
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  border-radius: var(--dt-borders-radius-container-default);
+}
+
+.pvs-builder__logo-title {
+  font-weight: 600;
+  color: var(--dt-colors-text-neutral-default);
+}
+
+.pvs-builder__logo-img {
+  flex: none;
+  max-width: 120px;
+  max-height: 48px;
+  object-fit: contain;
+}
+
+.pvs-kits {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+  gap: var(--dt-spacings-size-12);
+}
+
+.pvs-kit {
+  display: grid;
+  gap: var(--dt-spacings-size-8);
+  align-content: start;
+  min-width: 0;
+  padding: var(--dt-spacings-size-16);
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  border-radius: var(--dt-borders-radius-container-default);
+  background: var(--dt-colors-background-surface-default);
+}
+
+.pvs-kit[data-open='true'] {
+  box-shadow: inset 0 0 0 2px var(--pvs-v6-edge);
+}
+
+.pvs-kit__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--dt-spacings-size-8);
+}
+
+.pvs-kit__name {
+  font-weight: 600;
+  color: var(--dt-colors-text-neutral-default);
+}
+
+.pvs-kit__state {
+  flex: none;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--dt-colors-text-neutral-subdued);
+  background: var(--dt-colors-background-container-neutral-subdued);
+}
+
+.pvs-kit[data-created='true'] .pvs-kit__state {
+  color: var(--dt-colors-text-success-default);
+  background: color-mix(in srgb, var(--dt-colors-text-success-default) 12%, transparent);
+}
+
+/* A drawing of the dashboard: the header (with the logo when it goes in), then one block per section. */
+.pvs-kit__thumb {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-auto-rows: 10px;
+  gap: 3px;
+  padding: 6px;
+  border-radius: 6px;
+  background: var(--dt-colors-background-container-neutral-subdued);
+}
+
+.pvs-kit__thumb span {
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--dt-colors-border-neutral-default) 70%, transparent);
+}
+
+.pvs-kit__thumb span[data-wide='true'] {
+  grid-column: span 2;
+}
+
+.pvs-kit__thumb span[data-logo='true'] {
+  background: color-mix(in srgb, var(--pvs-v6-edge) 45%, transparent);
+}
+
+.pvs-kit__what,
+.pvs-kit__when {
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: 13px;
+}
+
+.pvs-kit__acts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--dt-spacings-size-12);
+  margin-top: var(--dt-spacings-size-4);
+}
+
+.pvs-ledger {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+}
+
+.pvs-ledger__row {
+  display: grid;
+  grid-template-columns: 11rem minmax(0, 1fr) minmax(0, 16rem) auto;
+  gap: var(--dt-spacings-size-12);
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--dt-colors-border-neutral-default);
+}
+
+.pvs-ledger__when {
+  font-variant-numeric: tabular-nums;
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: 13px;
+}
+
+.pvs-ledger__who {
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 960px) {
+  .pvs-builder__summary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .pvs-ledger__row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .pvs-ledger__when,
+  .pvs-ledger__who {
+    grid-column: 1 / -1;
+  }
+}
+
+/* 3.6.7: the PoC Builder's document kits (the investigation notebook, the PoC launchpad), side by side. */
+.pvs-doc-kits {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+  gap: var(--dt-spacings-size-16);
+  align-items: start;
+}
+
+.pvs-doc-steps {
+  margin: 0;
+  padding-left: 1.25em;
+  display: grid;
+  gap: 2px;
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: 13px;
+}
+.pvs-doc-steps[data-own-numbers='true'] {
+  list-style: none;
+  padding-left: 0;
+}
+
+/* ------------------------------------------------------------------ 3.6.8 — v6, wave 4: the maps */
+/* The owner (2026-11-22): "ainda observo que tem gráficos antigos de linha, mapas e outros que estão fora". The three
+   maps share the stack map's node and link (the stack map on Topology and the SE Report, "Who calls what" on Topology, the
+   RCA trail on the Executive summary and the SE Report): as in the v6 dashboards, the nodes are neutral cards with a
+   1 px border and a subdued icon, the links quiet ink whose width still says how much, and the moving light in the
+   menu's turquoise; colour is kept only where it is an identity (a cloud provider's brand) and the node the picture is
+   about (the root cause) carries the turquoise edge, without a glow. */
+.pvs-stackmap__box {
+  fill: var(--dt-colors-background-surface-default);
+  stroke: var(--dt-colors-border-neutral-default);
+  stroke-width: 1;
+}
+
+.pvs-stackmap__node:not([data-brand='true']) .pvs-stackmap__bar {
+  display: none;
+}
+
+.pvs-stackmap__icon {
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-stackmap__name {
+  fill: var(--dt-colors-text-neutral-default);
+}
+
+.pvs-stackmap__link {
+  stroke: var(--dt-colors-text-neutral-subdued);
+  opacity: 0.22;
+}
+
+.pvs-stackmap__flow {
+  stroke: var(--pvs-v6-edge);
+  stroke-opacity: 0.8;
+  stroke-dasharray: 2 18;
+}
+
+.pvs-stackmap__node[data-emphasis='true'] .pvs-stackmap__box {
+  stroke: var(--pvs-v6-edge);
+  stroke-width: 2;
+  filter: none;
+}
+
+.pvs-stackmap__node[data-emphasis='true'] .pvs-stackmap__icon {
+  color: var(--pvs-v6-edge);
+}
+
+.pvs-stackmap__node[data-href]:hover .pvs-stackmap__box {
+  stroke: var(--dt-colors-border-neutral-accent);
+}
+
+/* ------------------------------------------------------------------ 3.6.9 — the PoC Builder's SLO kit and the clean-up */
+/* A list of choices: each row a checkbox and a quiet caption (its requests, or what kind of thing it is). */
+.pvs-slo-services {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--dt-spacings-size-4);
+}
+
+.pvs-slo-services li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--dt-spacings-size-4) var(--dt-spacings-size-12);
+  padding-block: 2px;
+  border-bottom: 1px solid var(--dt-colors-border-neutral-default);
+}
+
+.pvs-slo-services li:last-child {
+  border-bottom: none;
+}
+
+.pvs-slo-services li > :first-child {
+  flex: 1 1 14rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.pvs-slo-services li > .pvs-caption {
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------ 3.7.3 — capacity against usage as a map (CapacityMap) */
+.pvs-capmap {
+  display: grid;
+  gap: 16px;
+}
+
+.pvs-capmap__group {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+}
+
+.pvs-capmap__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pvs-capmap__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.pvs-capmap__count {
+  font-size: 12px;
+  color: var(--dt-colors-text-neutral-subdued);
+  font-variant-numeric: tabular-nums;
+}
+
+.pvs-capmap__grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+}
+
+.pvs-capmap__card {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  border-left: 3px solid var(--pvs-capmap-edge, var(--dt-colors-border-neutral-default));
+  border-radius: 8px;
+  background: var(--dt-colors-background-container-neutral-subdued);
+}
+
+.pvs-capmap__name {
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pvs-capmap__gauge {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) 40px;
+  align-items: center;
+  gap: 6px;
+}
+
+.pvs-capmap__metric,
+.pvs-capmap__value,
+.pvs-capmap__none {
+  font-size: 12px;
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-capmap__value {
+  text-align: right;
+  color: var(--dt-colors-text-neutral-default);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ================================================================== 3.7.5 — the v6 wave 4, part 2 (what was left)
+   The honeycombs as status hex maps, the app's donut with a tabular legend, the hero banners flat and neutral, the
+   value chain, the pillars and the journey with icons in square boxes, the timeline's track in the menu's turquoise,
+   the old tiles without a coloured rail, and Adoption's heat map in neutral tones. Tokens only. */
+
+/* ---- the status hex map (components/viz/StatusHexMap.tsx) */
+.pvs-hexmap {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--dt-spacings-size-20);
+  align-items: start;
+}
+
+@media (max-width: 640px) {
+  .pvs-hexmap {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.pvs-hexmap__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 260px;
+}
+
+.pvs-hexmap__hex {
+  stroke: var(--dt-colors-background-surface-default);
+  stroke-width: 1.5;
+}
+
+.pvs-hexmap__legend {
+  width: auto;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.pvs-hexmap__legend th,
+.pvs-hexmap__legend td {
+  padding: 6px 4px;
+  text-align: left;
+  font-weight: 400;
+  border-bottom: 1px solid var(--dt-colors-border-neutral-default);
+  white-space: nowrap;
+}
+
+.pvs-hexmap__legend thead th {
+  font-size: 12px;
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-hexmap__legend tbody th {
+  color: var(--dt-colors-text-neutral-default);
+}
+
+.pvs-hexmap__num {
+  text-align: right !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.pvs-hexmap__dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 8px;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+
+.pvs-hexmap__blocks,
+.pvs-donut__blocks {
+  display: inline-flex;
+  gap: 2px;
+  vertical-align: middle;
+}
+
+.pvs-hexmap__block,
+.pvs-donut__block {
+  width: 5px;
+  height: 12px;
+  border-radius: 1px;
+  background: var(--dt-colors-background-container-neutral-subdued);
+}
+
+/* ---- the app's donut: a thicker ring and a tabular legend with micro-blocks (DonutBreakdown) */
+.pvs-donut__legend[data-v6='true'] .pvs-legend-list__row,
+.pvs-donut__legend-head {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) auto auto 3.4em;
+  align-items: center;
+  gap: var(--dt-spacings-size-12);
+  padding: 4px 0;
+  border-bottom: 1px solid var(--dt-colors-border-neutral-default);
+}
+
+.pvs-donut__legend-head {
+  font-size: 12px;
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-donut__legend-head > span:nth-child(3),
+.pvs-donut__legend-head > span:nth-child(5),
+.pvs-donut__legend[data-v6='true'] .pvs-legend-list__share {
+  text-align: right;
+}
+
+.pvs-donut__total {
+  color: var(--dt-colors-text-neutral-default);
+}
+
+/* ---- the hero banners: flat and neutral (the thin brand strip along the top lives in engine/spectrum.css, the one
+   sheet allowed to paint a gradient) */
+
+/* ---- square icon boxes: the value chain, the pillars and the PoC journey (the StratoKpi badge's anatomy) */
+.pvs-chain__emblem,
+.pvs-pillar__emblem,
+.pvs-journey__emblem {
+  border-radius: var(--dt-borders-radius-field-default, 8px);
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  color: var(--pvs-sp-from);
+  background: var(--dt-colors-background-container-neutral-subdued);
+  box-shadow: none;
+}
+
+.pvs-chain__emblem,
+.pvs-pillar__emblem {
+  width: 32px;
+  height: 32px;
+}
+
+.pvs-journey__emblem {
+  width: 40px;
+  height: 40px;
+}
+
+.pvs-chain__link,
+.pvs-chain__link[data-missing='true'] {
+  background: var(--dt-colors-background-surface-default);
+}
+
+.pvs-chain__link:not(:last-child)::after {
+  background: var(--dt-colors-border-neutral-default);
+  height: 1px;
+}
+
+.pvs-journey__rail {
+  background: var(--dt-colors-border-neutral-default);
+  opacity: 1;
+  height: 1px;
+}
+
+/* ---- the PoC timeline's day-by-day track: the elapsed part in the menu's turquoise, neutral marks */
+.pvs-track__fill {
+  background-image: none;
+  background-color: var(--pvs-v6-edge);
+}
+
+.pvs-track__dot {
+  background: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-track__mark[data-kind='today'] .pvs-track__dot {
+  background: var(--pvs-v6-edge);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pvs-v6-edge) 30%, transparent);
+}
+
+/* ---- the old tiles (FactTile / StatTile / KpiTile): no coloured rail; a toned tile shows a dot before its label */
+.pvs-tile__dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 50%;
+  vertical-align: middle;
+  background: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-kpi[data-tone='success'] .pvs-tile__dot {
+  background: var(--dt-colors-charts-status-ideal-default);
+}
+
+.pvs-kpi[data-tone='warning'] .pvs-tile__dot {
+  background: var(--dt-colors-charts-status-warning-default);
+}
+
+.pvs-kpi[data-tone='critical'] .pvs-tile__dot {
+  background: var(--dt-colors-charts-status-critical-default);
+}
+
+.pvs-panel.pvs-kpi {
+  background: var(--dt-colors-background-surface-default);
+}
+
+/* ---- Adoption's heat map in neutral tones, the busiest hour outlined in turquoise (as the problem calendar) */
+/* Scoped under the wrapper: engine/chart/chart.css loads after this sheet and would win a tie. */
+.pvs-whenmap-wrap .pvs-whenmap__cell,
+.pvs-whenmap-wrap .pvs-whenmap__swatch {
+  background: color-mix(in srgb, var(--dt-colors-text-neutral-default) calc(6% + var(--pvs-heat) * 40%), var(--dt-colors-background-surface-default));
+}
+
+.pvs-whenmap-wrap .pvs-whenmap__cell[data-empty='true'] {
+  background: var(--dt-colors-background-container-neutral-subdued);
+}
+
+.pvs-whenmap-wrap .pvs-whenmap__cell[data-peak='true'] {
+  box-shadow: inset 0 0 0 2px var(--pvs-v6-edge);
+}

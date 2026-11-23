@@ -1,0 +1,555 @@
+/*
+ * Value Evidence Experience — data-visualisation primitives.
+ *
+ * Solid fills from design tokens, text labels for every value, and motion that is
+ * switched off under `prefers-reduced-motion`. No gradients, no glow, no
+ * text-shadow: a mark is a fill and an edge, and a number is printed beside it.
+ */
+
+/* Shared label style: small, subdued, sentence case (never letter-spaced caps). */
+.pvs-label {
+  margin: 0;
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: var(--dt-typography-heading-level-6-size);
+  font-weight: var(--dt-typography-heading-level-6-weight);
+  line-height: 1.3;
+}
+
+.pvs-caption {
+  margin: 0;
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: var(--dt-typography-heading-level-6-size);
+  line-height: 1.4;
+}
+
+/* ───────────────────────── fact tile (KPI / stat) ───────────────────────── */
+
+.pvs-tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pvs-gap-tight);
+  flex: 1;
+  min-width: 0;
+}
+
+.pvs-tile__label {
+  overflow-wrap: break-word;
+}
+
+.pvs-tile__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--dt-spacings-size-4) var(--pvs-gap-tight);
+  margin-top: auto;
+}
+
+/* ───────────────────────── page summary band ───────────────────────── */
+
+.pvs-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 168px), 1fr));
+  gap: var(--pvs-gap-group) var(--pvs-gap-section);
+}
+
+.pvs-summary[data-dense='true'] {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 136px), 1fr));
+  column-gap: var(--pvs-gap-group);
+}
+
+/* A long figure (91,113,158,730) keeps to one line in the tighter cell: one step down the scale. */
+.pvs-summary[data-dense='true'] .pvs-figure[data-size='md'] {
+  font-size: var(--dt-typography-heading-level-4-size);
+}
+
+.pvs-summary__cell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dt-spacings-size-4);
+  min-width: 0;
+  padding-inline-start: var(--dt-spacings-size-12);
+  border-inline-start: var(--dt-borders-width-emphasized) var(--dt-borders-style-default)
+    var(--dt-colors-border-neutral-default);
+}
+
+.pvs-summary__cell[data-missing='true'] {
+  border-inline-start-style: dashed;
+}
+
+.pvs-summary__head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--dt-spacings-size-6);
+}
+
+/* ───────────────────────── chart frame ───────────────────────── */
+
+.pvs-chartframe__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--pvs-gap-group);
+}
+
+.pvs-chartframe__title {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dt-spacings-size-4);
+  min-width: 0;
+}
+
+.pvs-chartframe__tools {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pvs-gap-tight);
+}
+
+.pvs-chartframe__body {
+  min-width: 0;
+}
+
+/* ───────────────────────── health ring ───────────────────────── */
+
+.pvs-ring {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--pvs-gap-tight);
+  min-width: 0;
+  text-align: center;
+}
+
+.pvs-ring__dial {
+  position: relative;
+}
+
+.pvs-ring__svg {
+  display: block;
+  transform: rotate(-90deg);
+}
+
+.pvs-ring__arc {
+  transition: stroke-dasharray var(--dt-timings-slow-default) var(--pvs-ease);
+}
+
+.pvs-ring__value {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--dt-colors-text-neutral-default);
+  font-weight: var(--dt-typography-heading-level-1-weight);
+  font-variant-numeric: proportional-nums; /* 3.4.16: a value standing alone (DT Flow's tabular point read "6 .9") */
+}
+
+.pvs-ring__label {
+  margin: 0;
+  font-weight: 600;
+}
+
+/* ───────────────────────── ranked bars ───────────────────────── */
+
+.pvs-bars {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dt-spacings-size-12);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pvs-bars__row {
+  display: flex;
+  align-items: center;
+  gap: var(--pvs-gap-tight);
+  min-width: 0;
+}
+
+.pvs-bars__rank {
+  flex: none;
+  min-width: var(--dt-spacings-size-24);
+  text-align: end;
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: var(--dt-typography-heading-level-6-size);
+  font-weight: var(--dt-typography-heading-level-6-weight);
+  font-variant-numeric: tabular-nums;
+}
+
+.pvs-bars__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.pvs-bars__line {
+  display: flex;
+  /* A long reading ("median 22 min · p90 26 h · 2,480 closed") moves under the name on a phone
+     instead of widening the page (3.2.3, found by the build-mode harness on /rca). */
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0 var(--pvs-gap-tight);
+  margin-bottom: var(--dt-spacings-size-4);
+}
+
+.pvs-bars__name {
+  font-weight: 600;
+}
+
+.pvs-bars__value {
+  flex: none;
+  /* On its own line under the name it may still be wider than a phone row ("mediana 22,0 min ·
+     p90 26,0 h · 2.480 fechados" is 308 px in a 285 px row): capped at the row, it wraps at its
+     spaces instead of widening the page (3.2.7 final review P2). A reading that fits is unchanged. */
+  max-width: 100%;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.pvs-bars__track {
+  height: var(--dt-spacings-size-8);
+  overflow: hidden;
+  border-radius: var(--dt-borders-radius-container-subdued);
+  background: var(--dt-colors-background-container-neutral-emphasized);
+}
+
+.pvs-bars__track.pvs-bars__track--strato {
+  height: 12px;
+  background: none;
+  overflow: visible;
+}
+
+.pvs-bars__fill {
+  height: 100%;
+  border-radius: var(--dt-borders-radius-container-subdued);
+  transition: width var(--dt-timings-slow-default) var(--pvs-ease);
+}
+
+/* ───────────────────────── share bar & donut ───────────────────────── */
+
+.pvs-share {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pvs-gap-group);
+  min-width: 0;
+}
+
+.pvs-share__bar {
+  display: flex;
+  height: var(--dt-spacings-size-16);
+  overflow: hidden;
+  border-radius: var(--dt-borders-radius-container-subdued);
+  background: var(--dt-colors-background-container-neutral-emphasized);
+}
+
+/* A hairline between segments keeps neighbours distinguishable without relying on hue. */
+.pvs-share__seg + .pvs-share__seg {
+  border-inline-start: var(--dt-borders-width-emphasized) var(--dt-borders-style-default)
+    var(--dt-colors-background-surface-default);
+}
+
+.pvs-legend-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pvs-gap-tight);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+
+.pvs-legend-list__row {
+  display: flex;
+  align-items: center;
+  gap: var(--dt-spacings-size-12);
+  min-width: 0;
+}
+
+.pvs-swatch {
+  flex: none;
+  width: var(--dt-spacings-size-12);
+  height: var(--dt-spacings-size-12);
+  border-radius: var(--dt-borders-radius-container-subdued);
+}
+
+.pvs-legend-list__name {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+}
+
+.pvs-legend-list__value {
+  flex: none;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.pvs-legend-list__share {
+  flex: none;
+  min-width: var(--dt-spacings-size-56);
+  text-align: end;
+  color: var(--dt-colors-text-neutral-subdued);
+  font-variant-numeric: tabular-nums;
+}
+
+.pvs-donut {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--pvs-gap-section);
+}
+
+.pvs-donut__dial {
+  position: relative;
+  flex: none;
+}
+
+.pvs-donut__svg {
+  display: block;
+  transform: rotate(-90deg);
+}
+
+.pvs-donut__center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.pvs-donut__total {
+  font-weight: var(--dt-typography-heading-level-1-weight);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.pvs-donut__legend {
+  flex: 1;
+  min-width: min(100%, 220px);
+}
+
+/* ───────────────────────── capacity bars ───────────────────────── */
+
+.pvs-capacity {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dt-spacings-size-12);
+  min-width: 0;
+}
+
+.pvs-capacity__row {
+  display: grid;
+  grid-template-columns: minmax(96px, 30%) minmax(120px, 1fr) minmax(64px, auto) auto;
+  align-items: center;
+  gap: var(--pvs-gap-group);
+  min-width: 0;
+}
+
+.pvs-capacity__row[data-head='true'] {
+  align-items: end;
+}
+
+.pvs-capacity__keys {
+  grid-column: 3 / -1;
+  display: flex;
+  gap: var(--pvs-gap-group);
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.pvs-capacity__more {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--pvs-gap-group);
+  flex-wrap: wrap;
+}
+
+.pvs-capacity__track {
+  position: relative;
+  height: var(--dt-spacings-size-16);
+  overflow: hidden;
+  border-radius: var(--dt-borders-radius-container-subdued);
+  background: var(--dt-colors-background-container-neutral-emphasized);
+}
+
+.pvs-capacity__fill {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  z-index: 1;
+  border-radius: var(--dt-borders-radius-container-subdued);
+}
+
+/* Reclaimable headroom is hatched, so it differs from "used" by pattern, not just tint. */
+.pvs-capacity__reclaim {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pvs-capacity__ref {
+  position: absolute;
+  inset-block: 0;
+  z-index: 2;
+  width: var(--dt-borders-width-emphasized);
+}
+
+.pvs-capacity__readout {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+
+.pvs-capacity__readout strong {
+  font-weight: var(--dt-typography-heading-level-1-weight);
+}
+
+.pvs-capacity__key {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dt-spacings-size-6);
+}
+
+.pvs-capacity__key-mark {
+  display: inline-block;
+  width: var(--dt-borders-width-emphasized);
+  height: var(--dt-spacings-size-12);
+}
+
+@container pvs-page (max-width: 640px) {
+  .pvs-capacity__row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .pvs-capacity__track {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .pvs-capacity__row[data-head='true'] {
+    display: none;
+  }
+}
+
+/* ───────────────────────── dependency tiers (Smartscape) ───────────────────────── */
+
+.pvs-tiers {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pvs-gap-group);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pvs-tier {
+  display: grid;
+  grid-template-columns: minmax(120px, 160px) minmax(0, 1fr);
+  gap: var(--pvs-gap-group);
+  align-items: start;
+  padding-bottom: var(--pvs-gap-group);
+  border-bottom: var(--dt-borders-width-default) var(--dt-borders-style-default)
+    var(--dt-colors-border-neutral-subdued);
+  border-radius: var(--dt-borders-radius-container-default);
+  transition: opacity var(--pvs-time) var(--pvs-ease);
+}
+
+.pvs-tier:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.pvs-tier[data-dimmed='true'] {
+  opacity: 0.45;
+}
+
+.pvs-tier:focus-visible {
+  outline: var(--dt-borders-width-emphasized) var(--dt-borders-style-default)
+    var(--dt-colors-border-primary-accent);
+  outline-offset: 4px;
+}
+
+.pvs-tier__name {
+  margin: 0;
+  font-size: var(--dt-typography-heading-level-5-size);
+  font-weight: var(--dt-typography-heading-level-5-weight);
+}
+
+.pvs-tier__nodes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pvs-gap-tight);
+  min-width: 0;
+}
+
+.pvs-node {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dt-spacings-size-2);
+  min-width: 0;
+  max-width: 100%;
+  padding: var(--dt-spacings-size-8) var(--dt-spacings-size-12);
+  border: var(--dt-borders-width-default) var(--dt-borders-style-default)
+    var(--dt-colors-border-neutral-default);
+  border-radius: var(--dt-borders-radius-container-default);
+  background: var(--dt-colors-background-surface-default);
+}
+
+.pvs-node__label {
+  overflow-wrap: anywhere;
+  font-weight: 600;
+}
+
+@container pvs-page (max-width: 640px) {
+  .pvs-tier {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ───────────────────────── value card & sparkline ───────────────────────── */
+
+.pvs-valuecard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dt-spacings-size-6);
+  min-width: 0;
+}
+
+.pvs-valuecard__trend {
+  margin-inline-start: auto;
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: var(--dt-typography-heading-level-6-size);
+  font-weight: var(--dt-typography-heading-level-6-weight);
+  white-space: nowrap;
+}
+
+.pvs-spark {
+  display: block;
+  overflow: visible;
+}
+
+/* ───────────────────────── reduced motion ───────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .pvs-ring__arc,
+  .pvs-bars__fill,
+  .pvs-tier {
+    transition: none;
+  }
+}
+
+@media print {
+  .pvs-ring__arc,
+  .pvs-bars__fill {
+    transition: none;
+  }
+}

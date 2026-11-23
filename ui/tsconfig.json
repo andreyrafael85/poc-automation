@@ -1,0 +1,32 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "baseUrl": ".",
+    "declaration": true,
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "importHelpers": false /* Import emit helpers from 'tslib'. */,
+    "jsx": "react",
+    "lib": ["DOM", "DOM.Iterable", "esnext"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "paths": {},
+    "rootDir": ".",
+    "skipDefaultLibCheck": true,
+    "skipLibCheck": true /* Skip type checking of declaration files. */,
+    "sourceMap": true,
+    /* Raised above the template default: this app must not carry implicit `any`,
+       and unused symbols are a smell in a codebase meant to be audited. */
+    "strict": true,
+    "strictNullChecks": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "target": "ESNext",
+    "types": ["node"],
+    "typeRoots": ["../node_modules/@types", "../node_modules/@dynatrace"]
+  },
+  "exclude": ["node_modules", "dist", "actions"]
+}

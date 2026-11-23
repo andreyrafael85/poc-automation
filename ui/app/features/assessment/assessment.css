@@ -1,0 +1,1214 @@
+/* PoC Value Studio 3.4.0 — the Assessment page. Strato tokens only; no gradient (those live in spectrum.css). */
+
+/* ---------------------------------------------------------------- header */
+.pvs-asm-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--dt-spacings-size-12);
+}
+
+.pvs-asm-head__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dt-spacings-size-8) var(--dt-spacings-size-20);
+  min-width: 0;
+}
+
+.pvs-asm-head__fact {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.pvs-asm-head__label {
+  font-size: var(--dt-typography-text-small-default-size);
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-asm-head__value {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.pvs-asm-lens {
+  max-width: 22rem;
+}
+
+/* ---------------------------------------------------------------- domains of the index */
+.pvs-domains {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--dt-spacings-size-12);
+}
+
+.pvs-domains__row {
+  display: grid;
+  grid-template-columns: minmax(0, 13rem) minmax(0, 1fr) 3.5rem;
+  grid-template-areas:
+    'name track value'
+    'line line line';
+  align-items: center;
+  column-gap: var(--dt-spacings-size-12);
+  row-gap: var(--dt-spacings-size-2);
+  padding-left: var(--dt-spacings-size-8);
+  border-left: 3px solid transparent;
+}
+
+.pvs-domains__row[data-focus='true'] {
+  border-left-color: var(--dt-colors-border-primary-accent);
+}
+
+.pvs-domains__name {
+  grid-area: name;
+  font-weight: 600;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--dt-spacings-size-6);
+  min-width: 0;
+}
+
+.pvs-domains__weight {
+  font-weight: 400;
+  font-size: var(--dt-typography-text-small-default-size);
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-domains__track {
+  grid-area: track;
+  position: relative;
+  height: 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--dt-colors-border-neutral-default) 55%, transparent);
+}
+
+.pvs-domains__row[data-state='unavailable'] .pvs-domains__track,
+.pvs-domains__row[data-state='not-applicable'] .pvs-domains__track {
+  background: transparent;
+  border: 1px dashed var(--dt-colors-border-neutral-default);
+}
+
+.pvs-domains__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 999px;
+  background: var(--dt-colors-background-container-primary-accent);
+}
+
+.pvs-domains__value {
+  grid-area: value;
+  text-align: right;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.pvs-domains__line {
+  grid-area: line;
+  font-size: var(--dt-typography-text-small-default-size);
+  color: var(--dt-colors-text-neutral-subdued);
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+  .pvs-domains__row {
+    grid-template-columns: minmax(0, 1fr) 3.5rem;
+    grid-template-areas:
+      'name value'
+      'track track'
+      'line line';
+  }
+}
+
+/* ---------------------------------------------------------------- findings by class */
+.pvs-asm-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: var(--dt-spacings-size-12);
+  align-items: start;
+}
+
+.pvs-asm-class {
+  display: grid;
+  gap: var(--dt-spacings-size-8);
+  min-width: 0;
+}
+
+.pvs-asm-class__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--dt-spacings-size-8);
+  padding-bottom: var(--dt-spacings-size-4);
+  border-bottom: 3px solid var(--pvs-asm-class, var(--dt-colors-border-neutral-default));
+}
+
+.pvs-asm-class[data-class='critical'] {
+  --pvs-asm-class: var(--dt-colors-border-critical-default);
+}
+.pvs-asm-class[data-class='warning'] {
+  --pvs-asm-class: var(--dt-colors-border-warning-default);
+}
+.pvs-asm-class[data-class='opportunity'] {
+  --pvs-asm-class: var(--dt-colors-border-primary-accent);
+}
+.pvs-asm-class[data-class='strength'] {
+  --pvs-asm-class: var(--dt-colors-border-success-default);
+}
+
+.pvs-asm-class__count {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.pvs-asm-finding {
+  display: grid;
+  gap: var(--dt-spacings-size-4);
+  padding: var(--dt-spacings-size-12);
+  border-radius: var(--dt-borders-radius-container-default);
+  background: var(--dt-colors-background-container-neutral-subdued);
+  border-left: 3px solid var(--pvs-asm-class, var(--dt-colors-border-neutral-default));
+  min-width: 0;
+}
+
+.pvs-asm-finding__rule {
+  font-size: var(--dt-typography-text-small-default-size);
+  color: var(--dt-colors-text-neutral-subdued);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dt-spacings-size-6);
+}
+
+.pvs-asm-finding__title {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.pvs-asm-finding__field {
+  overflow-wrap: anywhere;
+}
+
+.pvs-asm-finding__field strong {
+  font-weight: 600;
+}
+
+.pvs-asm-finding__meta {
+  font-size: var(--dt-typography-text-small-default-size);
+  color: var(--dt-colors-text-neutral-subdued);
+  overflow-wrap: anywhere;
+}
+
+/* ---------------------------------------------------------------- summary */
+.pvs-asm-summary {
+  margin: 0;
+  padding-left: var(--dt-spacings-size-20);
+  display: grid;
+  gap: var(--dt-spacings-size-6);
+}
+
+/* ---------------------------------------------------------------- platform usage (3.4.1) */
+.pvs-adopt {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: var(--dt-spacings-size-12);
+}
+
+.pvs-adopt__item {
+  display: grid;
+  gap: var(--dt-spacings-size-4);
+  min-width: 0;
+  padding: var(--dt-spacings-size-12);
+  border-radius: var(--dt-borders-radius-container-default);
+  background: var(--dt-colors-background-container-neutral-subdued);
+  border-left: 3px solid var(--dt-colors-border-neutral-default);
+}
+
+.pvs-adopt__item[data-state='in-use'] {
+  border-left-color: var(--dt-colors-border-success-default);
+}
+.pvs-adopt__item[data-state='room'] {
+  border-left-color: var(--dt-colors-border-primary-accent);
+}
+.pvs-adopt__item[data-state='unread'] {
+  border-left-style: dashed;
+}
+
+.pvs-adopt__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--dt-spacings-size-8);
+}
+
+.pvs-adopt__name {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.pvs-adopt__state {
+  font-size: var(--dt-typography-text-small-default-size);
+  font-weight: 600;
+  color: var(--dt-colors-text-neutral-default);
+}
+
+.pvs-adopt__item[data-state='in-use'] .pvs-adopt__state {
+  color: var(--dt-colors-text-success-default);
+}
+
+.pvs-adopt__measured {
+  overflow-wrap: anywhere;
+}
+
+.pvs-adopt__evidence {
+  font-size: var(--dt-typography-text-small-default-size);
+  color: var(--dt-colors-text-neutral-subdued);
+  overflow-wrap: anywhere;
+}
+
+/* ---------------------------------------------------------------- tables that print (3.4.1) */
+.pvs-asm-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--dt-typography-text-base-default-size, 14px);
+}
+
+.pvs-asm-table th,
+.pvs-asm-table td {
+  text-align: left;
+  vertical-align: top;
+  padding: var(--dt-spacings-size-8);
+  border-bottom: 1px solid var(--dt-colors-border-neutral-default);
+  /* Break a long word only when it cannot fit; never split a header letter by letter. */
+  overflow-wrap: break-word;
+}
+
+.pvs-asm-table thead th {
+  font-weight: 600;
+  color: var(--dt-colors-text-neutral-subdued);
+  white-space: nowrap;
+}
+
+.pvs-asm-table td[data-num],
+.pvs-asm-table th[data-num] {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.pvs-asm-table td[data-code] {
+  font-size: var(--dt-typography-text-small-default-size);
+  white-space: nowrap;
+}
+
+.pvs-asm-table-wrap {
+  overflow-x: auto;
+}
+
+/* ---------------------------------------------------------------- print (3.4.1) */
+/* The report's cover: printed only (on screen the page intro says the same). */
+.pvs-print-only {
+  display: none;
+}
+
+@media print {
+  .pvs-print-only {
+    display: block !important;
+  }
+  .pvs-asm-finding a,
+  .pvs-asm-table a {
+    display: none !important;
+  }
+  .pvs-asm-classes,
+  .pvs-asm-cards,
+  .pvs-adopt {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  .pvs-asm-finding,
+  .pvs-adopt__item,
+  .pvs-domains__row {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .pvs-asm-table-wrap {
+    overflow: visible !important;
+  }
+  .pvs-asm-table tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  /* The matrix truncates its titles on screen; the print rules turn every clip off, so on paper
+     each title wraps in its cell instead of running over the next one. */
+  .pvs-matrix__item,
+  .pvs-matrix__title {
+    white-space: normal !important;
+    overflow-wrap: break-word;
+  }
+  /* Compact on paper, so the matrix and its heading fit on one page. */
+  .pvs-matrix {
+    font-size: var(--dt-typography-text-small-default-size);
+  }
+  .pvs-matrix__cell {
+    padding: var(--dt-spacings-size-4) !important;
+  }
+}
+
+/* ---------------------------------------------------------------- 3.4.3: states to improve, in soft colour */
+/* Owner's order: "Espaço para crescer" and "Ainda não detectado" in soft yellow / soft orange, as points to
+   improve. The same palette marks the SRE practices (developing / early). The state stays in the words. */
+.pvs-adopt__item[data-state='room'],
+.pvs-adopt__item[data-state='developing'] {
+  background: var(--dt-colors-background-field-warning-emphasized);
+  border-left-color: var(--dt-colors-background-container-warning-accent);
+}
+.pvs-adopt__item[data-state='not-detected'],
+.pvs-adopt__item[data-state='early'] {
+  background: color-mix(in srgb, var(--dt-colors-background-container-warning-accent) 16%, var(--dt-colors-background-container-critical-default));
+  border-left-color: var(--dt-colors-border-warning-accent);
+}
+.pvs-adopt__item[data-state='established'] {
+  border-left-color: var(--dt-colors-border-success-default);
+}
+.pvs-adopt__item[data-state='room'] .pvs-adopt__state,
+.pvs-adopt__item[data-state='developing'] .pvs-adopt__state,
+.pvs-adopt__item[data-state='not-detected'] .pvs-adopt__state,
+.pvs-adopt__item[data-state='early'] .pvs-adopt__state {
+  color: var(--dt-colors-text-warning-default);
+}
+.pvs-adopt__item[data-state='established'] .pvs-adopt__state {
+  color: var(--dt-colors-text-success-default);
+}
+
+/* ---------------------------------------------------------------- 3.4.3: executive summary */
+.pvs-asm-exec {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+  gap: var(--dt-spacings-size-12);
+}
+
+.pvs-asm-exec__kpi {
+  display: grid;
+  gap: var(--dt-spacings-size-2);
+  padding: var(--dt-spacings-size-12);
+  border-radius: var(--dt-borders-radius-container-default);
+  background: var(--dt-colors-background-container-neutral-subdued);
+  border-top: 3px solid var(--dt-colors-border-primary-accent);
+  min-width: 0;
+}
+
+.pvs-asm-exec__label {
+  font-size: var(--dt-typography-text-small-default-size);
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-asm-exec__value {
+  font-size: var(--dt-typography-heading-level-3-size, 24px);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.pvs-asm-exec__detail {
+  font-size: var(--dt-typography-text-small-default-size);
+  color: var(--dt-colors-text-neutral-subdued);
+  overflow-wrap: anywhere;
+}
+
+.pvs-asm-wins {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: var(--dt-spacings-size-16);
+}
+
+.pvs-asm-wins__box {
+  display: grid;
+  gap: var(--dt-spacings-size-6);
+  padding: var(--dt-spacings-size-12);
+  border-radius: var(--dt-borders-radius-container-default);
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  border-left: 3px solid var(--dt-colors-border-success-default);
+  min-width: 0;
+}
+
+.pvs-asm-wins__box[data-kind='gaps'] {
+  border-left-color: var(--dt-colors-background-container-warning-accent);
+}
+
+/* ---------------------------------------------------------------- 3.4.3: tabs that print whole */
+.pvs-asm-tabs [role='tabpanel'] {
+  overflow: visible;
+}
+
+.pvs-asm-tabtitle {
+  display: none;
+}
+
+@media print {
+  .pvs-asm-tabs [role='tablist'],
+  .pvs-asm-tabs :has(> [role='tablist']) {
+    display: none !important;
+  }
+  /* Every tab prints, in order, each under its own title: the report is the whole assessment. */
+  .pvs-asm-tabs [role='tabpanel'],
+  .pvs-asm-tabs [role='tabpanel'][hidden] {
+    display: block !important;
+    visibility: visible !important;
+    height: auto !important;
+  }
+  .pvs-asm-tabtitle {
+    display: block;
+  }
+}
+
+/* ---------------------------------------------------------------- 3.4.5: the glance, one grid */
+.pvs-asm-glance {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: var(--dt-spacings-size-16);
+  align-items: stretch;
+}
+
+.pvs-asm-glance__radar {
+  display: grid;
+  align-content: start;
+  gap: var(--dt-spacings-size-6);
+  padding: var(--dt-spacings-size-16);
+  border-radius: var(--dt-borders-radius-container-default);
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  min-width: 0;
+}
+
+.pvs-asm-glance__lists {
+  display: grid;
+  grid-template-rows: auto auto;
+  gap: var(--dt-spacings-size-16);
+  align-content: start;
+  min-width: 0;
+}
+
+.pvs-asm-wins__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--dt-spacings-size-8);
+}
+
+.pvs-asm-wins__count {
+  min-width: 2rem;
+  padding: 0 var(--dt-spacings-size-8);
+  border-radius: 999px;
+  text-align: center;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  background: var(--dt-colors-background-container-neutral-emphasized);
+}
+
+.pvs-asm-wins__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--dt-spacings-size-6);
+}
+
+.pvs-asm-wins__item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--dt-spacings-size-8);
+  padding: var(--dt-spacings-size-6) var(--dt-spacings-size-8);
+  border-radius: var(--dt-borders-radius-container-default);
+  background: var(--dt-colors-background-container-neutral-subdued);
+}
+
+.pvs-asm-wins__mark {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 999px;
+  background: var(--dt-colors-border-neutral-accent);
+}
+
+.pvs-asm-wins__item[data-kind='strength'] .pvs-asm-wins__mark,
+.pvs-asm-wins__item[data-kind='inUse'] .pvs-asm-wins__mark {
+  background: var(--dt-colors-background-container-success-accent);
+}
+.pvs-asm-wins__item[data-kind='critical'] .pvs-asm-wins__mark {
+  background: var(--dt-colors-border-critical-accent);
+}
+.pvs-asm-wins__item[data-kind='warning'] .pvs-asm-wins__mark {
+  background: var(--dt-colors-background-container-warning-accent);
+}
+.pvs-asm-wins__item[data-kind='notDetected'] .pvs-asm-wins__mark {
+  background: transparent;
+  border: 2px solid var(--dt-colors-border-warning-accent);
+}
+
+.pvs-asm-wins__text {
+  overflow-wrap: anywhere;
+}
+
+.pvs-asm-wins__tag {
+  font-size: var(--dt-typography-text-small-default-size);
+  color: var(--dt-colors-text-neutral-subdued);
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .pvs-asm-glance {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pvs-asm-wins__item {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .pvs-asm-wins__tag {
+    grid-column: 2;
+  }
+}
+
+@media print {
+  .pvs-asm-glance {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+  }
+}
+
+/* ---------------------------------------------------------------- 3.4.5: maturity journey, a staircase */
+.pvs-mat {
+  display: grid;
+  gap: var(--dt-spacings-size-12);
+}
+
+.pvs-mat__now {
+  margin: 0;
+  font-weight: 600;
+}
+
+.pvs-mat__stairs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--dt-spacings-size-8);
+  /* The risers line up at their foot, so the row of tops climbs left to right. */
+  align-items: start;
+}
+
+.pvs-mat__step {
+  display: grid;
+  grid-template-rows: auto auto;
+  min-width: 0;
+}
+
+.pvs-mat__riser {
+  /* Each riser is a step taller than the one before: the staircase is the journey. */
+  height: calc(var(--pvs-step, 1) * 22px + 26px);
+  align-self: end;
+  margin-top: calc((5 - var(--pvs-step, 1)) * 22px);
+  border-radius: var(--dt-borders-radius-container-default) var(--dt-borders-radius-container-default) 0 0;
+  background: var(--dt-colors-background-container-neutral-emphasized);
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  padding-top: var(--dt-spacings-size-6);
+}
+
+.pvs-mat__step[data-position='reached'] .pvs-mat__riser {
+  background: color-mix(in srgb, var(--dt-colors-background-container-primary-accent) 45%, var(--dt-colors-background-container-neutral-emphasized));
+}
+
+.pvs-mat__step[data-position='current'] .pvs-mat__riser {
+  background: var(--dt-colors-background-container-primary-accent);
+}
+
+.pvs-mat__badge {
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  background: var(--dt-colors-background-base-default, #fff);
+  color: var(--dt-colors-text-neutral-default);
+  border: 2px solid var(--dt-colors-border-neutral-default);
+}
+
+.pvs-mat__step[data-position='current'] .pvs-mat__badge {
+  border-color: var(--dt-colors-border-primary-accent);
+}
+
+.pvs-mat__card {
+  display: grid;
+  align-content: start;
+  gap: var(--dt-spacings-size-4);
+  padding: var(--dt-spacings-size-12);
+  border-radius: 0 0 var(--dt-borders-radius-container-default) var(--dt-borders-radius-container-default);
+  background: var(--dt-colors-background-container-neutral-subdued);
+  border-top: 3px solid var(--dt-colors-border-neutral-default);
+  min-height: 100%;
+}
+
+.pvs-mat__step[data-position='reached'] .pvs-mat__card {
+  border-top-color: var(--dt-colors-border-primary-accent);
+}
+
+.pvs-mat__step[data-position='current'] .pvs-mat__card {
+  border-top-color: var(--dt-colors-border-primary-accent);
+  background: var(--dt-colors-background-container-primary-default);
+  outline: 2px solid var(--dt-colors-border-primary-accent);
+  outline-offset: -2px;
+}
+
+.pvs-mat__name {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.pvs-mat__here {
+  justify-self: start;
+  padding: 0 var(--dt-spacings-size-6);
+  border-radius: var(--dt-borders-radius-container-default);
+  background: var(--dt-colors-background-container-primary-accent);
+  color: var(--dt-colors-text-primary-on-accent-default);
+  font-size: var(--dt-typography-text-small-default-size);
+  font-weight: 600;
+}
+
+.pvs-mat__tag {
+  font-weight: 600;
+  font-size: var(--dt-typography-text-small-default-size);
+  overflow-wrap: anywhere;
+}
+
+.pvs-mat__text,
+.pvs-mat__criterion,
+.pvs-mat__progress {
+  font-size: var(--dt-typography-text-small-default-size);
+  overflow-wrap: anywhere;
+}
+
+.pvs-mat__text,
+.pvs-mat__state {
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-mat__progress {
+  display: grid;
+  gap: var(--dt-spacings-size-2);
+  font-weight: 600;
+}
+
+.pvs-mat__bar {
+  height: 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--dt-colors-border-neutral-default) 55%, transparent);
+  overflow: hidden;
+}
+
+.pvs-mat__bar > span {
+  display: block;
+  height: 100%;
+  background: var(--dt-colors-background-container-primary-accent);
+}
+
+.pvs-mat__criteria {
+  list-style: none;
+  margin: var(--dt-spacings-size-4) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--dt-spacings-size-4);
+}
+
+.pvs-mat__criterion {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--dt-spacings-size-6);
+  align-items: start;
+}
+
+/* Three marks that differ by shape as well as colour: filled with a check, an amber ring with a bar, a dashed ring. */
+.pvs-mat__mark {
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.pvs-mat__mark svg {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.pvs-mat__criterion[data-state='met'] .pvs-mat__mark {
+  background: var(--dt-colors-background-container-success-accent);
+  color: var(--dt-colors-text-neutral-on-accent-default);
+}
+
+.pvs-mat__criterion[data-state='open'] .pvs-mat__mark {
+  /* 3.4.10: a next step, not a fault — the platform's blue, never the warning amber. */
+  border: 2px solid var(--dt-colors-border-primary-default);
+  color: var(--dt-colors-text-primary-default);
+}
+
+.pvs-mat__criterion[data-state='open'] .pvs-mat__state {
+  color: var(--dt-colors-text-primary-default);
+  font-weight: 600;
+}
+
+.pvs-mat__ahead-met {
+  font-size: var(--dt-typography-text-small-default-size);
+  color: var(--dt-colors-text-neutral-subdued);
+  font-style: italic;
+}
+
+.pvs-mat__criterion[data-state='unread'] .pvs-mat__mark {
+  border: 2px dashed var(--dt-colors-border-neutral-accent);
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+/* Screen only: the printed page keeps the staircase. */
+@media screen and (max-width: 900px) {
+  .pvs-mat__stairs {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pvs-mat__riser {
+    height: auto;
+    margin-top: 0;
+    border-radius: var(--dt-borders-radius-container-default) var(--dt-borders-radius-container-default) 0 0;
+    padding: var(--dt-spacings-size-4);
+  }
+}
+
+@media print {
+  .pvs-mat__stairs {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  }
+}
+
+/* ---------------------------------------------------------------- 3.4.6: the action plan (F-06, F-09) */
+.pvs-plan {
+  display: grid;
+  gap: var(--dt-spacings-size-12);
+}
+
+.pvs-plan__progress {
+  font-weight: 600;
+}
+
+.pvs-plan__overdue,
+.pvs-plan__late {
+  color: var(--dt-colors-text-warning-default);
+  font-weight: 600;
+}
+
+.pvs-plan__cap {
+  display: grid;
+  gap: var(--dt-spacings-size-2);
+  justify-items: start;
+}
+
+.pvs-plan__cell {
+  min-width: 13rem;
+}
+
+.pvs-plan__edit {
+  display: grid;
+  gap: var(--dt-spacings-size-4);
+}
+
+.pvs-plan__label {
+  font-size: var(--dt-typography-text-small-default-size);
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-plan__read {
+  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  font-size: var(--dt-typography-text-small-default-size);
+}
+
+.pvs-plan__read dt {
+  color: var(--dt-colors-text-neutral-subdued);
+  margin-top: var(--dt-spacings-size-4);
+}
+
+.pvs-plan__read dt:first-child {
+  margin-top: 0;
+}
+
+.pvs-plan__read dd {
+  margin: 0;
+}
+
+/* The SE edits on screen; the words take over on paper. */
+.pvs-plan__read[data-plan-read='print'] {
+  display: none;
+}
+
+.pvs-plan__status[data-status='done'] {
+  color: var(--dt-colors-text-success-default);
+  font-weight: 600;
+}
+
+.pvs-plan__status[data-status='inProgress'] {
+  color: var(--dt-colors-text-primary-default);
+  font-weight: 600;
+}
+
+@media print {
+  /* The documentation stays on paper as a link the reader can click in the PDF; in-app links do not. */
+  .pvs-asm-table .pvs-doc a,
+  .pvs-asm-finding .pvs-doc a,
+  .pvs-adopt .pvs-doc a {
+    display: inline !important;
+  }
+  .pvs-plan__read[data-plan-read='print'] {
+    display: grid !important;
+  }
+  .pvs-plan__cell {
+    min-width: 0;
+  }
+}
+
+/* ---------------------------------------------------------------- 3.4.7: the maturity hero, spectrum and pillars */
+.pvs-mat__hero {
+  display: grid;
+  grid-template-columns: minmax(10rem, 15rem) minmax(0, 1fr);
+  gap: var(--dt-spacings-size-24);
+  align-items: center;
+}
+
+@media screen and (max-width: 760px) {
+  .pvs-mat__hero {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+  }
+}
+
+.pvs-mat-rings {
+  display: block;
+  width: 100%;
+  max-width: 15rem;
+  height: auto;
+}
+
+.pvs-mat-rings__track {
+  fill: none;
+  stroke: var(--dt-colors-background-container-neutral-subdued);
+}
+
+.pvs-mat-rings__level {
+  font-size: 30px;
+  font-weight: 600;
+  fill: var(--dt-colors-text-neutral-default);
+  font-variant-numeric: tabular-nums;
+}
+
+.pvs-mat-rings__name {
+  font-size: 13px;
+  font-weight: 600;
+  fill: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-mat__reading {
+  display: grid;
+  gap: var(--dt-spacings-size-8);
+  min-width: 0;
+}
+
+.pvs-mat__reading p {
+  margin: 0;
+}
+
+.pvs-mat__inplace {
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-mat__pillars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--dt-spacings-size-4) var(--dt-spacings-size-16);
+}
+
+.pvs-mat__pillar {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: var(--dt-spacings-size-6);
+  align-items: baseline;
+}
+
+.pvs-mat__dot {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  grid-row: span 2;
+  align-self: center;
+}
+
+.pvs-mat__pillar-name {
+  font-weight: 600;
+}
+
+.pvs-mat__pillar-level {
+  grid-column: 2;
+  font-size: var(--dt-typography-text-small-default-size);
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-mat__next {
+  padding: var(--dt-spacings-size-8) var(--dt-spacings-size-12);
+  border-radius: var(--dt-borders-radius-container-default);
+  background: var(--dt-colors-background-container-primary-default);
+  border-left: 3px solid var(--dt-colors-border-primary-default);
+}
+
+.pvs-mat__next ul {
+  margin: var(--dt-spacings-size-4) 0 0;
+  padding-left: var(--dt-spacings-size-16);
+}
+
+.pvs-mat-spectrum {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--dt-spacings-size-4);
+}
+
+.pvs-mat-spectrum__step {
+  display: grid;
+  gap: var(--dt-spacings-size-2);
+  min-width: 0;
+}
+
+.pvs-mat-spectrum__here {
+  min-height: 1.2rem;
+  font-size: var(--dt-typography-text-small-default-size);
+  font-weight: 600;
+  color: var(--dt-colors-text-primary-default);
+}
+
+.pvs-mat-spectrum__bar {
+  height: 0.75rem;
+  border-radius: 999px;
+  background-color: var(--dt-colors-background-container-neutral-subdued);
+}
+
+.pvs-mat-spectrum__num {
+  font-size: var(--dt-typography-text-small-default-size);
+  font-weight: 600;
+  color: var(--dt-colors-text-neutral-subdued);
+  font-variant-numeric: tabular-nums;
+}
+
+.pvs-mat-spectrum__name {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.pvs-mat-spectrum__step[data-position='ahead'] .pvs-mat-spectrum__name {
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-mat__ptag {
+  display: flex;
+  align-items: center;
+  gap: var(--dt-spacings-size-2);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--dt-colors-text-neutral-subdued);
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.pvs-mat__ptag::before {
+  content: '';
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+}
+
+
+@media print {
+  .pvs-mat__hero {
+    grid-template-columns: 12rem minmax(0, 1fr) !important;
+  }
+  /* The step's description stays on screen; on paper the name, its line and the criteria keep the row on one page. */
+  .pvs-mat__step .pvs-mat__text {
+    display: none;
+  }
+  .pvs-mat__ptag {
+    font-size: 12px;
+  }
+}
+
+/* ---------------------------------------------------------------- 3.4.7: Platform adoption over time */
+.pvs-adopt-trend {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--dt-spacings-size-16);
+}
+
+.pvs-adopt-trend__stats {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: var(--dt-spacings-size-12);
+}
+
+.pvs-adopt-trend__stats > div {
+  padding: var(--dt-spacings-size-8) var(--dt-spacings-size-12);
+  border-radius: var(--dt-borders-radius-container-default);
+  background: var(--dt-colors-background-container-neutral-subdued);
+}
+
+.pvs-adopt-trend__stats dt {
+  font-size: var(--dt-typography-text-small-default-size);
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-adopt-trend__stats dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.pvs-adopt-trend__chart {
+  display: grid;
+  gap: var(--dt-spacings-size-4);
+}
+
+.pvs-adopt-hours {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--dt-spacings-size-12);
+}
+
+/* ---------------------------------------------------------------- 3.4.8: Platform adoption, side by side */
+.pvs-adopt-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--dt-spacings-size-16);
+  /* 3.5.3 (fit): the tiles of a row share one height, so a shorter tile leaves no hole beside the others. */
+  align-items: stretch;
+}
+
+.pvs-adopt-row[data-cols='3'] {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.pvs-adopt-row > .pvs-panel {
+  height: 100%;
+}
+
+@media screen and (max-width: 1100px) {
+  .pvs-adopt-row,
+  .pvs-adopt-row[data-cols='3'] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Compact bars: a row of three lists stays about as tall as the longest list, not twice as tall. */
+.pvs-adopt-compact .pvs-bars {
+  gap: var(--dt-spacings-size-6);
+}
+
+.pvs-adopt-compact .pvs-bars__line {
+  margin-bottom: var(--dt-spacings-size-2);
+}
+
+.pvs-adopt-compact .pvs-bars[data-spectrum] .pvs-bars__track {
+  height: 6px;
+}
+
+.pvs-adopt-compact .pvs-bars[data-spectrum] .pvs-bars__rank {
+  min-width: 20px;
+  height: 20px;
+  font-size: 12px;
+}
+
+/* ---------------------------------------------------------------- 3.4.9: the conversation guide by audience */
+.pvs-persona__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--dt-spacings-size-8) var(--dt-spacings-size-16);
+}
+
+.pvs-persona {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: var(--dt-spacings-size-12) var(--dt-spacings-size-24);
+  padding: var(--dt-spacings-size-12) var(--dt-spacings-size-16);
+  border-radius: var(--dt-borders-radius-container-default);
+  background: var(--dt-colors-background-container-neutral-subdued);
+}
+
+.pvs-persona__focus {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-weight: 600;
+}
+
+.pvs-persona__figures,
+.pvs-persona__show {
+  list-style: none;
+  margin: var(--dt-spacings-size-4) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--dt-spacings-size-4);
+}
+
+.pvs-persona__figures li {
+  font-weight: 600;
+}
+
+.pvs-persona__show li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--dt-spacings-size-8);
+}
+
+.pvs-persona__questions {
+  margin: var(--dt-spacings-size-4) 0 0;
+  padding-left: var(--dt-spacings-size-16);
+  display: grid;
+  gap: var(--dt-spacings-size-4);
+}
+
+@media print {
+  .pvs-persona .pvs-doc a {
+    display: inline !important;
+  }
+}
+
+/* ---------------------------------------------------------------- 3.4.11: app consumption figures */
+.pvs-cons-figure {
+  display: grid;
+  gap: var(--dt-spacings-size-2);
+  padding: var(--dt-spacings-size-8) var(--dt-spacings-size-12);
+  border-radius: var(--dt-borders-radius-container-default);
+  background: var(--dt-colors-background-container-neutral-subdued);
+}
+
+.pvs-cons-figure strong {
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+}

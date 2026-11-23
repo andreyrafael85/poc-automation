@@ -1,0 +1,851 @@
+/*
+ * Value Evidence Experience — engine stylesheet.
+ *
+ * The composition layer over Strato. Everything here resolves to an official
+ * `--dt-*` design token (checked by ui/app/tests/engine.test.ts, which fails on
+ * an unknown token name or a raw colour), so the app follows the user's
+ * light/dark theme and the platform's own visual refresh.
+ *
+ * Why plain CSS and not more inline styles: inline styles cannot express
+ * `:hover`, `:focus-visible`, `@media`, `@container`, `prefers-reduced-motion`,
+ * `forced-colors` or print rules — and those are exactly where accessibility,
+ * responsiveness and a calm interaction model live.
+ *
+ * Layout adapts to the width of the *content area* (container queries), not the
+ * viewport: the sidebar opening or closing changes the room a page has, and a
+ * viewport media query would be answering the wrong question.
+ *
+ * Class prefix: `pvs-`. Data attributes carry state (`data-tone`, `data-evidence`).
+ */
+
+:root {
+  /* Rhythm: the only four steps a layout may use. */
+  --pvs-gap-tight: var(--dt-spacings-size-8);
+  --pvs-gap-group: var(--dt-spacings-size-16);
+  --pvs-gap-section: var(--dt-spacings-size-24);
+  --pvs-gap-chapter: var(--dt-spacings-size-40);
+
+  /* Panel padding by density. */
+  --pvs-pad-compact: var(--dt-spacings-size-12);
+  --pvs-pad-default: var(--dt-spacings-size-16);
+  --pvs-pad-roomy: var(--dt-spacings-size-24);
+
+  --pvs-ease: var(--dt-easings-fast-in-slow-out);
+  --pvs-time: var(--dt-timings-fast-default);
+
+  /* Reading measure for prose, so a wide screen never produces a 200-character line. */
+  --pvs-measure: 72ch;
+}
+
+/* ───────────────────────── page canvas ───────────────────────── */
+
+.pvs-page {
+  container-type: inline-size;
+  container-name: pvs-page;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1560px;
+  margin-inline: auto;
+  padding: var(--pvs-gap-section);
+  display: flex;
+  flex-direction: column;
+  gap: var(--pvs-gap-section);
+}
+
+.pvs-page[data-density='compact'] {
+  --pvs-pad-default: var(--pvs-pad-compact);
+  --pvs-gap-section: var(--dt-spacings-size-16);
+}
+
+@container pvs-page (max-width: 640px) {
+  .pvs-page__inner {
+    gap: var(--pvs-gap-group);
+  }
+}
+
+/* ───────────────────────── layout primitives ───────────────────────── */
+
+.pvs-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pvs-gap, var(--pvs-gap-group));
+  min-width: 0;
+}
+
+.pvs-cluster {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: var(--pvs-align, center);
+  justify-content: var(--pvs-justify, flex-start);
+  gap: var(--pvs-gap, var(--pvs-gap-tight));
+  min-width: 0;
+}
+
+/*
+ * A link that sits on its own line (a card's "See the evidence", "Open in Dynatrace") is a
+ * target of its own, and Strato's link is 20 px tall. Links inside a sentence are exempt
+ * (WCAG 2.5.8) and are not direct children of a stack or cluster, so they are left alone.
+ */
+.pvs-stack > a[data-dt-component='Link'],
+.pvs-stack > a[data-dt-component='ExternalLink'],
+.pvs-cluster > a[data-dt-component='Link'],
+.pvs-cluster > a[data-dt-component='ExternalLink'] {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  min-height: var(--dt-spacings-size-24);
+}
+
+/*
+ * Auto-fitting grid. `min(100%, X)` keeps a single column from overflowing a
+ * narrow container; `--pvs-min` is the narrowest a cell is allowed to get.
+ */
+.pvs-grid {
+  display: grid;
+  gap: var(--pvs-gap, var(--pvs-gap-group));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--pvs-min, 240px)), 1fr));
+  min-width: 0;
+}
+
+.pvs-grid > * {
+  min-width: 0;
+}
+
+/* Main column + a supporting aside. Stacks when the content area is narrow. */
+.pvs-split {
+  display: grid;
+  gap: var(--pvs-gap-group);
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+  align-items: start;
+}
+
+@container pvs-page (max-width: 900px) {
+  .pvs-split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.pvs-truncate {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Long unbroken values (entity ids, DQL, hostnames) wrap instead of breaking layout. */
+.pvs-wrap {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+/* A wide table scrolls inside its own region and never widens the page. */
+.pvs-scroll-x {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* ───────────────────────── typography ───────────────────────── */
+
+.pvs-eyebrow {
+  margin: 0;
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: var(--dt-typography-heading-level-6-size);
+  font-weight: var(--dt-typography-heading-level-6-weight);
+  letter-spacing: 0.01em;
+}
+
+.pvs-muted {
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-lead {
+  margin: 0;
+  max-width: var(--pvs-measure);
+  color: var(--dt-colors-text-neutral-default);
+  font-size: var(--dt-typography-heading-level-5-size);
+  line-height: 1.5;
+}
+
+.pvs-prose {
+  max-width: var(--pvs-measure);
+}
+
+/*
+ * Figures. A figure stands alone, so its numerals are proportional (3.4.16): with the platform's DT Flow, tabular
+ * numerals give the decimal point a digit's width and "6.9 h" read "6 .9 h". Tables and stacked columns keep
+ * tabular numerals in their own rules, where alignment matters.
+ */
+.pvs-figure {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--dt-spacings-size-6);
+  min-width: 0;
+  margin: 0;
+  color: var(--dt-colors-text-neutral-default);
+  font-variant-numeric: proportional-nums;
+  font-weight: var(--dt-typography-heading-level-1-weight);
+  line-height: 1.1;
+}
+
+.pvs-figure__value {
+  /* Breaks at the `<wbr>`s Figure inserts first; mid-token only as a last resort. */
+  overflow-wrap: break-word;
+}
+
+.pvs-figure[data-size='md'] {
+  font-size: var(--dt-typography-heading-level-3-size);
+}
+
+.pvs-figure[data-size='lg'] {
+  font-size: var(--dt-typography-heading-level-1-size);
+}
+
+.pvs-figure[data-size='xl'] {
+  font-size: var(--dt-typography-display-level-3-size);
+}
+
+.pvs-figure__unit {
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: var(--dt-typography-heading-level-5-size);
+  font-weight: var(--dt-typography-heading-level-5-weight);
+}
+
+/* A figure that was not measured is a dash, visibly muted, never a zero. */
+.pvs-figure[data-missing='true'] {
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+/* ───────────────────────── panel ───────────────────────── */
+
+.pvs-panel {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+  transition:
+    box-shadow var(--pvs-time) var(--pvs-ease),
+    border-color var(--pvs-time) var(--pvs-ease);
+}
+
+.pvs-panel[data-pad='none'] {
+  padding: 0;
+}
+
+.pvs-panel[data-pad='compact'] {
+  padding: var(--pvs-pad-compact);
+}
+
+.pvs-panel[data-pad='default'] {
+  padding: var(--pvs-pad-default);
+}
+
+.pvs-panel[data-pad='roomy'] {
+  padding: var(--pvs-pad-roomy);
+}
+
+/* A rail marks one edge in a tone. Always paired with text or an icon elsewhere. */
+.pvs-panel[data-rail='true'] {
+  border-inline-start: var(--dt-borders-width-emphasized) var(--dt-borders-style-default)
+    var(--pvs-rail-color, var(--dt-colors-border-neutral-accent));
+}
+
+/* Evidence class, expressed by border style as well as by colour. */
+.pvs-panel[data-evidence='estimated'],
+.pvs-panel[data-evidence='hypothesis'],
+.pvs-panel[data-evidence='unavailable'] {
+  border: var(--dt-borders-width-default) var(--dt-borders-style-dashed)
+    var(--dt-colors-border-neutral-accent);
+}
+
+.pvs-panel[data-evidence='unavailable'] {
+  background: var(--dt-colors-background-container-neutral-subdued);
+}
+
+.pvs-panel[data-interactive='true'] {
+  cursor: pointer;
+}
+
+.pvs-panel[data-interactive='true']:hover {
+  box-shadow: var(--dt-box-shadows-surface-flat-hover);
+  border-color: var(--dt-colors-border-neutral-default-hover);
+}
+
+.pvs-panel[data-interactive='true']:active {
+  box-shadow: var(--dt-box-shadows-surface-flat-active);
+}
+
+/* ───────────────────────── evidence chip ───────────────────────── */
+
+.pvs-evidence {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+}
+
+.pvs-evidence__icon {
+  display: inline-flex;
+  flex: none;
+}
+
+/* ───────────────────────── callout ───────────────────────── */
+
+.pvs-callout {
+  display: flex;
+  gap: var(--pvs-gap-tight);
+  align-items: flex-start;
+  box-sizing: border-box;
+  padding: var(--pvs-pad-default);
+  border: var(--dt-borders-width-default) var(--dt-borders-style-default)
+    var(--dt-colors-border-neutral-default);
+  border-radius: var(--dt-borders-radius-container-default);
+  background: var(--dt-colors-background-container-neutral-subdued);
+  color: var(--dt-colors-text-neutral-default);
+}
+
+.pvs-callout[data-style='dashed'] {
+  border-style: dashed;
+}
+
+.pvs-callout__icon {
+  display: inline-flex;
+  flex: none;
+  margin-top: 2px;
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-callout__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dt-spacings-size-4);
+  min-width: 0;
+}
+
+.pvs-callout__title {
+  margin: 0;
+  font-size: var(--dt-typography-heading-level-6-size);
+  font-weight: var(--dt-typography-heading-level-6-weight);
+}
+
+/* ───────────────────────── page frame (narrative header) ───────────────────────── */
+
+.pvs-frame {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pvs-gap-tight);
+  padding-bottom: var(--pvs-gap-group);
+  border-bottom: var(--dt-borders-width-default) var(--dt-borders-style-default)
+    var(--dt-colors-border-neutral-default);
+}
+
+.pvs-frame__crumb {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pvs-gap-tight);
+  flex-wrap: wrap;
+}
+
+.pvs-frame__title {
+  margin: 0;
+}
+
+/* 3.4.15 (D-12): the page title beside its Dynatrace product signet. */
+.pvs-frame__titlerow {
+  display: flex;
+  align-items: center;
+  gap: var(--dt-spacings-size-12);
+}
+
+.pvs-frame__signet {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.pvs-frame__signet svg {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.pvs-frame__takeaway {
+  max-width: var(--pvs-measure);
+  margin-top: var(--pvs-gap-tight);
+}
+
+/* A step badge: the position in the story, in text and shape, not hue. */
+.pvs-step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  box-sizing: border-box;
+  min-width: var(--dt-spacings-size-24);
+  height: var(--dt-spacings-size-24);
+  padding-inline: var(--dt-spacings-size-6);
+  border: var(--dt-borders-width-default) var(--dt-borders-style-default)
+    var(--dt-colors-border-neutral-accent);
+  border-radius: var(--dt-borders-radius-container-default);
+  color: var(--dt-colors-text-neutral-default);
+  font-size: var(--dt-typography-heading-level-6-size);
+  font-weight: var(--dt-typography-heading-level-6-weight);
+  font-variant-numeric: tabular-nums;
+}
+
+.pvs-step[data-current='true'] {
+  border-color: var(--dt-colors-border-primary-accent);
+  background: var(--dt-colors-background-container-primary-accent);
+  color: var(--dt-colors-text-primary-on-accent-default);
+}
+
+/* ───────────────────────── story map (overview) ───────────────────────── */
+
+.pvs-story {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  gap: var(--pvs-gap-group);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+}
+
+.pvs-story__item {
+  display: flex;
+  min-width: 0;
+}
+
+.pvs-story__link {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pvs-gap-tight);
+  box-sizing: border-box;
+  width: 100%;
+  padding: var(--pvs-pad-default);
+  border: var(--dt-borders-width-default) var(--dt-borders-style-default)
+    var(--dt-colors-border-neutral-default);
+  border-radius: var(--dt-borders-radius-surface-default);
+  background: var(--dt-colors-background-surface-default);
+  color: inherit;
+  text-decoration: none;
+  transition:
+    box-shadow var(--pvs-time) var(--pvs-ease),
+    border-color var(--pvs-time) var(--pvs-ease);
+}
+
+.pvs-story__link:hover {
+  border-color: var(--dt-colors-border-primary-default);
+  box-shadow: var(--dt-box-shadows-surface-flat-hover);
+}
+
+.pvs-story__title {
+  margin: 0;
+  font-size: var(--dt-typography-heading-level-5-size);
+  font-weight: var(--dt-typography-heading-level-5-weight);
+}
+
+/* ───────────────────────── sidebar navigation ───────────────────────── */
+
+.pvs-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pvs-gap-group);
+  box-sizing: border-box;
+  padding: var(--pvs-gap-group) var(--dt-spacings-size-12);
+}
+
+.pvs-nav__stage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dt-spacings-size-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pvs-nav__stage-title {
+  display: flex;
+  align-items: center;
+  gap: var(--pvs-gap-tight);
+  padding: var(--dt-spacings-size-4) var(--dt-spacings-size-8);
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: var(--dt-typography-heading-level-6-size);
+  font-weight: var(--dt-typography-heading-level-6-weight);
+}
+
+.pvs-nav__link {
+  display: flex;
+  align-items: center;
+  gap: var(--pvs-gap-tight);
+  box-sizing: border-box;
+  padding: var(--dt-spacings-size-6) var(--dt-spacings-size-8) var(--dt-spacings-size-6)
+    var(--dt-spacings-size-16);
+  border-radius: var(--dt-borders-radius-container-subdued);
+  color: var(--dt-colors-text-neutral-default);
+  text-decoration: none;
+  transition: background var(--pvs-time) var(--pvs-ease);
+}
+
+/* 3.5.2: the page's functional icon, subdued; the current page's in the primary colour. */
+.pvs-nav__icon {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-nav__icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.pvs-nav__link[aria-current='page'] .pvs-nav__icon {
+  color: var(--dt-colors-text-primary-default);
+}
+
+.pvs-nav__link:hover {
+  background: var(--dt-colors-background-container-neutral-default);
+}
+
+.pvs-nav__link[aria-current='page'] {
+  background: var(--dt-colors-background-container-primary-default);
+  color: var(--dt-colors-text-primary-default);
+  font-weight: 600;
+  box-shadow: inset var(--dt-borders-width-emphasized) 0 0 var(--dt-colors-border-primary-accent);
+}
+
+.pvs-nav__note {
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+/* ───────────────────────── story footer (previous / next) ───────────────────────── */
+
+.pvs-pager {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--pvs-gap-group);
+  flex-wrap: wrap;
+  padding-top: var(--pvs-gap-group);
+  border-top: var(--dt-borders-width-default) var(--dt-borders-style-default)
+    var(--dt-colors-border-neutral-default);
+}
+
+.pvs-pager__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pvs-gap-tight);
+  max-width: 100%;
+  padding: var(--dt-spacings-size-8) var(--dt-spacings-size-12);
+  border-radius: var(--dt-borders-radius-container-default);
+  color: var(--dt-colors-text-primary-default);
+  text-decoration: none;
+}
+
+.pvs-pager__link:hover {
+  background: var(--dt-colors-background-container-primary-default);
+}
+
+.pvs-pager__link[data-dir='next'] {
+  margin-inline-start: auto;
+}
+
+/* ───────────────────────── focus and interaction ───────────────────────── */
+
+.pvs-panel[data-interactive='true']:focus-visible,
+.pvs-nav__link:focus-visible,
+.pvs-pager__link:focus-visible,
+.pvs-story__link:focus-visible,
+.pvs-evidence button:focus-visible {
+  outline: var(--dt-borders-width-emphasized) var(--dt-borders-style-default)
+    var(--dt-colors-border-primary-accent);
+  outline-offset: 2px;
+}
+
+/*
+ * Strato's information-overlay trigger (the evidence badge, the "as of" time) draws no
+ * visible ring of its own when reached by keyboard, and at 20px high is under the
+ * 24px minimum target. Give the button both.
+ */
+button[data-dt-component='InformationOverlay'] {
+  min-height: var(--dt-spacings-size-24);
+}
+
+button[data-dt-component='InformationOverlay']:focus-visible {
+  outline: var(--dt-borders-width-emphasized) var(--dt-borders-style-default)
+    var(--dt-colors-border-primary-accent);
+  outline-offset: 2px;
+  border-radius: var(--dt-borders-radius-container-subdued);
+}
+
+/* Lets a keyboard user skip the navigation. Visible only on focus. */
+.pvs-skip {
+  position: absolute;
+  inset-inline-start: var(--dt-spacings-size-8);
+  inset-block-start: var(--dt-spacings-size-8);
+  z-index: var(--dt-elevations-overlay);
+  padding: var(--dt-spacings-size-8) var(--dt-spacings-size-12);
+  border-radius: var(--dt-borders-radius-container-default);
+  background: var(--dt-colors-background-container-primary-accent);
+  color: var(--dt-colors-text-primary-on-accent-default);
+  transform: translateY(-200%);
+}
+
+.pvs-skip:focus {
+  transform: translateY(0);
+}
+
+/* ───────────────────────── responsive ───────────────────────── */
+
+/* 640px = Breakpoints.Max.Mobile, 960px = Breakpoints.Max.Tablet (engine.test.ts keeps them in sync). */
+
+@container pvs-page (max-width: 640px) {
+  .pvs-figure[data-size='xl'] {
+    font-size: var(--dt-typography-heading-level-1-size);
+  }
+
+  .pvs-pager {
+    flex-direction: column;
+  }
+
+  .pvs-pager__link[data-dir='next'] {
+    margin-inline-start: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .pvs-page {
+    padding: var(--pvs-gap-group);
+  }
+}
+
+/* ───────────────────────── motion, contrast, print ───────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .pvs-panel,
+  .pvs-story__link,
+  .pvs-nav__link,
+  .pvs-skip {
+    transition: none;
+  }
+}
+
+/* In forced-colours mode the platform palette wins; keep every edge visible. */
+@media (forced-colors: active) {
+  .pvs-panel,
+  .pvs-callout,
+  .pvs-story__link,
+  .pvs-step {
+    border: 1px solid CanvasText;
+  }
+
+  .pvs-nav__link[aria-current='page'] {
+    outline: 2px solid Highlight;
+  }
+}
+
+@media print {
+  .pvs-page {
+    max-width: none;
+    padding: 0;
+  }
+
+  .pvs-panel,
+  .pvs-callout,
+  .pvs-story__link {
+    box-shadow: none;
+    break-inside: avoid;
+  }
+
+  .pvs-pager,
+  .pvs-skip,
+  .pvs-nav {
+    display: none;
+  }
+
+  /*
+   * Hiding the navigation is not enough: Strato's sidebar wrapper stays a ~300 px flex
+   * column (and the page's height is 100vh), so a printed report used half the paper and
+   * ran to twice as many pages. The wrapper is the one element that holds the navigation
+   * but not the page's `main`; its hashed class is not something to select on.
+   */
+  div:has(.pvs-nav):not(:has(main)) {
+    display: none !important;
+  }
+
+  /* Its drag handle (a vertical separator; `:has()` cannot nest, so it is matched by role), and the inline
+     `width: max(0px, 100% - 304px)` Strato's script puts on the content column to leave room
+     for the sidebar: with the sidebar gone, that left the report ~40 % of the page. Strato's
+     own classes outrank these selectors, hence `!important`. */
+  div:has(> [role='separator'][aria-orientation='vertical']) {
+    display: none !important;
+  }
+
+  div[style*='100% - ']:has(main) {
+    width: 100% !important;
+  }
+}
+
+/* ───────────────────────── footer signature ───────────────────────── */
+
+.pvs-footer {
+  box-sizing: border-box;
+  padding: var(--pvs-gap-group) var(--pvs-gap-section) var(--pvs-gap-section);
+  text-align: center;
+  font-size: var(--dt-typography-heading-level-6-size);
+}
+
+/* ───────────────────────── help panels ───────────────────────── */
+
+.pvs-sheet {
+  box-sizing: border-box;
+  padding: var(--pvs-gap-group);
+}
+
+.pvs-list {
+  margin: 0;
+  padding-inline-start: var(--pvs-gap-section);
+  display: flex;
+  flex-direction: column;
+  gap: var(--pvs-gap-tight);
+}
+
+/* 3.5.3: What's new — the last ten releases, each headed by its version and the day it was published. */
+.pvs-whatsnew {
+  list-style: none;
+  padding-inline-start: 0;
+  gap: var(--pvs-gap-group);
+}
+
+.pvs-whatsnew__item {
+  display: grid;
+  gap: var(--dt-spacings-size-4);
+  padding-block-end: var(--pvs-gap-tight);
+  border-block-end: var(--dt-borders-width-default) var(--dt-borders-style-default) var(--dt-colors-border-neutral-default);
+}
+
+.pvs-whatsnew__item:last-child {
+  border-block-end: none;
+}
+
+.pvs-whatsnew__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--dt-spacings-size-8);
+}
+
+.pvs-whatsnew__version {
+  font-weight: 600;
+  color: var(--dt-colors-text-primary-default);
+}
+
+.pvs-whatsnew__date {
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: var(--dt-typography-text-small-default-size);
+}
+
+.pvs-legend {
+  list-style: none;
+  padding-inline-start: 0;
+}
+
+.pvs-legend__item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--pvs-gap-tight);
+  padding: var(--dt-spacings-size-8) var(--dt-spacings-size-12);
+  border: var(--dt-borders-width-default) var(--dt-borders-style-default)
+    var(--dt-colors-border-neutral-default);
+  border-radius: var(--dt-borders-radius-container-default);
+}
+
+.pvs-legend__item[data-border='dashed'] {
+  border-style: dashed;
+}
+
+.pvs-facts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--dt-spacings-size-8) var(--pvs-gap-group);
+  margin: 0;
+}
+
+.pvs-facts dt {
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Visually hidden, still announced. */
+.pvs-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ───────────────────────── shell ───────────────────────── */
+
+/* `main` is a programmatic focus target (route changes, the skip link). It is not
+   a control, so it takes no focus ring; every control inside it still does. */
+.pvs-main:focus {
+  outline: none;
+}
+
+.pvs-brand-dot {
+  display: inline-block;
+  width: var(--dt-spacings-size-8);
+  height: var(--dt-spacings-size-8);
+  border-radius: 50%;
+}
+
+/* ───────────────────────── engagement banner ───────────────────────── */
+
+/* An explicit height (not just max-*) so the logo also renders in the printed PDF,
+   where an unsized image can lay out to zero. */
+.pvs-hero__logo {
+  display: block;
+  height: var(--dt-spacings-size-40);
+  width: auto;
+  max-width: 220px;
+  object-fit: contain;
+}
+
+.pvs-hero__rule {
+  align-self: stretch;
+  width: var(--dt-borders-width-default);
+  background: var(--dt-colors-border-neutral-default);
+}
+
+.pvs-hero__title {
+  display: flex;
+  align-items: stretch;
+  gap: var(--pvs-gap-tight);
+  min-width: 0;
+}
+
+.pvs-hero__bar {
+  flex: none;
+  width: var(--dt-spacings-size-6);
+  min-height: var(--dt-spacings-size-28);
+  border-radius: var(--dt-borders-radius-container-subdued);
+}
+
+/* 3.5.3: the tabs at the top of the long pages (Services, Infrastructure, Dynatrace Intelligence) — the content
+   breathes under the tab bar and a chart's tooltip may leave its panel, as on the Coverage page. */
+.pvs-tabpane {
+  padding-block-start: var(--pvs-gap-group);
+}
+
+[role='tabpanel']:has(> .pvs-tabpane) {
+  overflow: visible;
+}

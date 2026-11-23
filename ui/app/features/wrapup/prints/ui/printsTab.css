@@ -1,0 +1,230 @@
+/*
+ * The real-prints tab (3.2.7, "Teste Deck Wrapup Print"): the few rules its panels need beyond the
+ * engine — a scroller for the plan table that can never widen the page, the print thumbnails, the
+ * manual drop zone, the crop preview and the editor's stage with its pins (each pin carries its
+ * own focus outline). Every value is a Strato token; the slides themselves are styled by the deck.
+ */
+
+.pvs-prt {
+  min-width: 0;
+}
+
+/* The plan table scrolls inside its own box at phone width, never the page. */
+.pvs-prt-scroll {
+  position: relative;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+/* Below this width the table's columns would wrap word by word: it keeps its width and scrolls in its box instead. */
+.pvs-prt-table {
+  min-width: 760px;
+}
+
+.pvs-prt-code {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.pvs-prt-break {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.pvs-prt-steps,
+.pvs-prt-list {
+  margin: 0;
+  padding-inline-start: var(--dt-spacings-size-20);
+  display: flex;
+  flex-direction: column;
+  gap: var(--dt-spacings-size-4);
+}
+
+.pvs-prt-card {
+  min-width: 0;
+}
+
+.pvs-prt-thumb {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1720 / 1080;
+  object-fit: cover;
+  border-radius: var(--dt-borders-radius-container-subdued);
+  border: var(--dt-borders-width-default) var(--dt-borders-style-default) var(--dt-colors-border-neutral-default);
+  background: var(--dt-colors-background-container-neutral-subdued);
+}
+
+.pvs-prt-thumb--empty {
+  box-sizing: border-box;
+}
+
+.pvs-prt-drop {
+  box-sizing: border-box;
+  padding: var(--dt-spacings-size-16);
+  border: var(--dt-borders-width-emphasized) dashed var(--dt-colors-border-neutral-accent);
+  border-radius: var(--dt-borders-radius-container-default);
+  background: var(--dt-colors-background-container-neutral-subdued);
+  text-align: center;
+  /* A paste and drop target: a click focuses it, it opens nothing (3.2.7 review UX-M5). */
+  cursor: default;
+}
+
+.pvs-prt-drop:focus-visible {
+  outline: var(--dt-borders-width-emphasized) solid var(--dt-colors-border-primary-accent);
+  outline-offset: var(--dt-spacings-size-2);
+}
+
+/*
+ * Chips whose text is a sentence — the link's evidence ("verificado nesta tenant em 15/09/2026",
+ * "visto após cliques — faça o probe") and "Tela verificada · {name} visível" — wrap instead of
+ * hiding their key words behind an ellipsis (3.2.7 review UX-M7). The chip's own parts are set to
+ * one line of fixed height; inside these chips they grow with the text. The class is doubled to
+ * outweigh the chip's own single-class rules, also in the editor's dialog (outside `.pvs-prt`).
+ */
+.pvs-prt-chip-wrap.pvs-prt-chip-wrap {
+  max-width: 100%;
+  height: auto;
+}
+
+.pvs-prt-chip-wrap.pvs-prt-chip-wrap * {
+  height: auto;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
+}
+
+/* Crop preview: the picture with the suggested crop drawn over it. */
+.pvs-prt-crop {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--dt-borders-radius-container-subdued);
+  background: var(--dt-colors-background-container-neutral-subdued);
+}
+
+.pvs-prt-crop__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+}
+
+.pvs-prt-crop__box {
+  position: absolute;
+  box-sizing: border-box;
+  border: var(--dt-borders-width-emphasized) solid var(--dt-colors-border-primary-accent);
+}
+
+/* The editor's stage: the master under an SVG in print space (1720 × 1080). */
+.pvs-prt-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1720 / 1080;
+  overflow: hidden;
+  border-radius: var(--dt-borders-radius-container-subdued);
+  background: var(--dt-colors-background-container-neutral-subdued);
+}
+
+.pvs-prt-stage__image,
+.pvs-prt-stage__svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.pvs-prt-stage__svg {
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.pvs-prt-stage__suggestion {
+  fill: none;
+  stroke: var(--dt-colors-charts-status-warning-default);
+  stroke-width: 4;
+  stroke-dasharray: 12 8;
+}
+
+.pvs-prt-stage__focus,
+.pvs-prt-stage__draft {
+  fill: none;
+  stroke: var(--dt-colors-border-primary-accent);
+  stroke-width: 4;
+  stroke-dasharray: 16 10;
+}
+
+.pvs-prt-pin {
+  cursor: grab;
+}
+
+.pvs-prt-pin circle {
+  fill: var(--dt-colors-background-container-primary-accent);
+  stroke: var(--dt-colors-text-primary-on-accent-default);
+  stroke-width: 3;
+}
+
+.pvs-prt-pin[data-origin='template'] circle {
+  stroke-dasharray: 8 6;
+}
+
+.pvs-prt-pin text {
+  fill: var(--dt-colors-text-primary-on-accent-default);
+  font-size: 28px;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+/* The pin itself carries the focus ring (a ring drawn on a child is invisible to the a11y check). */
+.pvs-prt-pin:focus-visible {
+  outline: var(--dt-borders-width-emphasized) solid var(--dt-colors-border-primary-accent);
+  outline-offset: 4px;
+}
+
+@media (forced-colors: active) {
+  .pvs-prt-pin:focus-visible,
+  .pvs-prt-drop:focus-visible {
+    outline-color: Highlight;
+  }
+}
+
+/* The batch import's review (3.3.2): one row per image — thumbnail, the screen it goes to, and why. */
+.pvs-prt-batch {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--dt-spacings-size-12);
+}
+
+.pvs-prt-batch__row {
+  display: grid;
+  grid-template-columns: minmax(96px, 172px) minmax(0, 1fr);
+  gap: var(--dt-spacings-size-12);
+  align-items: start;
+  padding: var(--dt-spacings-size-8);
+  border: var(--dt-borders-width-default) var(--dt-borders-style-default) var(--dt-colors-border-neutral-default);
+  border-radius: var(--dt-borders-radius-container-subdued);
+}
+
+.pvs-prt-batch__row[data-clash] {
+  border-color: var(--dt-colors-border-warning-default);
+}
+
+.pvs-prt-batch__thumb {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1720 / 1080;
+  object-fit: cover;
+  object-position: top left;
+  border-radius: var(--dt-borders-radius-container-subdued);
+  background: var(--dt-colors-background-container-neutral-subdued);
+}
+
+@media (max-width: 520px) {
+  .pvs-prt-batch__row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

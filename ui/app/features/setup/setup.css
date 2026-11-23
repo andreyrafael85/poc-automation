@@ -1,0 +1,86 @@
+/* 3.7.7 — the first-run wizard and its banner (features/setup). Tokens only; the state is always in words. */
+.pvs-setup .pvs-sticks {
+  max-width: 420px;
+}
+
+.pvs-setup__progress {
+  display: grid;
+  gap: var(--dt-spacings-size-8);
+}
+
+.pvs-setup__steps {
+  display: grid;
+  gap: var(--dt-spacings-size-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pvs-setup__step {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--dt-spacings-size-12);
+  padding: var(--dt-spacings-size-12) var(--dt-spacings-size-16);
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  border-radius: var(--dt-borders-radius-container-default);
+  background: var(--dt-colors-background-surface-default);
+}
+
+.pvs-setup__mark {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--dt-borders-radius-field-default, 8px);
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  background: var(--dt-colors-background-container-neutral-subdued);
+  color: var(--dt-colors-text-neutral-subdued);
+  font-weight: 600;
+}
+
+.pvs-setup__step[data-done='true'] .pvs-setup__mark {
+  color: var(--dt-colors-text-success-default);
+  border-color: var(--dt-colors-border-success-default);
+}
+
+.pvs-setup__body {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pvs-setup__name {
+  font-weight: 600;
+}
+
+.pvs-setup-banner {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--dt-spacings-size-12);
+  margin-bottom: var(--dt-spacings-size-16);
+  padding: var(--dt-spacings-size-8) var(--dt-spacings-size-16);
+  border: 1px solid var(--dt-colors-border-primary-default);
+  border-radius: var(--dt-borders-radius-container-default);
+  background: var(--dt-colors-background-container-primary-default);
+}
+
+.pvs-setup-banner .pvs-sticks {
+  width: 180px;
+}
+
+@media (max-width: 640px) {
+  .pvs-setup__step {
+    grid-template-columns: 32px minmax(0, 1fr);
+  }
+
+  .pvs-setup__action {
+    grid-column: 2;
+  }
+}
+
+/* 3.7.8: the way back to the guide sits at the banner's end. */
+.pvs-setup-banner [data-testid='setup-back'] {
+  margin-left: auto;
+}

@@ -1,0 +1,107 @@
+/*
+ * Application shell — header controls.
+ *
+ * Strato's AppHeader folds its direct action buttons into a "more actions" menu when
+ * the strip does not fit, but it never folds custom controls (selects, switches).
+ * Below the mobile breakpoint the redundant ones are therefore dropped: the customer
+ * chip and the "as of" trigger (the Overview and the window selector already state
+ * both), and the text labels, which stay available to assistive technology because they
+ * are visually hidden, not removed — each control is named by them.
+ *
+ * 3.3.0 (backlog A9): the Executive-mode switch still leaves the strip below 640 px — measured,
+ * it does not fit there — but it no longer disappears: it moves to `.pvs-hdr__mobilebar`, a row of
+ * its own under the header, with its label on screen (`components/StudioHeader.tsx`). Since 3.2.6
+ * it is the presentation mode, the one control that puts licensing, DPS and cost away for the
+ * whole app, and a presenter on a phone or a split screen had no way to turn it on.
+ *
+ * 640px = Breakpoints.Max.Mobile (engine.test.ts keeps it in sync).
+ */
+
+/*
+ * 3.3.0 (A9): the row under the header that carries the Executive-mode switch below 640 px.
+ * Hidden by default — above that width the switch sits in the strip, where it belongs.
+ */
+.pvs-hdr__mobilebar {
+  display: none;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--dt-spacings-size-8);
+  padding: var(--dt-spacings-size-4) var(--dt-spacings-size-16);
+  border-bottom: 1px solid var(--dt-colors-border-neutral-subdued);
+  background: var(--dt-colors-background-container-neutral-subdued);
+}
+
+.pvs-hdr__barlabel {
+  font-size: var(--dt-typography-text-small-default-size);
+  color: var(--dt-colors-text-neutral-default);
+  white-space: nowrap;
+}
+
+/*
+ * Known, and not ours to fix here: Strato draws the Switch's input at 46 × 20, under the 24 px
+ * minimum touch target, and the harness reports it on the five mobile pages where this row now
+ * puts a switch that 3.2.7 hid (`.visual-qa/v330f-en`: 0 → 1 small target, and that one target is
+ * Strato's). It is the same `targetSize` finding the project already accepts for Switch, Checkbox
+ * and NumberInput. Overriding the height from here was tried and does nothing — the size comes
+ * from inside the component, so the fix belongs to Strato, not to a selector reaching into it.
+ * The label beside the switch is the generous target in the meantime.
+ */
+
+@media (max-width: 640px) {
+  /* `!important`: Strato's own class on these elements sets `display: flex` with the same
+     specificity, and since 3.15 its stylesheet comes after this one. */
+  .pvs-hdr__customer,
+  .pvs-hdr__asof,
+  .pvs-hdr__commercial,
+  .pvs-hdr__executive--strip {
+    display: none !important;
+  }
+
+  /* …and the row under the header takes over. */
+  .pvs-hdr__mobilebar {
+    display: flex;
+  }
+
+  /* Without their text labels the selects are squeezed to a bare arrow; keep room for
+     the current value — "English" and "Last 24 hours", not "Engl…" and "Last…". The app name
+     in the strip yields the room (it is truncated first, and the Help menu carries it). */
+  .pvs-hdr__group [data-dt-component='Select'] {
+    min-width: calc(var(--dt-spacings-size-64) + var(--dt-spacings-size-40));
+  }
+
+  .pvs-hdr__group--window [data-dt-component='Select'] {
+    min-width: calc(var(--dt-spacings-size-64) * 2 + var(--dt-spacings-size-16));
+  }
+
+  .pvs-hdr__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* 3.2.6: "Internal view" — commercial data is on screen (SE or partner, outside executive mode). */
+.pvs-hdr__internal {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dt-spacings-size-4);
+  padding: var(--dt-spacings-size-2) var(--dt-spacings-size-8);
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  border-radius: 999px;
+  color: var(--dt-colors-text-neutral-default);
+  background: var(--dt-colors-background-container-neutral-subdued);
+  white-space: nowrap;
+}
+
+.pvs-hdr__internal svg {
+  width: 14px;
+  height: 14px;
+}
+
+.pvs-hdr__internal-label {
+  font-size: var(--dt-typography-text-small-default-size);
+}

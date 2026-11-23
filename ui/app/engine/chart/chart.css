@@ -1,0 +1,1051 @@
+/*
+ * The chart engine's marks (3.3.7): ranked bars, the "where to act first" table and the Assist
+ * card. Strato tokens only; status colours are the charts' status tokens and always travel with
+ * their word. Gradients and glow stay in `engine/spectrum.css` (AGENTS.md).
+ */
+
+[data-status='critical'] {
+  --pvs-status: var(--dt-colors-charts-status-critical-default);
+  --pvs-status-text: var(--dt-colors-text-critical-default);
+}
+[data-status='warning'] {
+  --pvs-status: var(--dt-colors-charts-status-warning-default);
+  --pvs-status-text: var(--dt-colors-text-warning-default);
+}
+[data-status='good'] {
+  --pvs-status: var(--dt-colors-charts-status-good-default);
+  --pvs-status-text: var(--dt-colors-text-success-default);
+}
+
+/* ------------------------------------------------------------------ ranked bars */
+
+.pvs-ranked {
+  display: grid;
+  gap: var(--dt-spacings-size-12);
+  min-width: 0;
+}
+
+.pvs-ranked__list {
+  display: grid;
+  gap: var(--dt-spacings-size-12);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pvs-ranked__row {
+  display: grid;
+  grid-template-columns: minmax(6rem, 34%) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--dt-spacings-size-12);
+  min-width: 0;
+}
+
+.pvs-ranked__label {
+  overflow: hidden;
+  color: var(--dt-colors-text-neutral-default);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pvs-ranked__track {
+  position: relative;
+  height: 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--dt-colors-border-neutral-default) 55%, transparent);
+}
+
+.pvs-ranked__bar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 999px;
+  background: var(--pvs-status);
+}
+
+.pvs-ranked__line {
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  width: 0;
+  border-left: 1.5px dashed var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-ranked__value {
+  min-width: 3.5rem;
+  color: var(--dt-colors-text-neutral-default);
+  font-weight: var(--dt-typography-heading-level-6-weight);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.pvs-ranked__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dt-spacings-size-16);
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: var(--dt-typography-text-small-default-size);
+}
+
+.pvs-ranked__key {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dt-spacings-size-6);
+}
+
+.pvs-ranked__key-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--pvs-status);
+}
+
+.pvs-ranked__key-line {
+  width: 16px;
+  border-top: 1.5px dashed var(--dt-colors-text-neutral-subdued);
+}
+
+/* ------------------------------------------------------------------ where to act first */
+
+.pvs-actions {
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.pvs-actions__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.pvs-actions__table th,
+.pvs-actions__table td {
+  padding: var(--dt-spacings-size-12) var(--dt-spacings-size-8);
+  border-bottom: 1px solid var(--dt-colors-border-neutral-default);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.pvs-actions__table thead th {
+  color: var(--dt-colors-text-neutral-subdued);
+  font-weight: var(--dt-typography-text-base-default-weight);
+}
+
+.pvs-actions__entity {
+  max-width: 16rem;
+  overflow: hidden;
+  font-weight: var(--dt-typography-text-base-default-weight);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pvs-actions__link {
+  color: inherit;
+}
+
+.pvs-actions__signal {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dt-spacings-size-8);
+}
+
+.pvs-actions__bar {
+  position: relative;
+  display: inline-block;
+  width: 72px;
+  height: 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--dt-colors-border-neutral-default) 55%, transparent);
+}
+
+.pvs-actions__bar > span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 999px;
+  background: var(--dt-colors-charts-categorical-color-01-default, var(--pvs-status));
+}
+
+.pvs-actions__num {
+  text-align: right !important;
+  white-space: nowrap;
+}
+
+.pvs-actions__versus {
+  color: var(--pvs-status-text);
+}
+
+.pvs-actions__chip {
+  display: inline-block;
+  padding: 1px var(--dt-spacings-size-8);
+  border-radius: 999px;
+  color: var(--pvs-status-text);
+  /* A light tint over the surface: the word keeps AA contrast in both themes. */
+  background: color-mix(in srgb, var(--pvs-status) 9%, var(--dt-colors-background-surface-default));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pvs-status) 45%, transparent);
+  font-size: var(--dt-typography-text-small-default-size);
+  font-weight: var(--dt-typography-heading-level-6-weight);
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------ the Assist card */
+
+.pvs-assist {
+  display: grid;
+  gap: var(--dt-spacings-size-12);
+  align-content: start;
+  min-width: 0;
+  padding: var(--dt-spacings-size-24);
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  border-radius: var(--dt-borders-radius-container-default);
+}
+
+.pvs-assist__head {
+  display: flex;
+  align-items: center;
+  gap: var(--dt-spacings-size-8);
+}
+
+.pvs-assist__spark {
+  color: var(--dt-colors-charts-categorical-color-04-default, var(--dt-colors-text-primary-default));
+  font-size: 1.1rem;
+}
+
+.pvs-assist__fact {
+  display: grid;
+  gap: var(--dt-spacings-size-4);
+  justify-items: start;
+  padding: var(--dt-spacings-size-16);
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  border-radius: var(--dt-borders-radius-container-default);
+}
+
+.pvs-assist__fact-label {
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-assist__fact-value {
+  color: var(--dt-colors-charts-categorical-color-01-default, var(--dt-colors-text-primary-default));
+  font-size: 2rem;
+  font-weight: var(--dt-typography-heading-level-1-weight);
+  font-variant-numeric: proportional-nums; /* 3.4.16: a value standing alone (DT Flow's tabular point read "6 .9") */
+  line-height: 1.1;
+}
+
+/* ------------------------------------------------------------------ cockpit rows (Overview) */
+
+.pvs-cockpit-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  gap: var(--dt-spacings-size-16);
+  align-items: stretch;
+}
+
+.pvs-cockpit-row[data-split='even'] {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+}
+
+.pvs-cockpit-row[data-align='start'] {
+  align-items: start;
+}
+
+/* 3.3.15: a tile whose component drew nothing leaves its sibling alone in the row — full width. */
+.pvs-cockpit-row > :only-child {
+  grid-column: 1 / -1;
+}
+
+/* A panel fills its cell (`.pvs-panel { height: 100% }`); in a start-aligned row it keeps its own height. */
+.pvs-cockpit-row[data-align='start'] > .pvs-panel {
+  height: auto;
+}
+
+/* 3.5.3 (the owner's "components well fitted", the harness's fit check): a note beside a chart fills the row's height,
+   so it reads as a side panel instead of a short box with a hole under it; a tile of gauges centres them in its height. */
+.pvs-cockpit-row:not([data-align='start']) > .pvs-callout {
+  height: 100%;
+}
+
+.pvs-cockpit-row:not([data-align='start']) > .pvs-panel > .pvs-stack:has(> .pvs-sgauge-row) {
+  height: 100%;
+}
+
+.pvs-cockpit-row:not([data-align='start']) > .pvs-panel > .pvs-stack > .pvs-sgauge-row {
+  margin-block: auto;
+}
+
+@media (max-width: 1100px) {
+  .pvs-cockpit-row,
+  .pvs-cockpit-row[data-split='even'] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* 3.3.9: four cockpit tiles in two columns (the AIOps page's explanation, logs, mix and time to close). */
+.pvs-cockpit-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--dt-spacings-size-16);
+  align-items: start;
+}
+
+@media (max-width: 1100px) {
+  .pvs-cockpit-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* 3.3.14: ring + ranking — the list's heading with its provenance badge on one line. */
+.pvs-ringrank__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--dt-spacings-size-8);
+}
+
+/* ------------------------------------------------- 3.3.20: impact × effort matrix */
+.pvs-matrix {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: var(--dt-spacings-size-6);
+  table-layout: fixed;
+}
+
+.pvs-matrix__corner,
+.pvs-matrix__head {
+  font-size: var(--dt-typography-text-small-default-size);
+  font-weight: 600;
+  color: var(--dt-colors-text-neutral-subdued);
+  text-align: left;
+  padding: var(--dt-spacings-size-4) var(--dt-spacings-size-8);
+}
+
+.pvs-matrix__corner {
+  width: 7.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pvs-matrix__cell {
+  vertical-align: top;
+  min-height: 4.5rem;
+  padding: var(--dt-spacings-size-8);
+  border-radius: var(--dt-borders-radius-container-default);
+  background: var(--dt-colors-background-container-neutral-subdued);
+  border: var(--dt-borders-width-default) solid var(--dt-colors-border-neutral-default);
+}
+
+.pvs-matrix__cell[data-quick='true'] {
+  background: var(--dt-colors-background-container-success-default);
+  border-color: var(--dt-colors-border-success-default);
+}
+
+.pvs-matrix__cell[data-empty='true'] {
+  background: transparent;
+  border-style: dashed;
+}
+
+.pvs-matrix__tag {
+  display: inline-block;
+  margin-bottom: var(--dt-spacings-size-6);
+  font-size: var(--dt-typography-text-small-default-size);
+  font-weight: 600;
+  color: var(--dt-colors-text-success-default);
+}
+
+.pvs-matrix__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--dt-spacings-size-4);
+}
+
+.pvs-matrix__item {
+  display: flex;
+  align-items: baseline;
+  gap: var(--dt-spacings-size-6);
+  min-width: 0;
+}
+
+.pvs-matrix__rank {
+  flex: none;
+  min-width: 1.4rem;
+  padding: 0 4px;
+  border-radius: 999px;
+  text-align: center;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  /* Neutral ink on a neutral chip: blue on blue read at 1.26:1 (harness, 3.3.20). */
+  background: var(--dt-colors-background-container-neutral-emphasized);
+  color: var(--dt-colors-text-neutral-default);
+}
+
+.pvs-matrix__title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------- 3.3.20: the roadmap at a glance */
+.pvs-horizons {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--dt-spacings-size-16);
+  position: relative;
+}
+
+.pvs-horizons__column {
+  min-width: 0;
+  padding: var(--dt-spacings-size-12);
+  border-radius: var(--dt-borders-radius-container-default);
+  background: var(--dt-colors-background-container-neutral-subdued);
+  border-top: 3px solid var(--dt-colors-border-primary-default, var(--dt-colors-border-neutral-default));
+}
+
+.pvs-horizons__head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--dt-spacings-size-8);
+  margin-bottom: var(--dt-spacings-size-8);
+}
+
+.pvs-horizons__step {
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-weight: 600;
+  background: var(--dt-colors-background-container-neutral-emphasized);
+}
+
+.pvs-horizons__titles {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.pvs-horizons__title {
+  font-weight: 600;
+}
+
+.pvs-horizons__intent,
+.pvs-horizons__count {
+  font-size: var(--dt-typography-text-small-default-size);
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-horizons__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--dt-spacings-size-4);
+}
+
+.pvs-horizons__item {
+  padding-left: var(--dt-spacings-size-8);
+  border-left: 2px solid var(--dt-colors-border-neutral-default);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .pvs-horizons {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------------------------------------------------------------- readiness list (3.3.21) */
+.pvs-ready {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: var(--dt-spacings-size-8);
+}
+
+.pvs-ready__item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--dt-spacings-size-8);
+  min-width: 0;
+  padding: var(--dt-spacings-size-8) var(--dt-spacings-size-12);
+  border-radius: var(--dt-borders-radius-container-default);
+  background: var(--dt-colors-background-container-neutral-subdued);
+  border-left: 3px solid var(--dt-colors-border-neutral-default);
+}
+
+.pvs-ready__item[data-done='true'] {
+  border-left-color: var(--dt-colors-border-success-default);
+}
+
+.pvs-ready__mark {
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--dt-colors-border-neutral-default);
+}
+
+.pvs-ready__mark svg {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+.pvs-ready__item[data-done='true'] .pvs-ready__mark {
+  border-color: var(--dt-colors-border-success-default);
+  color: var(--dt-colors-text-success-default);
+}
+
+.pvs-ready__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.pvs-ready__label {
+  font-weight: 600;
+  /* A capability name ("Log Management & Analytics - Ingest & Process") reads in full on two lines. */
+  overflow-wrap: anywhere;
+}
+
+.pvs-ready__where,
+.pvs-ready__state {
+  font-size: var(--dt-typography-text-small-default-size);
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-ready__item[data-done='true'] .pvs-ready__state {
+  color: var(--dt-colors-text-success-default);
+}
+
+/* ---------------------------------------------------------------- radar (3.4.3) */
+.pvs-radar {
+  margin: 0;
+  display: block;
+  width: 100%;
+}
+
+/* A block of its own width: centring it in a grid let the browser shrink it to its intrinsic size. */
+.pvs-radar__svg {
+  display: block;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 520px;
+  height: auto;
+  overflow: visible;
+}
+
+.pvs-radar__ring {
+  fill: none;
+  stroke: var(--dt-colors-border-neutral-default);
+  stroke-width: 1;
+}
+
+.pvs-radar__spoke {
+  stroke: var(--dt-colors-border-neutral-default);
+  stroke-width: 1;
+}
+
+.pvs-radar__spoke[data-unread='true'] {
+  stroke-dasharray: 4 4;
+}
+
+.pvs-radar__area {
+  fill: color-mix(in srgb, var(--dt-colors-background-container-primary-accent) 22%, transparent);
+  stroke: var(--dt-colors-border-primary-accent);
+  stroke-width: 2;
+}
+
+.pvs-radar__mark {
+  fill: var(--dt-colors-background-container-primary-accent);
+  stroke: var(--dt-colors-background-base-default, #fff);
+  stroke-width: 2;
+}
+
+.pvs-radar__mark[data-unread='true'] {
+  fill: var(--dt-colors-background-base-default, #fff);
+  stroke: var(--dt-colors-border-neutral-accent);
+  stroke-dasharray: 2 2;
+}
+
+.pvs-radar__label {
+  font-size: 19px;
+  font-weight: 600;
+  fill: var(--dt-colors-text-neutral-default);
+}
+
+.pvs-radar__value {
+  font-size: 16px;
+  font-weight: 400;
+  fill: var(--dt-colors-text-neutral-subdued);
+}
+
+/* ---------------------------------------------------------------- impact × effort heat map (3.4.3, redrawn 3.4.5) */
+.pvs-heat-wrap {
+  display: grid;
+  gap: var(--dt-spacings-size-6);
+}
+
+.pvs-heat {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: var(--dt-spacings-size-6);
+  table-layout: fixed;
+}
+
+.pvs-heat__corner {
+  width: 8.5rem;
+  text-align: left;
+  vertical-align: bottom;
+}
+
+.pvs-heat__axis-name {
+  display: block;
+  font-size: var(--dt-typography-text-small-default-size);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-heat__axis {
+  font-size: var(--dt-typography-text-small-default-size);
+  font-weight: 600;
+  color: var(--dt-colors-text-neutral-subdued);
+  text-align: center;
+}
+
+.pvs-heat__axis--row {
+  text-align: right;
+  padding-right: var(--dt-spacings-size-6);
+}
+
+.pvs-heat__cell {
+  --pvs-zone: var(--dt-colors-border-neutral-accent);
+  vertical-align: top;
+  height: 9rem;
+  padding: var(--dt-spacings-size-8) var(--dt-spacings-size-12);
+  border-radius: var(--dt-borders-radius-container-default);
+  /* The zone sets the hue; the count sets how strong it is (from a light wash to a clear tint). */
+  background: color-mix(in srgb, var(--pvs-zone) calc(8% + var(--pvs-heat, 0) * 30%), var(--dt-colors-background-container-neutral-subdued));
+  border: 1px solid color-mix(in srgb, var(--pvs-zone) 45%, transparent);
+  border-left: 4px solid var(--pvs-zone);
+}
+
+.pvs-heat__cell[data-zone='quickWins'] {
+  --pvs-zone: var(--dt-colors-background-container-success-accent);
+}
+.pvs-heat__cell[data-zone='strategic'] {
+  --pvs-zone: var(--dt-colors-background-container-primary-accent);
+}
+.pvs-heat__cell[data-zone='plan'] {
+  --pvs-zone: var(--dt-colors-border-neutral-accent);
+}
+.pvs-heat__cell[data-zone='fillIns'] {
+  --pvs-zone: var(--dt-colors-border-neutral-default);
+}
+.pvs-heat__cell[data-zone='reconsider'] {
+  --pvs-zone: var(--dt-colors-background-container-warning-accent);
+}
+
+.pvs-heat__cell[data-empty='true'] {
+  border-style: dashed;
+  border-left-style: solid;
+}
+
+.pvs-heat__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--dt-spacings-size-6);
+}
+
+.pvs-heat__zone {
+  font-weight: 600;
+  color: var(--dt-colors-text-neutral-default);
+  overflow-wrap: anywhere;
+}
+
+.pvs-heat__count {
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--dt-colors-text-neutral-default);
+}
+
+.pvs-heat__hint {
+  display: block;
+  font-size: var(--dt-typography-text-small-default-size);
+  color: var(--dt-colors-text-neutral-default);
+  opacity: 0.85;
+  margin-bottom: var(--dt-spacings-size-4);
+}
+
+.pvs-heat__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--dt-spacings-size-2);
+}
+
+.pvs-heat__item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--dt-spacings-size-4);
+  align-items: center;
+  font-size: var(--dt-typography-text-small-default-size);
+  color: var(--dt-colors-text-neutral-default);
+}
+
+.pvs-heat__title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pvs-heat__rank {
+  min-width: 1.4rem;
+  padding: 0 var(--dt-spacings-size-4);
+  border-radius: 999px;
+  text-align: center;
+  font-weight: 600;
+  background: var(--dt-colors-background-base-default, #fff);
+  color: var(--dt-colors-text-neutral-default);
+  border: 1px solid var(--dt-colors-border-neutral-default);
+}
+
+.pvs-heat__more {
+  font-size: var(--dt-typography-text-small-default-size);
+  color: var(--dt-colors-text-neutral-default);
+  font-weight: 600;
+}
+
+.pvs-heat__legend {
+  margin: 0;
+  font-size: var(--dt-typography-text-small-default-size);
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+/* Screen only: a printed A4 page is narrower than this, and the printed map keeps its actions. */
+@media screen and (max-width: 760px) {
+  .pvs-heat__corner {
+    width: 5rem;
+  }
+  .pvs-heat__cell {
+    height: auto;
+  }
+  .pvs-heat__items {
+    display: none;
+  }
+}
+
+@media print {
+  .pvs-heat__title {
+    white-space: normal !important;
+  }
+}
+
+/* ---------------------------------------------------------------- 3.4.7: a measure per day (DailyLine) */
+.pvs-daily {
+  position: relative;
+  margin: 0;
+  width: 100%;
+}
+
+.pvs-daily__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.pvs-daily__weekend {
+  fill: var(--dt-colors-background-container-neutral-subdued);
+}
+
+.pvs-daily__grid {
+  stroke: var(--dt-colors-border-neutral-default);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+}
+
+.pvs-daily__axis {
+  font-size: 12px;
+  fill: var(--dt-colors-text-neutral-subdued);
+  font-variant-numeric: tabular-nums;
+}
+
+.pvs-daily__area {
+  opacity: 0.35;
+}
+
+.pvs-daily__line {
+  fill: none;
+  stroke: var(--pvs-sp-to, var(--dt-colors-charts-categorical-color-01-default));
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.pvs-daily__peak circle {
+  fill: var(--pvs-sp-to, var(--dt-colors-charts-categorical-color-01-default));
+  stroke: var(--dt-colors-background-surface-default);
+  stroke-width: 2;
+}
+
+.pvs-daily__peak text {
+  font-size: 12px;
+  font-weight: 600;
+  fill: var(--dt-colors-text-neutral-default);
+}
+
+.pvs-daily__cross line {
+  stroke: var(--dt-colors-text-neutral-subdued);
+  stroke-width: 1;
+}
+
+.pvs-daily__cross circle {
+  fill: var(--dt-colors-background-surface-default);
+  stroke: var(--pvs-sp-to, var(--dt-colors-charts-categorical-color-01-default));
+  stroke-width: 2;
+}
+
+.pvs-daily__hit {
+  fill: transparent;
+  cursor: crosshair;
+}
+
+.pvs-daily__tip {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  padding: var(--dt-spacings-size-2) var(--dt-spacings-size-6);
+  border-radius: var(--dt-borders-radius-container-default);
+  background: var(--dt-colors-background-surface-default);
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  font-size: var(--dt-typography-text-small-default-size);
+  color: var(--dt-colors-text-neutral-default);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------- 3.4.7: weekdays × hours (HourHeatmap) */
+.pvs-whenmap-wrap {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--dt-spacings-size-8);
+  overflow-x: auto;
+}
+
+.pvs-whenmap {
+  border-collapse: separate;
+  border-spacing: 3px;
+  width: 100%;
+  table-layout: fixed;
+  min-width: 26rem;
+}
+
+.pvs-whenmap__corner {
+  width: 3.2rem;
+}
+
+.pvs-whenmap__hour {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--dt-colors-text-neutral-subdued);
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+}
+
+.pvs-whenmap__day {
+  font-size: var(--dt-typography-text-small-default-size);
+  font-weight: 600;
+  color: var(--dt-colors-text-neutral-default);
+  text-align: right;
+  padding-right: var(--dt-spacings-size-6);
+  white-space: nowrap;
+}
+
+.pvs-whenmap__cell,
+.pvs-whenmap__swatch {
+  height: 1.35rem;
+  border-radius: 3px;
+  background: color-mix(
+    in srgb,
+    var(--dt-colors-charts-sequential-blue-turquoise-color-07-default) calc(14% + var(--pvs-heat) * 86%),
+    var(--dt-colors-background-container-neutral-subdued)
+  );
+}
+
+.pvs-whenmap__cell[data-empty='true'] {
+  background: var(--dt-colors-background-container-neutral-subdued);
+}
+
+.pvs-whenmap__legend {
+  display: flex;
+  align-items: center;
+  gap: var(--dt-spacings-size-4);
+  font-size: var(--dt-typography-text-small-default-size);
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-whenmap__swatch {
+  display: inline-block;
+  width: 1.4rem;
+  height: 0.8rem;
+}
+
+@media print {
+  .pvs-whenmap__cell,
+  .pvs-whenmap__swatch,
+  .pvs-daily__weekend {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}
+
+/* ---------------------------------------------------------------- 3.4.10: coverage as radial bars (RadialBars) */
+.pvs-rbars {
+  margin: 0;
+  width: 100%;
+  display: grid;
+  gap: var(--dt-spacings-size-4);
+}
+
+.pvs-rbars__svg {
+  display: block;
+  width: 100%;
+  max-width: 900px;
+  height: auto;
+  margin: 0 auto;
+  overflow: visible;
+}
+
+.pvs-rbars__ring {
+  fill: none;
+  stroke: var(--dt-colors-text-neutral-subdued);
+  stroke-width: 1;
+  stroke-dasharray: 2 5;
+  opacity: 0.55;
+}
+
+.pvs-rbars__ring[data-full='true'] {
+  stroke-dasharray: none;
+  opacity: 0.5;
+}
+
+.pvs-rbars__track {
+  /* The domain's own hue, faint: each bar sits on a track of its colour, as in the reference images. */
+  fill: color-mix(in srgb, var(--pvs-sp-to, var(--dt-colors-border-neutral-default)) 16%, var(--dt-colors-background-surface-default));
+  stroke: var(--dt-colors-background-surface-default);
+  stroke-width: 2;
+}
+
+.pvs-rbars__sector[data-unread='true'] .pvs-rbars__track {
+  stroke: var(--dt-colors-border-neutral-default);
+  stroke-dasharray: 4 4;
+}
+
+.pvs-rbars__bar {
+  fill: var(--pvs-sp-to, var(--dt-colors-charts-categorical-color-01-default));
+  stroke: var(--dt-colors-background-surface-default);
+  stroke-width: 2;
+}
+
+.pvs-rbars__rim {
+  fill: none;
+  stroke: var(--pvs-sp-to, var(--dt-colors-charts-categorical-color-01-default));
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+
+.pvs-rbars__leader {
+  fill: none;
+  stroke: var(--pvs-sp-to, var(--dt-colors-border-neutral-default));
+  stroke-width: 1.5;
+}
+
+.pvs-rbars__sector {
+  cursor: default;
+  outline: none;
+  transition: opacity var(--dt-timings-fast-default, 120ms);
+}
+
+.pvs-rbars[data-active='true'] .pvs-rbars__sector:not([data-active='true']) {
+  opacity: 0.45;
+}
+
+.pvs-rbars__name {
+  /* 3.4.16 (D-32): SVG units — the chart is drawn 900 wide and shown at about 560 px, so 21 reads ≈ 13 px. */
+  font-size: 21px;
+  font-weight: 600;
+  fill: var(--dt-colors-text-neutral-default);
+  white-space: pre;
+}
+
+.pvs-rbars__value {
+  font-size: 19px;
+  white-space: pre;
+}
+
+.pvs-rbars__pct {
+  font-weight: 600;
+  fill: var(--dt-colors-text-neutral-default);
+}
+
+.pvs-rbars__band {
+  fill: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-rbars__hub {
+  fill: var(--dt-colors-background-surface-default);
+  stroke: var(--dt-colors-border-neutral-default);
+}
+
+.pvs-rbars__centre-label {
+  font-size: 18px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  fill: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-rbars__centre-value {
+  font-size: 40px;
+  font-weight: 600;
+  fill: var(--dt-colors-text-neutral-default);
+  font-variant-numeric: proportional-nums; /* 3.4.16: a value standing alone (DT Flow's tabular point read "6 .9") */
+}
+
+.pvs-rbars__centre-band {
+  font-size: 19px;
+  font-weight: 600;
+  fill: var(--dt-colors-text-primary-default);
+}
+
+.pvs-rbars__rings-label {
+  font-size: var(--dt-typography-text-small-default-size);
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+@media print {
+  .pvs-rbars__bar,
+  .pvs-rbars__rim,
+  .pvs-rbars__track {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}

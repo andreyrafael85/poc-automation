@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Dynatrace App" />
+    <title>PoC Automation 3.0 (visual harness)</title>
+    <!-- Same base as the platform's index.html, so BrowserRouter basename="ui" and
+         relative asset URLs (./assets/...) resolve as they do on a tenant. -->
+    <base href="/ui/" />
+    <script>
+      /* Harness state, resolved BEFORE any module runs.
+         ?scenario=rich|sparse|denied|loading|error|scanlimit   (default rich)
+         ?locale=en|pt-BR                                      (default en)
+         ?exec=1                                               (executive mode on)
+         ?as=se|partner|customer|unknown                       (who the platform says is signed in; default se)
+         ?state=empty|seeded|forbidden|fail                    (what the tenant's App State holds; default empty)
+         Each is persisted in sessionStorage so in-app navigation and reloads keep it. */
+      (function () {
+        var params = new URLSearchParams(window.location.search);
+        var store = window.sessionStorage;
+        function pick(key, fallback) {
+          var value = params.get(key);
+          if (value !== null) store.setItem('pvs.' + key, value);
+          var saved = store.getItem('pvs.' + key);
+          return saved === null ? fallback : saved;
+        }
+        window.__PVS__ = {
+          scenario: pick('scenario', 'rich'),
+          locale: pick('locale', 'en'),
+          exec: pick('exec', '0') === '1',
+          as: pick('as', 'se'),
+          state: pick('state', 'empty'),
+          pending: 0,
+          hung: 0,
+          queries: {},
+          unmatched: [],
+        };
+      })();
+    </script>
+  </head>
+  <body>
+    <noscript>Please turn on Javascript.</noscript>
+    <div id="root"></div>
+    <script type="module" src="/entry.jsx"></script>
+  </body>
+</html>

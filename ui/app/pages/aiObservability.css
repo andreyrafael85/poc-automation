@@ -1,0 +1,88 @@
+/* 3.7.8 — AI Observability in the v6 layout: model cards in a grid, the next steps in a strip. Tokens only. */
+
+.pvs-aimodels {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--dt-spacings-size-16);
+}
+
+.pvs-aimodel__head {
+  display: flex;
+  align-items: center;
+  gap: var(--dt-spacings-size-8);
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-aimodel__name {
+  font-weight: 600;
+  color: var(--dt-colors-text-neutral-default);
+  overflow-wrap: anywhere;
+}
+
+.pvs-aimodel__figure {
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 1.1;
+  font-variant-numeric: proportional-nums;
+}
+
+.pvs-aimodel__facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--dt-spacings-size-4) var(--dt-spacings-size-12);
+  margin: 0;
+  padding-top: var(--dt-spacings-size-8);
+  border-top: 1px solid var(--dt-colors-border-neutral-default);
+  font-size: 13px;
+}
+
+.pvs-aimodel__facts dt {
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-aimodel__facts dd {
+  margin: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.pvs-aideeper__steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--dt-spacings-size-16);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pvs-aideeper__steps li {
+  display: flex;
+  gap: var(--dt-spacings-size-12);
+  align-items: flex-start;
+  padding: var(--dt-spacings-size-12);
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  border-radius: var(--dt-borders-radius-container-default);
+}
+
+.pvs-aideeper__steps li > span:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dt-spacings-size-4);
+}
+
+.pvs-aideeper__n {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  border-radius: var(--dt-borders-radius-field-default);
+  color: var(--pvs-v6-edge, var(--dt-colors-text-primary-default));
+  font-weight: 600;
+}
+
+.pvs-aideeper__title {
+  font-weight: 600;
+}

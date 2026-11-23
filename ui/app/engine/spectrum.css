@@ -1,0 +1,4057 @@
+/*
+ * Spectrum: the expressive skin of 3.2.
+ *
+ * 3.1 drew every mark as a flat fill and an edge, and its tests forbade any gradient, glow or
+ * text shadow. The owner asked for more impact (3.2, "Value Spectrum"): gradient rings, numbers
+ * with presence, light that has a source. This is the one stylesheet where that is allowed, and
+ * only on these terms, which `engine.test.ts` enforces:
+ *
+ *   - every colour comes from a Strato token (the sequential chart palettes), never a literal;
+ *   - ink that is painted with a gradient keeps a real `color` token underneath, so contrast is
+ *     measured on text that exists and the text survives a forced-colours or print mode;
+ *   - motion stops under `prefers-reduced-motion`;
+ *   - print draws every Spectrum surface flat.
+ *
+ * Evidence is still told apart by icon, word and border, never by this skin.
+ *
+ * Why the stops are picked per theme: Strato's sequential palettes run from dark (01) to light
+ * (09) in BOTH themes. The stop that reads on a white surface is the one that disappears on the
+ * dark one, and the reverse. So every family names its stops twice, and the dark picks apply on
+ * screen only: for print Strato resets a dark page to the light tokens, and the light picks come
+ * back with them. `spectrumContrast.test.ts` measures every ink stop against the surface of
+ * every theme the app can run in, from the tokens Strato actually ships.
+ */
+
+:root {
+  --pvs-spec-a: var(--dt-colors-charts-sequential-blue-turquoise-color-05-default);
+  --pvs-spec-b: var(--dt-colors-charts-sequential-blue-turquoise-color-08-default);
+  --pvs-spec-c: var(--dt-colors-charts-sequential-pink-purple-color-06-default);
+  --pvs-spec-ok: var(--dt-colors-charts-sequential-turquoise-color-07-default);
+  --pvs-spec-warn: var(--dt-colors-charts-status-warning-default);
+
+  /* Title ink: three stops of a headline painted across the spectrum. */
+  --pvs-title-ink-1: var(--dt-colors-charts-sequential-blue-turquoise-color-02-default);
+  --pvs-title-ink-2: var(--dt-colors-charts-sequential-turquoise-color-02-default);
+  --pvs-title-ink-3: var(--dt-colors-charts-sequential-pink-purple-color-07-default);
+
+  /* The particles that run along the stack map's links. */
+  --pvs-flow-ink: var(--dt-colors-background-surface-default);
+}
+
+@media screen {
+  :root[data-theme='dark'] {
+    --pvs-title-ink-1: var(--dt-colors-charts-sequential-blue-turquoise-color-09-default);
+    --pvs-title-ink-2: var(--dt-colors-charts-sequential-turquoise-color-07-default);
+    --pvs-title-ink-3: var(--dt-colors-charts-sequential-pink-purple-color-01-default);
+    --pvs-flow-ink: var(--dt-colors-text-neutral-default);
+  }
+}
+
+/* ------------------------------------------------------------------ families */
+
+/*
+ * `data-spectrum` names a family. Paint (`--pvs-sp-from` → `--pvs-sp-to`) colours marks:
+ * arcs, bars, icon tiles, links. Ink (`--pvs-ink-from` → `--pvs-ink-to`) colours numerals and
+ * must stay readable as text.
+ */
+[data-spectrum='blue'] {
+  --pvs-sp-from: var(--dt-colors-charts-sequential-blue-color-03-default);
+  --pvs-sp-to: var(--dt-colors-charts-sequential-blue-color-05-default);
+  --pvs-ink-from: var(--dt-colors-charts-sequential-blue-color-02-default);
+  --pvs-ink-to: var(--dt-colors-charts-sequential-blue-color-03-default);
+}
+
+[data-spectrum='blue-turquoise'] {
+  --pvs-sp-from: var(--dt-colors-charts-sequential-blue-turquoise-color-03-default);
+  --pvs-sp-to: var(--dt-colors-charts-sequential-blue-turquoise-color-07-default);
+  --pvs-ink-from: var(--dt-colors-charts-sequential-blue-turquoise-color-02-default);
+  --pvs-ink-to: var(--dt-colors-charts-sequential-blue-turquoise-color-04-default);
+}
+
+[data-spectrum='turquoise'] {
+  --pvs-sp-from: var(--dt-colors-charts-sequential-turquoise-color-03-default);
+  --pvs-sp-to: var(--dt-colors-charts-sequential-turquoise-color-05-default);
+  --pvs-ink-from: var(--dt-colors-charts-sequential-turquoise-color-02-default);
+  --pvs-ink-to: var(--dt-colors-charts-sequential-turquoise-color-03-default);
+}
+
+[data-spectrum='moss'] {
+  --pvs-sp-from: var(--dt-colors-charts-sequential-moss-color-03-default);
+  --pvs-sp-to: var(--dt-colors-charts-sequential-moss-color-05-default);
+  --pvs-ink-from: var(--dt-colors-charts-sequential-moss-color-02-default);
+  --pvs-ink-to: var(--dt-colors-charts-sequential-moss-color-03-default);
+}
+
+[data-spectrum='orange'] {
+  --pvs-sp-from: var(--dt-colors-charts-sequential-orange-color-04-default);
+  --pvs-sp-to: var(--dt-colors-charts-sequential-orange-color-05-default);
+  --pvs-ink-from: var(--dt-colors-charts-sequential-orange-color-02-default);
+  --pvs-ink-to: var(--dt-colors-charts-sequential-orange-color-03-default);
+}
+
+[data-spectrum='pink-purple'] {
+  --pvs-sp-from: var(--dt-colors-charts-sequential-pink-purple-color-02-default);
+  --pvs-sp-to: var(--dt-colors-charts-sequential-pink-purple-color-06-default);
+  --pvs-ink-from: var(--dt-colors-charts-sequential-pink-purple-color-04-default);
+  --pvs-ink-to: var(--dt-colors-charts-sequential-pink-purple-color-07-default);
+}
+
+[data-spectrum='purple'] {
+  --pvs-sp-from: var(--dt-colors-charts-sequential-purple-color-03-default);
+  --pvs-sp-to: var(--dt-colors-charts-sequential-purple-color-05-default);
+  --pvs-ink-from: var(--dt-colors-charts-sequential-purple-color-02-default);
+  --pvs-ink-to: var(--dt-colors-charts-sequential-purple-color-04-default);
+}
+
+[data-spectrum='grey'] {
+  --pvs-sp-from: var(--dt-colors-charts-sequential-grey-color-03-default);
+  --pvs-sp-to: var(--dt-colors-charts-sequential-grey-color-05-default);
+  --pvs-ink-from: var(--dt-colors-charts-sequential-grey-color-01-default);
+  --pvs-ink-to: var(--dt-colors-charts-sequential-grey-color-03-default);
+}
+
+/* 3.2.6: the one family that is a verdict — risk totals (open vulnerabilities). */
+[data-spectrum='red'] {
+  --pvs-sp-from: var(--dt-colors-charts-sequential-red-color-04-default);
+  --pvs-sp-to: var(--dt-colors-charts-sequential-red-color-05-default);
+  --pvs-ink-from: var(--dt-colors-charts-sequential-red-color-02-default);
+  --pvs-ink-to: var(--dt-colors-charts-sequential-red-color-03-default);
+}
+
+@media screen {
+  :root[data-theme='dark'] [data-spectrum='blue'] {
+    --pvs-sp-from: var(--dt-colors-charts-sequential-blue-color-04-default);
+    --pvs-sp-to: var(--dt-colors-charts-sequential-blue-color-07-default);
+    --pvs-ink-from: var(--dt-colors-charts-sequential-blue-color-06-default);
+    --pvs-ink-to: var(--dt-colors-charts-sequential-blue-color-08-default);
+  }
+
+  :root[data-theme='dark'] [data-spectrum='blue-turquoise'] {
+    --pvs-sp-from: var(--dt-colors-charts-sequential-blue-turquoise-color-05-default);
+    --pvs-sp-to: var(--dt-colors-charts-sequential-blue-turquoise-color-09-default);
+    --pvs-ink-from: var(--dt-colors-charts-sequential-blue-turquoise-color-07-default);
+    --pvs-ink-to: var(--dt-colors-charts-sequential-blue-turquoise-color-09-default);
+  }
+
+  :root[data-theme='dark'] [data-spectrum='turquoise'] {
+    --pvs-sp-from: var(--dt-colors-charts-sequential-turquoise-color-05-default);
+    --pvs-sp-to: var(--dt-colors-charts-sequential-turquoise-color-08-default);
+    --pvs-ink-from: var(--dt-colors-charts-sequential-turquoise-color-06-default);
+    --pvs-ink-to: var(--dt-colors-charts-sequential-turquoise-color-08-default);
+  }
+
+  :root[data-theme='dark'] [data-spectrum='moss'] {
+    --pvs-sp-from: var(--dt-colors-charts-sequential-moss-color-05-default);
+    --pvs-sp-to: var(--dt-colors-charts-sequential-moss-color-08-default);
+    --pvs-ink-from: var(--dt-colors-charts-sequential-moss-color-06-default);
+    --pvs-ink-to: var(--dt-colors-charts-sequential-moss-color-08-default);
+  }
+
+  :root[data-theme='dark'] [data-spectrum='orange'] {
+    --pvs-sp-from: var(--dt-colors-charts-sequential-orange-color-05-default);
+    --pvs-sp-to: var(--dt-colors-charts-sequential-orange-color-07-default);
+    --pvs-ink-from: var(--dt-colors-charts-sequential-orange-color-06-default);
+    --pvs-ink-to: var(--dt-colors-charts-sequential-orange-color-08-default);
+  }
+
+  :root[data-theme='dark'] [data-spectrum='pink-purple'] {
+    --pvs-sp-from: var(--dt-colors-charts-sequential-pink-purple-color-04-default);
+    --pvs-sp-to: var(--dt-colors-charts-sequential-pink-purple-color-01-default);
+    --pvs-ink-from: var(--dt-colors-charts-sequential-pink-purple-color-01-default);
+    --pvs-ink-to: var(--dt-colors-charts-sequential-pink-purple-color-02-default);
+  }
+
+  :root[data-theme='dark'] [data-spectrum='purple'] {
+    --pvs-sp-from: var(--dt-colors-charts-sequential-purple-color-04-default);
+    --pvs-sp-to: var(--dt-colors-charts-sequential-purple-color-07-default);
+    --pvs-ink-from: var(--dt-colors-charts-sequential-purple-color-06-default);
+    --pvs-ink-to: var(--dt-colors-charts-sequential-purple-color-08-default);
+  }
+
+  :root[data-theme='dark'] [data-spectrum='grey'] {
+    --pvs-sp-from: var(--dt-colors-charts-sequential-grey-color-05-default);
+    --pvs-sp-to: var(--dt-colors-charts-sequential-grey-color-08-default);
+    --pvs-ink-from: var(--dt-colors-charts-sequential-grey-color-06-default);
+    --pvs-ink-to: var(--dt-colors-charts-sequential-grey-color-08-default);
+  }
+
+  :root[data-theme='dark'] [data-spectrum='red'] {
+    --pvs-sp-from: var(--dt-colors-charts-sequential-red-color-05-default);
+    --pvs-sp-to: var(--dt-colors-charts-sequential-red-color-07-default);
+    --pvs-ink-from: var(--dt-colors-charts-sequential-red-color-06-default);
+    --pvs-ink-to: var(--dt-colors-charts-sequential-red-color-08-default);
+  }
+}
+
+/* ------------------------------------------------------------------ the access gate */
+
+.pvs-gate {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: var(--dt-spacings-size-24);
+  background:
+    radial-gradient(900px 360px at 85% -10%, color-mix(in srgb, var(--pvs-spec-a) 24%, transparent), transparent 70%),
+    radial-gradient(700px 320px at 0% 110%, color-mix(in srgb, var(--pvs-spec-c) 20%, transparent), transparent 70%),
+    var(--dt-colors-background-base-default);
+  color: var(--dt-colors-text-neutral-default);
+}
+
+.pvs-gate__card {
+  width: min(100%, 460px);
+  display: grid;
+  gap: var(--dt-spacings-size-16);
+  padding: var(--dt-spacings-size-32);
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  border-radius: var(--dt-borders-radius-surface-default);
+  background: var(--dt-colors-background-surface-default);
+  box-shadow: var(--dt-box-shadows-surface-floating-rest);
+}
+
+.pvs-gate__title {
+  margin: 0;
+  font-size: var(--dt-typography-heading-level-3-size);
+  line-height: var(--dt-typography-heading-level-3-line-height);
+  color: var(--dt-colors-text-neutral-default);
+  background: linear-gradient(95deg, var(--pvs-title-ink-1), var(--pvs-title-ink-2) 60%, var(--pvs-title-ink-3));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.pvs-gate__lead,
+.pvs-gate__who,
+.pvs-gate__foot {
+  margin: 0;
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-gate__field {
+  display: grid;
+  gap: var(--dt-spacings-size-8);
+}
+
+.pvs-gate__row {
+  display: flex;
+  gap: var(--dt-spacings-size-8);
+  align-items: center;
+}
+
+.pvs-gate__msg {
+  min-height: 1.5em;
+  margin: 0;
+  color: var(--dt-colors-text-neutral-default);
+}
+
+.pvs-gate__msg[data-tone='ok'] {
+  color: var(--dt-colors-text-success-default);
+}
+
+/* The vault: eight segments that light one by one as the password is typed. */
+.pvs-vault {
+  justify-self: center;
+  width: 132px;
+  height: 132px;
+}
+
+.pvs-vault__seg {
+  fill: none;
+  stroke: var(--dt-colors-border-neutral-default);
+  stroke-width: 9;
+  stroke-linecap: round;
+  transition: stroke 160ms ease;
+}
+
+.pvs-vault__seg[data-lit='true'] {
+  stroke: url('#pvs-vault-gradient');
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--pvs-spec-a) 55%, transparent));
+}
+
+.pvs-vault[data-state='ok'] .pvs-vault__seg {
+  stroke: var(--pvs-spec-ok);
+  filter: drop-shadow(0 0 7px color-mix(in srgb, var(--pvs-spec-ok) 60%, transparent));
+}
+
+.pvs-vault__mark {
+  fill: none;
+  stroke: var(--dt-colors-text-neutral-subdued);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pvs-vault[data-state='ok'] .pvs-vault__mark {
+  stroke: var(--pvs-spec-ok);
+}
+
+.pvs-vault[data-state='wrong'] {
+  animation: pvs-vault-shake 360ms ease;
+}
+
+@keyframes pvs-vault-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-7px);
+  }
+  40% {
+    transform: translateX(6px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+}
+
+/* ------------------------------------------------------------------ hero */
+
+/*
+ * The opening band of the Overview, the Executive summary and the report. Two soft light
+ * sources over the platform's primary container, and the headline painted across the spectrum.
+ */
+/* 3.7.5 (v6, wave 4): flat and neutral — the surface of every other card, the brand gradient only as a thin strip along
+   the top (no light sources, no primary container). */
+.pvs-panel.pvs-spec-hero {
+  background:
+    linear-gradient(90deg, var(--pvs-spec-a), var(--pvs-spec-c)) top / 100% 3px no-repeat,
+    var(--dt-colors-background-surface-default);
+}
+
+.pvs-spec-hero__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.6fr);
+  gap: var(--pvs-gap-section);
+  align-items: center;
+}
+
+.pvs-spec-hero__grid[data-aside='false'] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.pvs-panel.pvs-spec-hero .pvs-spec-hero__title {
+  margin: 0;
+  /* The paint spans the text, not the empty width of the block, so every stop shows. */
+  width: fit-content;
+  /* 3.6.3 (v6): the title in neutral ink, as the Overview's header (no painted text). */
+  color: var(--dt-colors-text-neutral-default);
+}
+
+.pvs-spec-hero__aside {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  gap: var(--pvs-gap-tight);
+  min-width: 0;
+}
+
+@container pvs-page (max-width: 960px) {
+  .pvs-spec-hero__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ------------------------------------------------------------------ gauge ring */
+
+.pvs-gauge {
+  margin: 0;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: var(--dt-spacings-size-6);
+  width: 172px;
+  max-width: 100%;
+  text-align: center;
+}
+
+.pvs-gauge__dial {
+  position: relative;
+  width: 172px;
+  max-width: 100%;
+  height: 120px;
+}
+
+/* 3.5.0: the platform's GaugeChart inside the dial (Strato native, wave 2). */
+.pvs-gauge__arc {
+  width: 100%;
+  height: 100%;
+}
+
+.pvs-gauge__arc {
+  position: relative;
+}
+
+.pvs-gauge__reading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding-top: 10px;
+  font-size: var(--dt-typography-heading-level-3-size);
+  font-weight: 600;
+  color: var(--dt-colors-text-neutral-default);
+  font-variant-numeric: proportional-nums;
+  pointer-events: none;
+}
+
+.pvs-gauge__svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.pvs-gauge__ticks {
+  fill: none;
+  stroke: var(--dt-colors-border-neutral-default);
+  stroke-width: 5;
+  stroke-dasharray: 1.2 5.6;
+  opacity: 0.7;
+}
+
+.pvs-gauge__track {
+  fill: none;
+  stroke: var(--dt-colors-border-neutral-default);
+  stroke-width: 12;
+  opacity: 0.55;
+}
+
+/* Not measured: a dashed track and a dash, never an empty ring that reads as zero. */
+.pvs-gauge__track[data-missing='true'] {
+  stroke-dasharray: 4 8;
+  opacity: 1;
+}
+
+
+.pvs-gauge__knob {
+  fill: var(--pvs-sp-to);
+  stroke: var(--dt-colors-background-surface-default);
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--pvs-sp-to) 60%, transparent));
+  animation: pvs-fade-in var(--dt-timings-slow-default) var(--dt-easings-decelerate) var(--dt-timings-slowest-default) both;
+}
+
+.pvs-sp-stop-from {
+  stop-color: var(--pvs-sp-from);
+}
+
+.pvs-sp-stop-to {
+  stop-color: var(--pvs-sp-to);
+}
+
+.pvs-gauge__value {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  color: var(--dt-colors-text-neutral-default);
+  font-size: var(--dt-typography-heading-level-2-size);
+  font-weight: var(--dt-typography-display-level-3-weight);
+  font-variant-numeric: proportional-nums; /* 3.4.16: a value standing alone (DT Flow's tabular point read "6 .9") */
+  line-height: 1;
+}
+
+.pvs-gauge__value[data-missing='true'] {
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-gauge__label {
+  font-weight: var(--dt-typography-heading-level-6-weight);
+  color: var(--dt-colors-text-neutral-default);
+}
+
+.pvs-gauge__caption {
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: var(--dt-typography-text-small-default-size);
+}
+
+
+@keyframes pvs-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* ------------------------------------------------------------------ KPI hero */
+
+/* A headline number with presence: an accent edge, a light wash, and the numeral painted. */
+.pvs-panel.pvs-kpi {
+  position: relative;
+  overflow: hidden;
+}
+
+/*
+ * The wash only on a card that states no condition. A card toned for a measured condition (a
+ * warning, a fault) keeps the platform's own tinted container and its rail: the skin must never
+ * paint over a verdict (3.2.3, when `ValueCard` and `FactTile` took this skin).
+ */
+.pvs-panel.pvs-kpi:not([data-toned='true']) {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--pvs-sp-from) 8%, var(--dt-colors-background-surface-default)),
+    var(--dt-colors-background-surface-default) 60%
+  );
+}
+
+/*
+ * The accent edge is an element of its own, never the panel's ::before. Strato's Surface owns
+ * ::before and ::after (absolute, 100 % × 100 %) at the same specificity as a class of ours, so
+ * whichever stylesheet loads last wins. In the production bundle that is Strato's: on the lab tenant
+ * (3.2.1) the 3 px edge became a gradient over the whole card and hid its number. The harness ran
+ * the dev server, where the order was the other way round. `engine.test.ts` now refuses any
+ * pseudo-element on a class that a `Panel` carries.
+ */
+.pvs-kpi__edge,
+.pvs-spec-band__edge {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  pointer-events: none;
+}
+
+.pvs-kpi__edge {
+  background: linear-gradient(90deg, var(--pvs-sp-from), var(--pvs-sp-to));
+}
+
+.pvs-panel.pvs-kpi[data-missing='true'] {
+  background: var(--dt-colors-background-surface-default);
+}
+
+.pvs-kpi[data-missing='true'] .pvs-kpi__edge,
+.pvs-kpi[data-toned='true'] .pvs-kpi__edge {
+  background: none;
+}
+
+.pvs-kpi__body {
+  display: grid;
+  gap: var(--dt-spacings-size-6);
+  min-width: 0;
+}
+
+.pvs-kpi__spark {
+  display: block;
+  width: 100%;
+  height: 38px;
+  overflow: visible;
+}
+
+.pvs-kpi__spark-line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.pvs-kpi__spark-dot {
+  stroke: var(--pvs-sp-to);
+  stroke-width: 6;
+  stroke-linecap: round;
+}
+
+.pvs-sp-area-top {
+  stop-color: var(--pvs-sp-from);
+  stop-opacity: 0.4;
+}
+
+.pvs-sp-area-bottom {
+  stop-color: var(--pvs-sp-from);
+  stop-opacity: 0;
+}
+
+.pvs-kpi__trend {
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: var(--dt-typography-text-small-default-size);
+}
+
+/*
+ * Numerals in neutral ink. 3.2 painted them with the family's gradient; 3.4.16 (design proposal D-04, the owner's
+ * order to follow the recommendations) sets them like the platform's SingleValue — the number in the neutral text
+ * colour, the family's colour on its mark (ring, bar, edge, sparkline) — so a figure never reads as a verdict by
+ * its colour alone. `--pvs-ink-*` stay defined for the marks that still use them.
+ */
+.pvs-figure[data-ink='spectrum'] .pvs-figure__value {
+  color: var(--dt-colors-text-neutral-default);
+  letter-spacing: -0.02em;
+}
+
+.pvs-figure[data-ink='spectrum'][data-missing='true'] .pvs-figure__value {
+  background: none;
+  -webkit-text-fill-color: currentColor;
+}
+
+/* The headline band of a domain page: a spectrum edge along its top. */
+.pvs-panel.pvs-spec-band {
+  position: relative;
+  overflow: hidden;
+}
+
+.pvs-spec-band__edge {
+  /* 3.6.3 (v6): no spectrum edge along a panel's top — the panels are flat, as the rest of the v6 surfaces. */
+  display: none;
+}
+
+/* Each figure of the band marks its edge with its own family. */
+.pvs-summary__cell[data-spectrum]:not([data-missing='true']) {
+  border-inline-start-color: var(--pvs-sp-from);
+}
+
+/* ------------------------------------------------------------------ inventory tile */
+
+.pvs-inv {
+  display: flex;
+  gap: var(--dt-spacings-size-12);
+  align-items: center;
+  min-width: 0;
+}
+
+.pvs-inv__icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--dt-borders-radius-container-default);
+  color: var(--dt-colors-text-neutral-on-accent-default);
+  background: linear-gradient(135deg, var(--pvs-sp-from), var(--pvs-sp-to));
+  box-shadow: 0 4px 14px -4px color-mix(in srgb, var(--pvs-sp-to) 70%, transparent);
+}
+
+.pvs-inv[data-missing='true'] .pvs-inv__icon {
+  color: var(--dt-colors-text-neutral-subdued);
+  background: var(--dt-colors-background-container-neutral-default);
+  box-shadow: none;
+}
+
+.pvs-inv__text {
+  display: grid;
+  gap: var(--dt-spacings-size-2);
+  min-width: 0;
+}
+
+/* ------------------------------------------------------------------ provider and brand glyphs */
+
+.pvs-glyph {
+  display: inline-block;
+  flex: none;
+  vertical-align: middle;
+}
+
+/* A provider mark: the official monochrome glyph in the provider's colour, on a wash of it. */
+.pvs-provider {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: var(--pvs-provider-size, 40px);
+  height: var(--pvs-provider-size, 40px);
+  border-radius: var(--dt-borders-radius-container-default);
+  color: var(--pvs-brand);
+  background: color-mix(in srgb, var(--pvs-brand) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--pvs-brand) 40%, var(--dt-colors-border-neutral-default));
+}
+
+.pvs-tech-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dt-spacings-size-8);
+}
+
+.pvs-tech-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dt-spacings-size-6);
+  padding: var(--dt-spacings-size-4) var(--dt-spacings-size-12) var(--dt-spacings-size-4) var(--dt-spacings-size-8);
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  border-radius: var(--dt-borders-radius-field-emphasized);
+  background: var(--dt-colors-background-container-neutral-default);
+  color: var(--dt-colors-text-neutral-default);
+}
+
+.pvs-tech-chip .pvs-glyph {
+  color: var(--pvs-sp-to);
+}
+
+.pvs-tech-chip__count {
+  color: var(--dt-colors-text-neutral-subdued);
+  font-weight: var(--dt-typography-heading-level-6-weight);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 3.2.7: a chip that opens its page in the platform (who calls a database root cause). */
+.pvs-tech-chip__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  color: var(--dt-colors-text-primary-default);
+  text-decoration: none;
+}
+
+.pvs-tech-chip__link:hover {
+  color: var(--dt-colors-text-primary-default-hover);
+  text-decoration: underline;
+}
+
+.pvs-tech-chip__link:focus-visible {
+  outline: 2px solid var(--dt-colors-border-primary-accent);
+  outline-offset: 2px;
+  border-radius: var(--dt-borders-radius-field-default);
+}
+
+/* ------------------------------------------------------------------ stack map */
+
+.pvs-stackmap {
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.pvs-stackmap__svg {
+  display: block;
+  width: 100%;
+  min-width: 720px;
+  height: auto;
+}
+
+.pvs-stackmap__column {
+  fill: var(--dt-colors-text-neutral-subdued);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+
+.pvs-stackmap__box {
+  fill: var(--dt-colors-background-container-neutral-default);
+  stroke: color-mix(in srgb, var(--pvs-sp-to) 45%, var(--dt-colors-border-neutral-default));
+  stroke-width: 1.2;
+}
+
+.pvs-stackmap__node[data-brand='true'] .pvs-stackmap__box {
+  stroke: color-mix(in srgb, var(--pvs-brand) 45%, var(--dt-colors-border-neutral-default));
+}
+
+.pvs-stackmap__bar {
+  fill: var(--pvs-sp-to);
+}
+
+.pvs-stackmap__node[data-brand='true'] .pvs-stackmap__bar {
+  fill: var(--pvs-brand);
+}
+
+.pvs-stackmap__icon {
+  color: var(--pvs-sp-to);
+}
+
+.pvs-stackmap__node[data-brand='true'] .pvs-stackmap__icon {
+  color: var(--pvs-brand);
+}
+
+.pvs-stackmap__name {
+  fill: var(--dt-colors-text-neutral-subdued);
+  font-size: 13px;
+}
+
+.pvs-stackmap__count {
+  fill: var(--dt-colors-text-neutral-default);
+  font-size: 20px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.pvs-stackmap__unit {
+  fill: var(--dt-colors-text-neutral-subdued);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.pvs-stackmap__node[data-missing='true'] .pvs-stackmap__box {
+  stroke-dasharray: 4 4;
+}
+
+.pvs-stackmap__node[data-href] {
+  cursor: pointer;
+}
+
+.pvs-stackmap__node[data-href]:focus-visible {
+  outline: 2px solid var(--dt-colors-border-primary-accent);
+  outline-offset: 3px;
+}
+
+.pvs-stackmap__node[data-href]:focus-visible .pvs-stackmap__box {
+  stroke: var(--dt-colors-border-primary-accent);
+  stroke-width: 2.5;
+}
+
+/* 3.2.6: a node that opens the problem or the entity in the platform, in a new tab. Its focus
+   ring is on the link itself, as on the nodes that open a page of the app. */
+.pvs-stackmap__ext {
+  cursor: pointer;
+}
+
+.pvs-stackmap__ext:focus-visible {
+  outline: 2px solid var(--dt-colors-border-primary-accent);
+  outline-offset: 3px;
+}
+
+.pvs-stackmap__ext:hover .pvs-stackmap__box,
+.pvs-stackmap__ext:focus-visible .pvs-stackmap__box {
+  stroke: var(--dt-colors-border-primary-accent);
+  stroke-width: 2.5;
+}
+
+.pvs-stackmap__stop-brand {
+  stop-color: var(--pvs-brand);
+}
+
+.pvs-stackmap__link {
+  fill: none;
+  opacity: 0.5;
+  stroke-linecap: round;
+}
+
+.pvs-stackmap__flow {
+  fill: none;
+  stroke: var(--pvs-flow-ink);
+  stroke-opacity: 0.55;
+  stroke-width: 1.6;
+  stroke-dasharray: 3 14;
+  stroke-linecap: round;
+  animation: pvs-stackmap-flow 2.4s linear infinite;
+}
+
+@keyframes pvs-stackmap-flow {
+  to {
+    stroke-dashoffset: -34;
+  }
+}
+
+.pvs-stackmap__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dt-spacings-size-8) var(--dt-spacings-size-20);
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: var(--dt-typography-text-small-default-size);
+}
+
+/* ------------------------------------------------------------------ severity */
+
+[data-risk='critical'] {
+  --pvs-sev: var(--dt-colors-charts-security-risk-level-critical-default);
+}
+
+[data-risk='high'] {
+  --pvs-sev: var(--dt-colors-charts-security-risk-level-high-default);
+}
+
+[data-risk='medium'] {
+  --pvs-sev: var(--dt-colors-charts-security-risk-level-medium-default);
+}
+
+[data-risk='low'] {
+  --pvs-sev: var(--dt-colors-charts-security-risk-level-low-default);
+}
+
+[data-risk='none'] {
+  --pvs-sev: var(--dt-colors-charts-security-risk-level-none-default);
+}
+
+.pvs-sev__bar {
+  display: flex;
+  gap: 3px;
+  height: 22px;
+  overflow: hidden;
+  border-radius: var(--dt-borders-radius-field-emphasized);
+}
+
+.pvs-sev__seg {
+  min-width: 6px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--pvs-sev) 70%, var(--dt-colors-background-base-default)), var(--pvs-sev));
+}
+
+.pvs-sev__list {
+  display: grid;
+  gap: var(--dt-spacings-size-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pvs-sev__item {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto 52px;
+  gap: var(--dt-spacings-size-8);
+  align-items: center;
+}
+
+.pvs-sev__shape {
+  color: var(--pvs-sev);
+  text-align: center;
+}
+
+.pvs-sev__count {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.pvs-sev__share {
+  color: var(--dt-colors-text-neutral-subdued);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------------ radar and ranking */
+
+/* Scoped to the scorecard's radar (`.pvs-status-radar`): `engine/chart/chart.css` styles the 3.4.3 RadarChart with the
+   same class names (19 px bold labels, a block layout), which had overridden these. 3.5.2 (owner's validation of 3.5.1: "não está correto o resize, mapa e barras desproporcionais"): the profile and its
+   ranking side by side at sizes that keep the text at its size — the radar at most 480 px, the ranking a fixed bar
+   column — stacked on a narrow page with the ranking as wide as the radar. Vivid fill, status-coloured points. */
+.pvs-status-radar.pvs-radar {
+  display: grid;
+  grid-template-columns: minmax(0, 480px) minmax(0, 1fr);
+  gap: var(--dt-spacings-size-32);
+  align-items: center;
+  justify-content: center;
+}
+
+@container pvs-page (max-width: 960px) {
+  .pvs-status-radar.pvs-radar {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+  }
+}
+
+.pvs-status-radar .pvs-radar__svg {
+  display: block;
+  width: 100%;
+  max-width: 480px;
+  height: auto;
+  justify-self: center;
+}
+
+.pvs-status-radar .pvs-radar__ring {
+  fill: none;
+  stroke: var(--dt-colors-border-neutral-default);
+  opacity: 0.7;
+}
+
+.pvs-status-radar .pvs-radar__ring:nth-of-type(odd) {
+  fill: color-mix(in srgb, var(--dt-colors-charts-categorical-vivid-color-01-default) 4%, transparent);
+}
+
+.pvs-status-radar .pvs-radar__axis {
+  stroke: var(--dt-colors-border-neutral-default);
+  opacity: 0.6;
+}
+
+.pvs-status-radar .pvs-radar__area {
+  fill-opacity: 1;
+  stroke: var(--dt-colors-charts-categorical-vivid-color-01-default);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+
+.pvs-sp-glow-centre {
+  stop-color: var(--dt-colors-charts-categorical-vivid-color-01-default);
+  stop-opacity: 0.18;
+}
+
+.pvs-sp-glow-edge {
+  stop-color: var(--dt-colors-charts-categorical-vivid-color-03-default);
+  stop-opacity: 0.42;
+}
+
+.pvs-status-radar .pvs-radar__dot {
+  fill: var(--dt-colors-charts-categorical-vivid-color-01-default);
+  stroke: var(--dt-colors-background-surface-default);
+  stroke-width: 2.5;
+}
+
+.pvs-status-radar .pvs-radar__dot[data-status='ideal'] {
+  fill: var(--dt-colors-charts-status-ideal-default);
+}
+
+.pvs-status-radar .pvs-radar__dot[data-status='good'] {
+  fill: var(--dt-colors-charts-status-good-default);
+}
+
+.pvs-status-radar .pvs-radar__dot[data-status='neutral'] {
+  fill: var(--dt-colors-charts-status-neutral-default);
+}
+
+.pvs-status-radar .pvs-radar__dot[data-status='warning'] {
+  fill: var(--dt-colors-charts-status-warning-default);
+}
+
+.pvs-status-radar .pvs-radar__dot[data-status='critical'] {
+  fill: var(--dt-colors-charts-status-critical-default);
+}
+
+.pvs-status-radar .pvs-radar__label {
+  fill: var(--dt-colors-text-neutral-default);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.pvs-status-radar .pvs-radar__value {
+  fill: var(--dt-colors-text-neutral-subdued);
+  font-size: 12px;
+}
+
+.pvs-rank {
+  display: grid;
+  gap: var(--dt-spacings-size-8);
+  width: 100%;
+  max-width: 560px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--dt-typography-text-small-default-size);
+}
+
+.pvs-rank__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 120px 2.5em minmax(7.5rem, auto);
+  gap: var(--dt-spacings-size-8);
+  align-items: center;
+}
+
+.pvs-rank__track {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--dt-colors-border-neutral-default) 60%, transparent);
+}
+
+.pvs-rank__fill {
+  height: 100%;
+  border-radius: 4px;
+  background: var(--dt-colors-charts-categorical-vivid-color-01-default);
+}
+
+.pvs-rank__row[data-status='ideal'] .pvs-rank__fill {
+  background: var(--dt-colors-charts-status-ideal-default);
+}
+
+.pvs-rank__row[data-status='good'] .pvs-rank__fill {
+  background: var(--dt-colors-charts-status-good-default);
+}
+
+.pvs-rank__row[data-status='neutral'] .pvs-rank__fill {
+  background: var(--dt-colors-charts-status-neutral-default);
+}
+
+.pvs-rank__row[data-status='warning'] .pvs-rank__fill {
+  background: var(--dt-colors-charts-status-warning-default);
+}
+
+.pvs-rank__row[data-status='critical'] .pvs-rank__fill {
+  background: var(--dt-colors-charts-status-critical-default);
+}
+
+.pvs-rank__row[data-missing='true'] .pvs-rank__track {
+  background: none;
+  border: 1px dashed var(--dt-colors-border-neutral-default);
+}
+
+.pvs-rank__value {
+  text-align: right;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+/* ------------------------------------------------------------------ heat calendar */
+
+/*
+ * When problems start: a row per day, a column per six-hour period. Every cell prints its count
+ * over a solid wash of the family colour, at most 55 % strong (4.5:1 or better for the neutral ink
+ * in the four Strato themes, measured for pink-purple). The wash is a colour, not an image, so the
+ * harness can measure it.
+ */
+.pvs-heatcal__scroll {
+  /* Positioned, so the screen-reader-only labels inside its cells (absolute) are clipped by this
+     scroller instead of escaping to the panel and widening the page by their offset. */
+  position: relative;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.pvs-heatcal {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: separate;
+  border-spacing: 3px;
+  font-variant-numeric: tabular-nums;
+}
+
+.pvs-heatcal th {
+  padding: var(--dt-spacings-size-4) var(--dt-spacings-size-8);
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: var(--dt-typography-text-small-default-size);
+  font-weight: var(--dt-typography-heading-level-6-weight);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.pvs-heatcal tbody th {
+  text-align: start;
+  color: var(--dt-colors-text-neutral-default);
+}
+
+.pvs-heatcal__cell {
+  height: 34px;
+  border-radius: 4px;
+  text-align: center;
+  color: var(--dt-colors-text-neutral-default);
+  font-weight: var(--dt-typography-heading-level-6-weight);
+  background: color-mix(in srgb, var(--pvs-sp-to) calc(var(--pvs-heat) * 55%), var(--dt-colors-background-surface-default));
+  box-shadow: inset 0 0 0 1px var(--dt-colors-border-neutral-subdued);
+}
+
+.pvs-heatcal__cell[data-peak='true'] {
+  box-shadow: inset 0 0 0 2px var(--pvs-sp-to);
+}
+
+.pvs-heatcal__out {
+  text-align: center;
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-heatcal tr[data-busiest='true'] th {
+  color: var(--dt-colors-text-neutral-default);
+  text-decoration: underline;
+  text-decoration-color: var(--pvs-sp-to);
+  text-underline-offset: 3px;
+}
+
+.pvs-heatcal__total {
+  min-width: 120px;
+  padding-inline: var(--dt-spacings-size-8);
+}
+
+.pvs-heatcal__bar {
+  display: inline-block;
+  width: 64px;
+  height: 6px;
+  margin-inline-end: var(--dt-spacings-size-6);
+  overflow: hidden;
+  vertical-align: middle;
+  border-radius: var(--dt-borders-radius-field-emphasized);
+  background: var(--dt-colors-background-container-neutral-default);
+}
+
+.pvs-heatcal__bar > span {
+  display: block;
+  height: 100%;
+  background: var(--pvs-sp-to);
+}
+
+.pvs-heatcal__sum {
+  font-weight: var(--dt-typography-heading-level-6-weight);
+}
+
+.pvs-heatcal__legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--dt-spacings-size-8);
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: var(--dt-typography-text-small-default-size);
+}
+
+.pvs-heatcal__ramp {
+  flex: 0 1 140px;
+  min-width: 56px;
+  height: 8px;
+  border-radius: var(--dt-borders-radius-field-emphasized);
+  background: linear-gradient(
+    90deg,
+    var(--dt-colors-background-surface-default),
+    color-mix(in srgb, var(--pvs-sp-to) 55%, var(--dt-colors-background-surface-default))
+  );
+  box-shadow: inset 0 0 0 1px var(--dt-colors-border-neutral-subdued);
+}
+
+/* ------------------------------------------------------------------ 3.2.3 (V4): shared marks */
+
+/* Ranked bars: the role's family painted along the bar, over its solid palette colour (print keeps the solid). */
+.pvs-bars[data-spectrum] .pvs-bars__track {
+  height: 10px;
+  border-radius: var(--dt-borders-radius-field-emphasized);
+}
+
+.pvs-bars[data-spectrum] .pvs-bars__fill {
+  border-radius: var(--dt-borders-radius-field-emphasized);
+  background-image: linear-gradient(90deg, var(--pvs-sp-from), var(--pvs-sp-to));
+  box-shadow: 0 0 10px -3px color-mix(in srgb, var(--pvs-sp-to) 60%, transparent);
+}
+
+.pvs-bars[data-spectrum] .pvs-bars__rank {
+  display: inline-grid;
+  place-items: center;
+  min-width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  color: var(--dt-colors-text-neutral-default);
+  background: color-mix(in srgb, var(--pvs-sp-from) 16%, var(--dt-colors-background-surface-default));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pvs-sp-to) 35%, transparent);
+}
+
+.pvs-bars__who {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dt-spacings-size-6);
+  min-width: 0;
+}
+
+.pvs-bars__icon {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  color: var(--pvs-sp-to);
+}
+
+/* A share bar: segments apart, rounded, with a soft top light. */
+.pvs-share__bar {
+  gap: 3px;
+  height: 18px;
+  background: none;
+}
+
+.pvs-share__seg {
+  border-radius: 4px;
+  background-image: linear-gradient(180deg, color-mix(in srgb, var(--dt-colors-background-surface-default) 32%, transparent), transparent 70%);
+}
+
+.pvs-share__seg + .pvs-share__seg {
+  border-inline-start: none;
+}
+
+/* The donut: a track under the slices, which draw themselves in once. */
+.pvs-donut__track {
+  stroke: var(--dt-colors-border-neutral-default);
+  opacity: 0.3;
+}
+
+.pvs-donut__arc {
+  animation: pvs-fade-in var(--dt-timings-slow-default) var(--dt-easings-decelerate) both;
+}
+
+/* ------------------------------------------------------------------ 3.2.3 (V4): area chart */
+
+.pvs-area {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: var(--pvs-area-h) auto;
+  column-gap: var(--dt-spacings-size-8);
+  min-width: 0;
+  touch-action: pan-y;
+}
+
+.pvs-area__y {
+  position: relative;
+  min-width: 40px;
+}
+
+.pvs-area__ytick {
+  position: absolute;
+  right: 0;
+  transform: translateY(-50%);
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: var(--dt-typography-text-small-default-size);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.pvs-area__plot {
+  position: relative;
+  min-width: 0;
+  cursor: crosshair;
+}
+
+.pvs-area__svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.pvs-area__grid {
+  stroke: var(--dt-colors-border-neutral-default);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+  opacity: 0.7;
+}
+
+/* 3.3.7: a reference line (mean, PoC criterion) — dashed, never the series' solid stroke. */
+.pvs-area__ref {
+  stroke-width: 1.5;
+  stroke-dasharray: 6 5;
+  stroke: var(--dt-colors-charts-status-warning-default, var(--dt-colors-text-warning-default));
+}
+
+.pvs-area__ref[data-kind='mean'] {
+  stroke: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-area__ref-label {
+  position: absolute;
+  right: 0;
+  transform: translateY(-120%);
+  padding: 0 var(--dt-spacings-size-4);
+  border-radius: var(--dt-borders-radius-field-default);
+  background: color-mix(in srgb, var(--dt-colors-background-surface-default) 85%, transparent);
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: var(--dt-typography-text-small-default-size);
+  font-variant-numeric: proportional-nums; /* 3.4.16: a value standing alone (DT Flow's tabular point read "6 .9") */
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.pvs-area__ref-label[data-kind='goal'] {
+  color: var(--dt-colors-text-warning-default);
+}
+
+.pvs-area__base {
+  stroke: var(--dt-colors-border-neutral-default);
+  stroke-width: 1;
+}
+
+.pvs-area__line {
+  fill: none;
+  stroke-width: 2.25;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  filter: drop-shadow(0 2px 5px color-mix(in srgb, var(--pvs-sp-to) 45%, transparent));
+}
+
+.pvs-area__peak {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  margin: -4.5px 0 0 -4.5px;
+  border-radius: 50%;
+  background: var(--pvs-sp-to);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pvs-sp-to) 28%, transparent);
+  pointer-events: none;
+}
+
+.pvs-area__peak-label {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 1px var(--dt-spacings-size-6);
+  border-radius: var(--dt-borders-radius-field-emphasized);
+  color: var(--dt-colors-text-neutral-default);
+  background: var(--dt-colors-background-surface-default);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pvs-sp-to) 45%, var(--dt-colors-border-neutral-default));
+  font-size: var(--dt-typography-text-small-default-size);
+  font-weight: var(--dt-typography-heading-level-6-weight);
+  font-variant-numeric: proportional-nums; /* 3.4.16: a value standing alone (DT Flow's tabular point read "6 .9") */
+  white-space: nowrap;
+}
+
+.pvs-area__peak[data-edge='end'] .pvs-area__peak-label {
+  left: auto;
+  right: -4px;
+  transform: none;
+}
+
+.pvs-area__peak[data-edge='start'] .pvs-area__peak-label {
+  left: -4px;
+  transform: none;
+}
+
+.pvs-area__cursor {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--dt-colors-border-neutral-accent);
+  pointer-events: none;
+}
+
+.pvs-area__dot {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  margin: -5.5px 0 0 -5.5px;
+  border-radius: 50%;
+  background: var(--pvs-sp-to);
+  box-shadow: 0 0 0 3px var(--dt-colors-background-surface-default);
+  pointer-events: none;
+}
+
+.pvs-area__tip {
+  position: absolute;
+  top: 0;
+  z-index: 1;
+  display: grid;
+  gap: 2px;
+  margin-inline-start: var(--dt-spacings-size-8);
+  padding: var(--dt-spacings-size-4) var(--dt-spacings-size-8);
+  border-radius: var(--dt-borders-radius-container-default);
+  color: var(--dt-colors-text-neutral-default);
+  background: var(--dt-colors-background-surface-default);
+  box-shadow: var(--dt-box-shadows-surface-floating-rest);
+  font-size: var(--dt-typography-text-small-default-size);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.pvs-area__tip[data-edge='end'] {
+  transform: translateX(-100%);
+  margin-inline-start: calc(-1 * var(--dt-spacings-size-8));
+}
+
+.pvs-area__tip-time {
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-area__tip-value {
+  font-weight: var(--dt-typography-heading-level-6-weight);
+  font-variant-numeric: proportional-nums; /* 3.4.16: a value standing alone (DT Flow's tabular point read "6 .9") */
+}
+
+.pvs-area__x {
+  grid-column: 2;
+  position: relative;
+  height: 22px;
+}
+
+.pvs-area__xtick {
+  position: absolute;
+  top: 4px;
+  transform: translateX(-50%);
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: var(--dt-typography-text-small-default-size);
+  white-space: nowrap;
+}
+
+.pvs-area__xtick[data-align='start'] {
+  transform: none;
+}
+
+.pvs-area__xtick[data-align='end'] {
+  transform: translateX(-100%);
+}
+
+/* The panel around one chart: title, three figures, the chart. */
+.pvs-trend__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--dt-spacings-size-6) var(--pvs-gap-group);
+}
+
+/* The title takes the room; the evidence badge keeps its word whole and wraps under it if needed. */
+.pvs-trend__head > :first-child {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.pvs-trend__head > :last-child {
+  flex: none;
+  white-space: nowrap;
+}
+
+.pvs-trend__figures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dt-spacings-size-8) var(--pvs-gap-section);
+  align-items: flex-end;
+}
+
+.pvs-trend__figure {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pvs-trend__value {
+  font-weight: var(--dt-typography-heading-level-6-weight);
+  font-variant-numeric: proportional-nums; /* 3.4.16: a value standing alone (DT Flow's tabular point read "6 .9") */
+}
+
+/* ------------------------------------------------------------------ 3.2.3 (V4): flow map */
+
+/* The flow map reuses the stack map's node and link; only the node the picture is about is raised. */
+.pvs-stackmap__node[data-emphasis='true'] .pvs-stackmap__box {
+  stroke: var(--pvs-sp-to);
+  stroke-width: 2.4;
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--pvs-sp-to) 45%, transparent));
+}
+
+.pvs-stackmap__node[data-emphasis='true'] .pvs-stackmap__bar {
+  width: 7px;
+}
+
+/* ------------------------------------------------------------------ 3.2.3 (V4): threshold gauge */
+
+[data-rating='good'],
+[data-zone='good'] {
+  --pvs-rate: var(--dt-colors-charts-status-ideal-default);
+}
+
+[data-rating='needs-improvement'],
+[data-zone='needs-improvement'] {
+  --pvs-rate: var(--dt-colors-charts-status-warning-default);
+}
+
+[data-rating='poor'],
+[data-zone='poor'] {
+  --pvs-rate: var(--dt-colors-charts-status-critical-default);
+}
+
+[data-rating='no-data'] {
+  --pvs-rate: var(--dt-colors-border-neutral-default);
+}
+
+.pvs-tgauge {
+  margin: 0;
+  display: grid;
+  justify-items: center;
+  gap: var(--dt-spacings-size-6);
+  min-width: 0;
+  text-align: center;
+}
+
+.pvs-tgauge__dial {
+  position: relative;
+  width: 100%;
+  max-width: 220px;
+  aspect-ratio: 200 / 116;
+}
+
+.pvs-tgauge__svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.pvs-tgauge__zone {
+  fill: none;
+  stroke: var(--pvs-rate);
+  stroke-width: 7;
+  opacity: 0.32;
+}
+
+.pvs-tgauge__value {
+  fill: none;
+  stroke: var(--pvs-rate);
+  stroke-width: 12;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--pvs-rate) 55%, transparent));
+  animation: pvs-fade-in var(--dt-timings-slow-default) var(--dt-easings-decelerate) both;
+}
+
+.pvs-tgauge__knob {
+  fill: var(--pvs-rate);
+  stroke: var(--dt-colors-background-surface-default);
+  stroke-width: 3;
+}
+
+.pvs-tgauge__missing {
+  fill: none;
+  stroke: var(--dt-colors-border-neutral-default);
+  stroke-width: 12;
+  stroke-dasharray: 4 8;
+}
+
+.pvs-tgauge__reading {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 2%;
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: var(--dt-spacings-size-4);
+  color: var(--dt-colors-text-neutral-default);
+  line-height: 1;
+}
+
+.pvs-tgauge__reading[data-missing='true'] {
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-tgauge__number {
+  font-size: var(--dt-typography-heading-level-2-size);
+  font-weight: var(--dt-typography-display-level-3-weight);
+  font-variant-numeric: proportional-nums; /* 3.4.16: a value standing alone (DT Flow's tabular point read "6 .9") */
+}
+
+.pvs-tgauge__unit {
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: var(--dt-typography-text-small-default-size);
+}
+
+.pvs-tgauge__tick {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: var(--dt-typography-text-small-default-size);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.pvs-tgauge__caption {
+  display: grid;
+  justify-items: center;
+  gap: var(--dt-spacings-size-4);
+}
+
+.pvs-tgauge__label {
+  font-weight: var(--dt-typography-heading-level-6-weight);
+}
+
+.pvs-tgauge__rating {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dt-spacings-size-4);
+  padding: 1px var(--dt-spacings-size-8);
+  border-radius: var(--dt-borders-radius-field-emphasized);
+  color: var(--dt-colors-text-neutral-default);
+  background: color-mix(in srgb, var(--pvs-rate) 16%, var(--dt-colors-background-surface-default));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pvs-rate) 55%, transparent);
+  font-size: var(--dt-typography-text-small-default-size);
+  font-weight: var(--dt-typography-heading-level-6-weight);
+}
+
+.pvs-tgauge__rating svg {
+  color: var(--pvs-rate);
+}
+
+/* Topology: the composition of the services, four groups of chips side by side. */
+.pvs-topo-comp {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: var(--pvs-gap-group) var(--pvs-gap-section);
+}
+
+/* Experience: three vitals side by side, one per column on a phone. */
+.pvs-dx-vitals {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  gap: var(--pvs-gap-group) var(--pvs-gap-section);
+  align-items: start;
+}
+
+/* Services: the health ring beside the honeycomb of the busiest services. */
+.pvs-svc-health {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--pvs-gap-section);
+  align-items: center;
+}
+
+.pvs-svc-health__hive {
+  min-width: 0;
+}
+
+@container pvs-page (max-width: 720px) {
+  .pvs-svc-health {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+  }
+
+  .pvs-svc-health__hive {
+    width: 100%;
+  }
+}
+
+/* Logs: one card per bucket with three context meters. */
+.pvs-logctx {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: var(--pvs-gap-group);
+}
+
+.pvs-logctx__bucket {
+  display: grid;
+  gap: var(--dt-spacings-size-8);
+  padding: var(--dt-spacings-size-12);
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  border-radius: var(--dt-borders-radius-container-default);
+  background: var(--dt-colors-background-surface-default);
+}
+
+.pvs-logctx__head {
+  display: flex;
+  align-items: center;
+  gap: var(--dt-spacings-size-12);
+  min-width: 0;
+}
+
+.pvs-logctx__icon {
+  width: 34px;
+  height: 34px;
+}
+
+.pvs-logctx__name {
+  font-weight: var(--dt-typography-heading-level-6-weight);
+  overflow-wrap: anywhere;
+}
+
+.pvs-logctx__meter {
+  display: grid;
+  grid-template-columns: minmax(0, 8rem) minmax(3rem, 1fr) auto;
+  gap: var(--dt-spacings-size-8);
+  align-items: center;
+}
+
+.pvs-logctx__meter .pvs-rank__track {
+  display: block;
+}
+
+.pvs-logctx__share {
+  min-width: 3.5rem;
+  text-align: right;
+  font-weight: var(--dt-typography-heading-level-6-weight);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Security: the three criteria of the immediate-action bar, each with its icon and count. */
+.pvs-actnow__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: var(--pvs-gap-section);
+  align-items: center;
+}
+
+@container pvs-page (max-width: 720px) {
+  .pvs-actnow__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.pvs-actnow {
+  display: grid;
+  gap: var(--dt-spacings-size-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pvs-actnow__row {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) auto;
+  gap: var(--dt-spacings-size-8);
+  align-items: center;
+}
+
+.pvs-actnow__count {
+  font-weight: var(--dt-typography-heading-level-6-weight);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 3.2.6: the next queue under "act now", and the pairs of signals beside the single ones. */
+.pvs-actnow__grid {
+  align-items: start;
+}
+
+.pvs-actnow__next {
+  display: grid;
+  gap: var(--dt-spacings-size-4);
+  margin-top: var(--dt-spacings-size-8);
+  padding: var(--dt-spacings-size-12);
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  border-radius: var(--dt-borders-radius-container-default);
+}
+
+.pvs-actnow__next[data-tone='warning'] {
+  border-color: var(--dt-colors-border-warning-default);
+  background: color-mix(in srgb, var(--dt-colors-charts-status-warning-default) 10%, transparent);
+}
+
+.pvs-actnow__pair {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--dt-colors-charts-status-warning-default);
+  border-radius: 50%;
+  background: linear-gradient(90deg, var(--dt-colors-charts-status-warning-default) 50%, transparent 50%);
+}
+
+/* Executive summary: "what changed" beside "next steps" on wide screens. */
+.pvs-exec-story {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: var(--pvs-gap-section);
+  align-items: start;
+}
+
+@container pvs-page (max-width: 960px) {
+  .pvs-exec-story {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.pvs-steps {
+  display: grid;
+  gap: var(--pvs-gap-group);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pvs-steps__item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--dt-spacings-size-12);
+  align-items: start;
+}
+
+.pvs-steps__index {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: var(--dt-colors-text-neutral-on-accent-default);
+  background: linear-gradient(135deg, var(--pvs-sp-from), var(--pvs-sp-to));
+  box-shadow: 0 4px 12px -4px color-mix(in srgb, var(--pvs-sp-to) 70%, transparent);
+  font-weight: var(--dt-typography-heading-level-6-weight);
+}
+
+.pvs-steps__title {
+  font-weight: var(--dt-typography-heading-level-6-weight);
+}
+
+.pvs-steps__link {
+  justify-self: start;
+  align-self: flex-start;
+  min-height: 24px;
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  color: var(--dt-colors-text-primary-default);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.pvs-steps__link:focus-visible {
+  outline: 2px solid var(--dt-colors-border-primary-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ------------------------------------------------------------------ motion and print */
+
+/* ------------------------------------------------------------------ M5 (3.2.5)
+ * Objectives × what was proven, the PoC plan editor, the PoC track, incident stories, the
+ * security fix queue and the consumption sparkline. Status is told by icon and word first; the
+ * border colour only repeats it. */
+.pvs-criteria__list,
+.pvs-plan__list,
+.pvs-stories__list,
+.pvs-fixq__list {
+  display: grid;
+  gap: var(--dt-spacings-size-12);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pvs-criteria__item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--dt-spacings-size-12);
+  align-items: start;
+  padding: var(--dt-spacings-size-12) var(--dt-spacings-size-16);
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  border-left-width: 4px;
+  border-radius: var(--dt-borders-radius-container-default);
+}
+
+.pvs-criteria__item[data-tone='met'] {
+  border-left-color: var(--dt-colors-border-success-default);
+}
+
+.pvs-criteria__item[data-tone='not-met'] {
+  border-left-color: var(--dt-colors-border-critical-default);
+}
+
+.pvs-criteria__icon {
+  display: inline-flex;
+  padding-top: var(--dt-spacings-size-2);
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-criteria__item[data-tone='met'] .pvs-criteria__icon {
+  color: var(--dt-colors-text-success-default);
+}
+
+.pvs-criteria__item[data-tone='not-met'] .pvs-criteria__icon {
+  color: var(--dt-colors-text-critical-default);
+}
+
+.pvs-criteria__body {
+  display: grid;
+  gap: var(--dt-spacings-size-4);
+  min-width: 0;
+}
+
+.pvs-criteria__goal {
+  font-weight: var(--dt-typography-text-base-emphasized-weight);
+  overflow-wrap: anywhere;
+}
+
+.pvs-criteria__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dt-spacings-size-4) var(--dt-spacings-size-16);
+}
+
+.pvs-criteria__status {
+  font-weight: var(--dt-typography-text-base-emphasized-weight);
+}
+
+.pvs-criteria__bar {
+  height: 6px;
+  margin-top: var(--dt-spacings-size-4);
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--dt-colors-background-container-neutral-subdued);
+}
+
+.pvs-criteria__fill {
+  --pvs-sp-from: var(--dt-colors-charts-sequential-blue-turquoise-color-03-default);
+  --pvs-sp-to: var(--dt-colors-charts-sequential-turquoise-color-05-default);
+
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background-color: var(--pvs-sp-from);
+  background-image: linear-gradient(90deg, var(--pvs-sp-from), var(--pvs-sp-to));
+}
+
+.pvs-plan__item {
+  padding: var(--dt-spacings-size-16);
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  border-radius: var(--dt-borders-radius-container-default);
+}
+
+/* The PoC track: a rail from the kick-off to the last milestone, filled up to today. */
+.pvs-track {
+  position: relative;
+  margin: var(--dt-spacings-size-8) 0 0;
+  padding: var(--dt-spacings-size-16) var(--dt-spacings-size-16) var(--dt-spacings-size-4);
+}
+
+.pvs-track__rail {
+  position: relative;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--dt-colors-background-container-neutral-subdued);
+}
+
+.pvs-track__fill {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background-color: var(--pvs-sp-from);
+  background-image: linear-gradient(90deg, var(--pvs-sp-from), var(--pvs-sp-to));
+}
+
+.pvs-track__marks {
+  position: relative;
+  height: 124px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pvs-track__mark {
+  position: absolute;
+  top: -14px;
+  display: grid;
+  justify-items: center;
+  gap: var(--dt-spacings-size-4);
+  width: 140px;
+  margin-left: -70px;
+  text-align: center;
+}
+
+.pvs-track__mark[data-align='start'] {
+  justify-items: start;
+  margin-left: -6px;
+  text-align: left;
+}
+
+.pvs-track__mark[data-align='end'] {
+  justify-items: end;
+  margin-left: -134px;
+  text-align: right;
+}
+
+/* A label too close to the one before it drops to the next row (trackStops), so none collide. */
+.pvs-track__mark[data-row='1'] .pvs-track__label {
+  margin-top: 52px;
+}
+
+.pvs-track__mark[data-row='2'] .pvs-track__label {
+  margin-top: 104px;
+}
+
+.pvs-track[data-rows='1'] .pvs-track__marks {
+  height: 76px;
+}
+
+.pvs-track[data-rows='3'] .pvs-track__marks {
+  height: 176px;
+}
+
+/* A second milestone of the same day, under the first. */
+.pvs-track__also {
+  color: var(--dt-colors-text-neutral-default);
+}
+
+.pvs-track__dot {
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--dt-colors-background-surface-default);
+  border-radius: 50%;
+  background: var(--pvs-sp-to);
+}
+
+.pvs-track__mark[data-kind='today'] .pvs-track__dot {
+  width: 16px;
+  height: 16px;
+  margin-top: -2px;
+  background: var(--pvs-sp-from);
+}
+
+.pvs-track__mark[data-kind='planned-end'] .pvs-track__dot {
+  background: var(--dt-colors-background-surface-default);
+  border-color: var(--dt-colors-border-neutral-default);
+}
+
+.pvs-track__label {
+  display: grid;
+  gap: var(--dt-spacings-size-2);
+  font-size: var(--dt-typography-text-small-default-size);
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-track__label strong {
+  color: var(--dt-colors-text-neutral-default);
+}
+
+.pvs-stories__list {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.pvs-stories__beats {
+  display: grid;
+  gap: var(--dt-spacings-size-4);
+  margin: 0;
+  padding-left: var(--dt-spacings-size-20);
+}
+
+.pvs-stories__play {
+  display: grid;
+  gap: var(--dt-spacings-size-6);
+  justify-items: start;
+  padding-top: var(--dt-spacings-size-8);
+  border-top: 1px solid var(--dt-colors-border-neutral-default);
+}
+
+.pvs-fixq__item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--dt-spacings-size-12);
+  align-items: start;
+  padding: var(--dt-spacings-size-12) var(--dt-spacings-size-16);
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  border-radius: var(--dt-borders-radius-container-default);
+}
+
+.pvs-fixq__item[data-act-now='true'] {
+  border-left: 4px solid var(--dt-colors-border-critical-default);
+}
+
+.pvs-fixq__rank {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--dt-colors-background-container-neutral-subdued);
+  font-weight: var(--dt-typography-text-base-emphasized-weight);
+}
+
+.pvs-fixq__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dt-spacings-size-8) var(--dt-spacings-size-16);
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.pvs-fixq__score {
+  display: grid;
+  justify-items: end;
+}
+
+.pvs-fixq__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dt-spacings-size-6);
+}
+
+.pvs-fixq__facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--dt-spacings-size-8) var(--dt-spacings-size-16);
+  margin: 0;
+}
+
+.pvs-fixq__facts dt {
+  font-size: var(--dt-typography-text-small-default-size);
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-fixq__facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.pvs-cons__spark {
+  min-width: 120px;
+}
+
+/* ------------------------------------------------------------------ capture stage (3.2.4)
+ * The SE deck photographs the app's own panels (features/wrapup/captures.tsx). They are laid out
+ * off screen at a fixed width, on the page's own background, with every motion stopped: the
+ * picture is the settled panel, never a frame of its entrance. */
+.pvs-capture-stage {
+  position: fixed;
+  top: 0;
+  left: -20000px;
+  display: grid;
+  gap: var(--dt-spacings-size-32);
+  pointer-events: none;
+  background: var(--dt-colors-background-base-default);
+  /*
+   * The picture is drawn with the deck's own DT Flow faces (the platform's CDN fonts cannot reach
+   * it). The panels are laid out in the very same faces, or every box would be measured for one
+   * font and painted in another, and the last characters of a figure would fall outside it.
+   */
+  --pvs-capture-font: 'DTFlow', DynatraceFlow, Roboto, Helvetica, sans-serif;
+  --dt-typography-display-level-1-family: var(--pvs-capture-font);
+  --dt-typography-display-level-2-family: var(--pvs-capture-font);
+  --dt-typography-display-level-3-family: var(--pvs-capture-font);
+  --dt-typography-heading-level-1-family: var(--pvs-capture-font);
+  --dt-typography-heading-level-2-family: var(--pvs-capture-font);
+  --dt-typography-heading-level-3-family: var(--pvs-capture-font);
+  --dt-typography-heading-level-4-family: var(--pvs-capture-font);
+  --dt-typography-heading-level-5-family: var(--pvs-capture-font);
+  --dt-typography-heading-level-6-family: var(--pvs-capture-font);
+  --dt-typography-subtitle-display-level-1-family: var(--pvs-capture-font);
+  --dt-typography-subtitle-display-level-2-family: var(--pvs-capture-font);
+  --dt-typography-subtitle-display-level-3-family: var(--pvs-capture-font);
+  --dt-typography-subtitle-heading-level-1-family: var(--pvs-capture-font);
+  --dt-typography-subtitle-heading-level-2-family: var(--pvs-capture-font);
+  --dt-typography-subtitle-heading-level-3-family: var(--pvs-capture-font);
+  --dt-typography-text-base-default-family: var(--pvs-capture-font);
+  --dt-typography-text-base-emphasized-family: var(--pvs-capture-font);
+  --dt-typography-text-small-default-family: var(--pvs-capture-font);
+  --dt-typography-text-small-emphasized-family: var(--pvs-capture-font);
+  font-family: var(--pvs-capture-font);
+}
+
+.pvs-capture-target {
+  padding: var(--dt-spacings-size-16);
+  background: var(--dt-colors-background-base-default);
+}
+
+.pvs-capture-stage * {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* The links stay; the particles running along them would be caught mid-way. */
+.pvs-capture-stage .pvs-stackmap__flow {
+  stroke-dasharray: none;
+  stroke-opacity: 0.25;
+}
+
+/* ------------------------------------------------------------------ 3.2.6: value pillars */
+
+/* A pillar as one tile: identity edge and emblem, the share proven, a dot per point, the proof
+   and the objectives tied to it. The family is the pillar's identity; verdicts keep their tones. */
+.pvs-pillars__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+  gap: var(--pvs-gap-group);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pvs-pillars__grid[data-variant='detailed'] {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+}
+
+.pvs-pillar {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: var(--dt-spacings-size-12);
+  overflow: hidden;
+  padding: var(--dt-spacings-size-20) var(--dt-spacings-size-20) var(--dt-spacings-size-16);
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  border-radius: var(--dt-borders-radius-container-default);
+  /* 3.6.3 (v6): flat, no wash in the family's colour. */
+  background: var(--dt-colors-background-surface-default);
+}
+
+.pvs-pillar__edge,
+.pvs-pillarboard__edge {
+  /* 3.6.3 (v6): flat cards, no accent edge. */
+  display: none;
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--pvs-sp-from), var(--pvs-sp-to));
+  pointer-events: none;
+}
+
+.pvs-pillar__head {
+  display: flex;
+  align-items: center;
+  gap: var(--dt-spacings-size-12);
+}
+
+.pvs-pillar__emblem {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: var(--dt-colors-text-neutral-on-accent-default);
+  background: linear-gradient(135deg, var(--pvs-sp-from), var(--pvs-sp-to));
+  box-shadow: 0 4px 14px -4px color-mix(in srgb, var(--pvs-sp-to) 70%, transparent);
+}
+
+.pvs-pillar__title {
+  margin: 0;
+}
+
+.pvs-pillar__score {
+  display: flex;
+  align-items: center;
+  gap: var(--dt-spacings-size-12);
+}
+
+.pvs-pillar__proven {
+  font-weight: var(--dt-typography-text-base-emphasized-weight);
+}
+
+.pvs-pillar__dots {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--dt-spacings-size-4);
+}
+
+.pvs-pillar__dot {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--dt-colors-border-neutral-default);
+  border-radius: 50%;
+  background: transparent;
+}
+
+.pvs-pillar__dot[data-status='evidenced'] {
+  border-color: var(--dt-colors-charts-status-ideal-default);
+  background: var(--dt-colors-charts-status-ideal-default);
+}
+
+.pvs-pillar__dot[data-status='partial'] {
+  border-color: var(--dt-colors-border-primary-default);
+  background: linear-gradient(90deg, var(--dt-colors-border-primary-default) 50%, transparent 50%);
+}
+
+.pvs-pillar__dot[data-status='measuring'] {
+  border-style: dashed;
+}
+
+.pvs-pillar__proof {
+  margin: 0;
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-pillar__proof strong {
+  color: var(--dt-colors-text-neutral-default);
+}
+
+.pvs-pillar__goals {
+  display: grid;
+  gap: var(--dt-spacings-size-6);
+  padding-top: var(--dt-spacings-size-12);
+  border-top: 1px solid var(--dt-colors-border-neutral-default);
+}
+
+.pvs-pillar__goal-list,
+.pvs-pillar__points {
+  display: grid;
+  gap: var(--dt-spacings-size-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pvs-pillar__goal,
+.pvs-pillar__point {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: var(--dt-spacings-size-6);
+  align-items: start;
+}
+
+.pvs-pillar__goal-icon {
+  display: grid;
+  place-items: center;
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-pillar__goal[data-tone='met'] .pvs-pillar__goal-icon {
+  color: var(--dt-colors-text-success-default);
+}
+
+.pvs-pillar__goal[data-tone='not-met'] .pvs-pillar__goal-icon {
+  color: var(--dt-colors-text-critical-default);
+}
+
+.pvs-pillar__points {
+  padding-top: var(--dt-spacings-size-12);
+  border-top: 1px dashed var(--dt-colors-border-neutral-default);
+}
+
+.pvs-pillar__point .pvs-pillar__dot {
+  margin-top: 4px;
+}
+
+.pvs-pillar__point-body {
+  display: grid;
+  gap: var(--dt-spacings-size-2);
+}
+
+/* Settings → PoC plan: the board where pillars are put in scope and get their objectives. */
+.pvs-pillarboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+  gap: var(--pvs-gap-group);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pvs-pillarboard__card {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: var(--dt-spacings-size-12);
+  overflow: hidden;
+  padding: var(--dt-spacings-size-20) var(--dt-spacings-size-16) var(--dt-spacings-size-16);
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  border-radius: var(--dt-borders-radius-container-default);
+  background: var(--dt-colors-background-surface-default);
+}
+
+.pvs-pillarboard__card[data-on='true'] {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--pvs-sp-from) 10%, var(--dt-colors-background-surface-default)),
+    var(--dt-colors-background-surface-default) 60%
+  );
+}
+
+.pvs-pillarboard__card[data-on='false'] .pvs-pillarboard__edge,
+.pvs-pillarboard__card[data-on='false'] .pvs-pillar__emblem {
+  opacity: 0.45;
+}
+
+.pvs-pillarboard__head {
+  display: flex;
+  align-items: center;
+  gap: var(--dt-spacings-size-12);
+}
+
+.pvs-pillarboard__title {
+  font-weight: var(--dt-typography-text-base-emphasized-weight);
+}
+
+.pvs-pillarboard__goals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dt-spacings-size-4);
+}
+
+/* A pillar named on an objective: its family as a small tag. */
+.pvs-pillartag {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px var(--dt-spacings-size-8);
+  border: 1px solid color-mix(in srgb, var(--pvs-sp-to) 55%, transparent);
+  border-radius: 999px;
+  color: var(--dt-colors-text-neutral-default);
+  background: color-mix(in srgb, var(--pvs-sp-from) 14%, var(--dt-colors-background-surface-default));
+  font-size: var(--dt-typography-text-small-default-size);
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------ 3.2.6: the milestone journey */
+
+/* Seven milestones on one rail: an emblem each, in the families of the PoC's reading order. */
+.pvs-journey {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  row-gap: var(--pvs-gap-section);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pvs-journey__step {
+  display: grid;
+  align-content: start;
+  gap: var(--dt-spacings-size-12);
+}
+
+.pvs-journey__marker {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  height: 48px;
+}
+
+.pvs-journey__rail {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 3px;
+  margin-top: -1.5px;
+  background: linear-gradient(90deg, var(--pvs-sp-from), var(--pvs-sp-to));
+  opacity: 0.55;
+}
+
+.pvs-journey__step:first-child .pvs-journey__rail {
+  left: 50%;
+}
+
+.pvs-journey__step:last-child .pvs-journey__rail {
+  right: 50%;
+}
+
+.pvs-journey__emblem {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 3px solid var(--dt-colors-background-surface-default);
+  border-radius: 50%;
+  color: var(--dt-colors-text-neutral-on-accent-default);
+  background: linear-gradient(135deg, var(--pvs-sp-from), var(--pvs-sp-to));
+  box-shadow: 0 6px 16px -6px color-mix(in srgb, var(--pvs-sp-to) 75%, transparent);
+}
+
+.pvs-journey__step[data-state='missing'] .pvs-journey__emblem {
+  color: var(--dt-colors-text-neutral-subdued);
+  background: var(--dt-colors-background-surface-default);
+  border: 2px dashed var(--dt-colors-border-neutral-default);
+  box-shadow: none;
+}
+
+.pvs-journey__card {
+  display: grid;
+  justify-items: center;
+  gap: var(--dt-spacings-size-6);
+  padding: 0 var(--dt-spacings-size-12);
+  text-align: center;
+}
+
+.pvs-journey__kicker {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--dt-spacings-size-4);
+}
+
+.pvs-journey__kind {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dt-spacings-size-2);
+}
+
+.pvs-journey__kind svg {
+  width: 14px;
+  height: 14px;
+}
+
+.pvs-journey__title {
+  margin: 0;
+}
+
+/* A large figure in a narrow card: the number never breaks at its thousands separator. */
+.pvs-journey__card .pvs-figure,
+.pvs-chain__link .pvs-figure {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--dt-spacings-size-6);
+}
+
+.pvs-journey__card .pvs-figure {
+  justify-content: center;
+}
+
+.pvs-journey__card .pvs-figure__value,
+.pvs-chain__link .pvs-figure__value {
+  white-space: nowrap;
+}
+
+.pvs-journey__impact {
+  font-weight: var(--dt-typography-text-base-emphasized-weight);
+  color: var(--dt-colors-text-neutral-default);
+}
+
+/* ------------------------------------------------------------------ 3.2.6: digital experience */
+
+/* An application's spotlight: its vitals beside its page load. */
+.pvs-dx-spot {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--pvs-gap-section);
+  align-items: start;
+}
+
+@container pvs-page (max-width: 960px) {
+  .pvs-dx-spot {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Page load on one time axis: server, DOM, load event — then a user action. */
+.pvs-loadline {
+  display: grid;
+  gap: var(--dt-spacings-size-12);
+  margin: 0;
+}
+
+.pvs-loadline__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 8.5rem) minmax(0, 1fr) minmax(3.5rem, auto);
+  gap: var(--dt-spacings-size-8) var(--dt-spacings-size-12);
+  align-items: center;
+}
+
+.pvs-loadline__name {
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: var(--dt-typography-text-small-default-size);
+}
+
+.pvs-loadline__track {
+  position: relative;
+  height: 18px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--dt-colors-border-neutral-default) 45%, transparent);
+}
+
+.pvs-loadline__seg {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 9px;
+}
+
+.pvs-loadline__seg[data-seg='server'],
+.pvs-loadline__legend [data-seg='server'] .pvs-loadline__swatch {
+  background: var(--dt-colors-charts-sequential-blue-turquoise-color-05-default);
+}
+
+.pvs-loadline__seg[data-seg='dom'],
+.pvs-loadline__legend [data-seg='dom'] .pvs-loadline__swatch {
+  background: var(--dt-colors-charts-sequential-turquoise-color-04-default);
+}
+
+.pvs-loadline__seg[data-seg='load'],
+.pvs-loadline__legend [data-seg='load'] .pvs-loadline__swatch {
+  background: var(--dt-colors-charts-sequential-moss-color-04-default);
+}
+
+.pvs-loadline__seg[data-seg='action'],
+.pvs-loadline__legend [data-seg='action'] .pvs-loadline__swatch {
+  background: linear-gradient(90deg, var(--dt-colors-charts-sequential-orange-color-03-default), var(--dt-colors-charts-sequential-orange-color-05-default));
+}
+
+.pvs-loadline__value {
+  font-variant-numeric: proportional-nums; /* 3.4.16: a value standing alone (DT Flow's tabular point read "6 .9") */
+  font-weight: var(--dt-typography-text-base-emphasized-weight);
+  text-align: right;
+}
+
+.pvs-loadline__axis {
+  position: relative;
+  height: 16px;
+  border-top: 1px solid var(--dt-colors-border-neutral-default);
+}
+
+.pvs-loadline__tick {
+  position: absolute;
+  top: 2px;
+  transform: translateX(-50%);
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: var(--dt-typography-text-small-default-size);
+  white-space: nowrap;
+}
+
+.pvs-loadline__tick:first-child {
+  transform: none;
+}
+
+.pvs-loadline__tick:last-child {
+  transform: translateX(-100%);
+}
+
+.pvs-loadline__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dt-spacings-size-8) var(--dt-spacings-size-16);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pvs-loadline__legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dt-spacings-size-6);
+}
+
+.pvs-loadline__swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.pvs-loadline__rating {
+  padding: 0 var(--dt-spacings-size-6);
+  border-radius: 999px;
+  font-size: var(--dt-typography-text-small-default-size);
+  color: var(--dt-colors-text-neutral-default);
+  background: color-mix(in srgb, var(--dt-colors-charts-status-ideal-default) 20%, transparent);
+}
+
+.pvs-loadline__rating[data-rating='needs-improvement'] {
+  background: color-mix(in srgb, var(--dt-colors-charts-status-warning-default) 25%, transparent);
+}
+
+.pvs-loadline__rating[data-rating='poor'] {
+  background: color-mix(in srgb, var(--dt-colors-charts-status-critical-default) 22%, transparent);
+}
+
+/* Error rates on one absolute scale, the bands behind the bars. */
+.pvs-errmeter {
+  display: grid;
+  gap: var(--dt-spacings-size-8);
+}
+
+.pvs-errmeter__rows {
+  display: grid;
+  gap: var(--dt-spacings-size-12);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pvs-errmeter__row,
+.pvs-errmeter__axis {
+  display: grid;
+  grid-template-columns: minmax(0, 14rem) minmax(0, 1fr) minmax(9rem, 16rem);
+  gap: var(--dt-spacings-size-12);
+  align-items: center;
+}
+
+.pvs-errmeter__track {
+  position: relative;
+  height: 14px;
+  overflow: hidden;
+  border-radius: 7px;
+}
+
+.pvs-errmeter__zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  opacity: 0.22;
+}
+
+.pvs-errmeter__zone[data-zone='good'] {
+  background: var(--dt-colors-charts-status-ideal-default);
+}
+
+.pvs-errmeter__zone[data-zone='attention'] {
+  background: var(--dt-colors-charts-status-warning-default);
+}
+
+.pvs-errmeter__zone[data-zone='high'] {
+  background: var(--dt-colors-charts-status-critical-default);
+}
+
+.pvs-errmeter__fill {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 0;
+  border-radius: 4px;
+  background: var(--dt-colors-charts-status-ideal-default);
+}
+
+.pvs-errmeter__row[data-band='attention'] .pvs-errmeter__fill {
+  background: var(--dt-colors-charts-status-warning-default);
+}
+
+.pvs-errmeter__row[data-band='high'] .pvs-errmeter__fill {
+  background: var(--dt-colors-charts-status-critical-default);
+}
+
+.pvs-errmeter__value {
+  font-variant-numeric: proportional-nums; /* 3.4.16: a value standing alone (DT Flow's tabular point read "6 .9") */
+}
+
+.pvs-errmeter__scale {
+  position: relative;
+  height: 16px;
+  border-top: 1px solid var(--dt-colors-border-neutral-default);
+}
+
+.pvs-errmeter__tick {
+  position: absolute;
+  top: 2px;
+  transform: translateX(-50%);
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: var(--dt-typography-text-small-default-size);
+}
+
+.pvs-errmeter__tick:first-child {
+  transform: none;
+}
+
+.pvs-errmeter__tick:last-child {
+  transform: translateX(-100%);
+}
+
+@container pvs-page (max-width: 720px) {
+  .pvs-errmeter__row,
+  .pvs-errmeter__axis {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pvs-errmeter__axis > span {
+    display: none;
+  }
+
+  .pvs-loadline__grid {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .pvs-loadline__track,
+  .pvs-loadline__axis {
+    grid-column: 1 / -1;
+  }
+
+  .pvs-loadline__grid > span:empty {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------------ 3.2.6: competitor overlap as consolidation */
+
+/* Today's agents and tools → one OneAgent, one platform. */
+.pvs-consol {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: var(--pvs-gap-group);
+  align-items: stretch;
+}
+
+@container pvs-page (max-width: 720px) {
+  .pvs-consol {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pvs-consol__arrow {
+    transform: rotate(90deg);
+  }
+}
+
+.pvs-consol__side {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: var(--dt-spacings-size-8);
+  overflow: hidden;
+  padding: var(--dt-spacings-size-20);
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  border-radius: var(--dt-borders-radius-container-default);
+  background: var(--dt-colors-background-surface-default);
+}
+
+/* 3.2.7: today's sprawl reads as the problem it is — a soft red ground, red-marked vendor marks. */
+.pvs-consol__side[data-side='today'] {
+  border-color: color-mix(in srgb, var(--dt-colors-charts-status-critical-default) 45%, transparent);
+  border-style: dashed;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--dt-colors-charts-status-critical-default) 12%, var(--dt-colors-background-surface-default)),
+    var(--dt-colors-background-surface-default) 75%
+  );
+}
+
+.pvs-consol__side[data-side='today'] .pvs-consol__mark {
+  position: relative;
+  border-color: color-mix(in srgb, var(--dt-colors-charts-status-critical-default) 55%, transparent);
+  background: color-mix(in srgb, var(--dt-colors-charts-status-critical-default) 14%, var(--dt-colors-background-surface-default));
+}
+
+/* A small red "!" on each third-party mark. */
+.pvs-consol__side[data-side='today'] .pvs-consol__mark::after {
+  content: '!';
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  display: grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  color: var(--dt-colors-text-neutral-on-accent-default);
+  background: var(--dt-colors-charts-status-critical-default);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.pvs-consol__side[data-side='today'] .pvs-consol__figure {
+  color: var(--dt-colors-text-critical-default);
+}
+
+.pvs-consol__side[data-side='dynatrace'] {
+  border-color: color-mix(in srgb, var(--pvs-sp-to) 60%, transparent);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--pvs-sp-from) 16%, var(--dt-colors-background-surface-default)),
+    var(--dt-colors-background-surface-default) 70%
+  );
+  box-shadow: 0 10px 28px -18px color-mix(in srgb, var(--pvs-sp-to) 80%, transparent);
+}
+
+.pvs-consol__marks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dt-spacings-size-6);
+}
+
+.pvs-consol__mark {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  border-radius: 50%;
+  background: var(--dt-colors-background-surface-default);
+}
+
+.pvs-consol__mark[data-dt='true'] {
+  width: 44px;
+  height: 44px;
+  border: none;
+  color: var(--dt-colors-text-neutral-on-accent-default);
+  background: linear-gradient(135deg, var(--pvs-sp-from), var(--pvs-sp-to));
+}
+
+.pvs-consol__figure {
+  font-size: var(--dt-typography-heading-level-5-size);
+  font-weight: var(--dt-typography-heading-level-5-weight);
+  line-height: var(--dt-typography-heading-level-5-line-height);
+}
+
+.pvs-consol__arrow,
+.pvs-compare__arrow {
+  display: grid;
+  place-items: center;
+  align-self: center;
+  justify-self: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: var(--dt-colors-text-neutral-on-accent-default);
+  background: linear-gradient(135deg, var(--dt-colors-charts-sequential-blue-turquoise-color-03-default), var(--dt-colors-charts-sequential-moss-color-05-default));
+}
+
+/* The overlap's cost beside the unified platform. */
+.pvs-compare {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: var(--pvs-gap-group);
+  align-items: stretch;
+}
+
+@container pvs-page (max-width: 720px) {
+  .pvs-compare {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pvs-compare__arrow {
+    transform: rotate(90deg);
+  }
+}
+
+/* 3.2.7: the co-installed side on a soft red ground, as the cost it describes. */
+.pvs-panel.pvs-compare__side[data-side='risk'] {
+  border-color: color-mix(in srgb, var(--dt-colors-charts-status-critical-default) 45%, transparent);
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--dt-colors-charts-status-critical-default) 11%, var(--dt-colors-background-surface-default)),
+    var(--dt-colors-background-surface-default) 75%
+  );
+}
+
+.pvs-panel.pvs-compare__side[data-side='dynatrace'] {
+  border-color: color-mix(in srgb, var(--dt-colors-charts-status-ideal-default) 55%, transparent);
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--dt-colors-charts-status-ideal-default) 14%, var(--dt-colors-background-surface-default)),
+    var(--dt-colors-background-surface-default) 75%
+  );
+}
+
+.pvs-compare__badge {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+.pvs-compare__badge[data-side='risk'] {
+  color: var(--dt-colors-charts-status-critical-default);
+  background: color-mix(in srgb, var(--dt-colors-charts-status-critical-default) 14%, transparent);
+}
+
+.pvs-compare__badge[data-side='dynatrace'] {
+  color: var(--dt-colors-text-neutral-on-accent-default);
+  background: linear-gradient(135deg, var(--dt-colors-charts-sequential-blue-turquoise-color-03-default), var(--dt-colors-charts-sequential-moss-color-05-default));
+}
+
+.pvs-b-points[data-side='risk'] .pvs-b-point__icon {
+  color: var(--dt-colors-charts-status-critical-default);
+}
+
+.pvs-b-points[data-side='dynatrace'] .pvs-b-point__icon {
+  color: var(--dt-colors-text-success-default);
+}
+
+/* The recommendation as a plan under the Dynatrace signet. */
+.pvs-panel.pvs-reco {
+  position: relative;
+  overflow: hidden;
+  border-color: color-mix(in srgb, var(--pvs-sp-to) 55%, transparent);
+  background: linear-gradient(
+    120deg,
+    color-mix(in srgb, var(--pvs-sp-from) 12%, var(--dt-colors-background-surface-default)),
+    var(--dt-colors-background-surface-default) 55%
+  );
+}
+
+.pvs-reco__grid {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--pvs-gap-section);
+  align-items: start;
+}
+
+@container pvs-page (max-width: 720px) {
+  .pvs-reco__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.pvs-reco__emblem {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  color: var(--dt-colors-text-neutral-on-accent-default);
+  background: linear-gradient(135deg, var(--pvs-sp-from), var(--pvs-sp-to));
+  box-shadow: 0 10px 24px -12px color-mix(in srgb, var(--pvs-sp-to) 85%, transparent);
+}
+
+.pvs-reco__emblem svg {
+  width: 36px;
+  height: 36px;
+}
+
+.pvs-reco__lead {
+  margin: 0;
+  font-size: var(--dt-typography-heading-level-5-size);
+  line-height: var(--dt-typography-heading-level-5-line-height);
+  font-weight: var(--dt-typography-heading-level-5-weight);
+}
+
+.pvs-reco__steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: var(--dt-spacings-size-12);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pvs-reco__step {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: var(--dt-spacings-size-8);
+  align-items: start;
+  padding: var(--dt-spacings-size-12);
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  border-radius: var(--dt-borders-radius-container-default);
+  background: var(--dt-colors-background-surface-default);
+}
+
+.pvs-reco__index {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: var(--dt-colors-text-neutral-on-accent-default);
+  background: linear-gradient(135deg, var(--pvs-sp-from), var(--pvs-sp-to));
+  font-weight: var(--dt-typography-heading-level-6-weight);
+}
+
+/* ------------------------------------------------------------------ 3.2.6: value & ROI */
+
+/* The value chain: discover → detect → resolve → automate (→ consolidate), joined by arrows. */
+.pvs-chain {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
+  gap: var(--pvs-gap-group);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pvs-chain__link {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: var(--dt-spacings-size-8);
+  padding: var(--dt-spacings-size-16);
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  border-radius: var(--dt-borders-radius-container-default);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--pvs-sp-from) 10%, var(--dt-colors-background-surface-default)),
+    var(--dt-colors-background-surface-default) 65%
+  );
+}
+
+/* The arrow to the next link, outside the card, in the gap. */
+.pvs-chain__link:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 34px;
+  right: calc(-1 * var(--pvs-gap-group) + 2px);
+  width: calc(var(--pvs-gap-group) - 4px);
+  height: 2px;
+  background: linear-gradient(90deg, var(--pvs-sp-to), transparent);
+}
+
+.pvs-chain__link[data-missing='true'] {
+  border-style: dashed;
+  background: var(--dt-colors-background-surface-default);
+}
+
+.pvs-chain__head {
+  display: flex;
+  align-items: center;
+  gap: var(--dt-spacings-size-8);
+}
+
+.pvs-chain__emblem {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: var(--dt-colors-text-neutral-on-accent-default);
+  background: linear-gradient(135deg, var(--pvs-sp-from), var(--pvs-sp-to));
+}
+
+.pvs-chain__step {
+  margin: 0;
+}
+
+/* The MTTR reference: presets, then any value. */
+.pvs-mttr-ref {
+  display: grid;
+  gap: var(--dt-spacings-size-8);
+  justify-items: start;
+}
+
+/* Where the problem hours went (3.2.7): problems × average duration per category, on one scale. */
+.pvs-hours {
+  display: grid;
+  gap: var(--dt-spacings-size-12);
+}
+
+.pvs-hours__total {
+  font-size: var(--dt-typography-heading-level-5-size);
+  font-weight: var(--dt-typography-heading-level-5-weight);
+  line-height: var(--dt-typography-heading-level-5-line-height);
+}
+
+.pvs-hours__rows {
+  display: grid;
+  gap: var(--dt-spacings-size-12);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pvs-hours__row {
+  display: grid;
+  gap: var(--dt-spacings-size-4);
+  padding: var(--dt-spacings-size-8) var(--dt-spacings-size-12);
+  border-radius: var(--dt-borders-radius-container-default);
+}
+
+.pvs-hours__row[data-top='true'] {
+  background: color-mix(in srgb, var(--pvs-sp-from) 10%, transparent);
+}
+
+.pvs-hours__head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--dt-spacings-size-8);
+  align-items: baseline;
+}
+
+.pvs-hours__name {
+  font-weight: var(--dt-typography-text-base-emphasized-weight);
+}
+
+.pvs-hours__value {
+  font-variant-numeric: tabular-nums;
+}
+
+.pvs-hours__track {
+  height: 12px;
+  overflow: hidden;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--dt-colors-border-neutral-default) 45%, transparent);
+}
+
+.pvs-hours__fill {
+  display: block;
+  height: 100%;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--pvs-sp-from), var(--pvs-sp-to));
+}
+
+.pvs-hours__action {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--dt-spacings-size-8);
+  padding: var(--dt-spacings-size-12) var(--dt-spacings-size-16);
+  border-left: 4px solid var(--dt-colors-charts-sequential-pink-purple-color-05-default);
+  border-radius: var(--dt-borders-radius-container-default);
+  background: color-mix(in srgb, var(--dt-colors-charts-sequential-pink-purple-color-03-default) 10%, var(--dt-colors-background-surface-default));
+}
+
+/* ------------------------------------------------------------------ 3.2.6: the general report's figures */
+
+/* Every figure of the deliverable as a card in the app's skin: edge, wash, painted numeral. */
+.pvs-rfig {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: var(--dt-spacings-size-4);
+  overflow: hidden;
+  padding: var(--dt-spacings-size-16) var(--dt-spacings-size-16) var(--dt-spacings-size-12);
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  border-radius: var(--dt-borders-radius-container-default);
+  /* 3.6.3 (v6): flat, no wash in the family's colour. */
+  background: var(--dt-colors-background-surface-default);
+}
+
+.pvs-rfig__edge {
+  /* 3.6.3 (v6): flat, no accent edge. */
+  display: none;
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--pvs-sp-from), var(--pvs-sp-to));
+}
+
+.pvs-rfig[data-toned='true'],
+.pvs-rfig[data-missing='true'] {
+  background: var(--dt-colors-background-surface-default);
+}
+
+.pvs-rfig[data-missing='true'] {
+  border-style: dashed;
+}
+
+.pvs-rfig[data-missing='true'] .pvs-rfig__edge {
+  display: none;
+}
+
+/* ------------------------------------------------------------------ 3.2.7: executive incident spotlight */
+
+.pvs-spotlight__facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  gap: var(--pvs-gap-group);
+}
+
+.pvs-spotlight__root {
+  font-size: var(--dt-typography-heading-level-5-size);
+  font-weight: var(--dt-typography-heading-level-5-weight);
+  line-height: var(--dt-typography-heading-level-5-line-height);
+  overflow-wrap: anywhere;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pvs-vault__seg {
+    transition: none;
+  }
+
+  .pvs-vault[data-state='wrong'] {
+    animation: none;
+  }
+
+  .pvs-gauge__arc,
+  .pvs-gauge__knob {
+    animation: none;
+  }
+
+  .pvs-donut__arc,
+  .pvs-tgauge__value {
+    animation: none;
+  }
+
+  /* The links stay; only the movement along them stops. */
+  .pvs-stackmap__flow {
+    animation: none;
+    stroke-dasharray: none;
+    stroke-opacity: 0.25;
+  }
+
+  /* Already still: the capture stage stops every motion on its own. */
+  .pvs-capture-stage * {
+    animation: none;
+    transition: none;
+  }
+}
+
+/* Print draws every Spectrum surface flat: gradient ink prints as nothing, and light costs toner. */
+@media print {
+  /* 3.5.1: a printed page is photographed before an entrance animation ends — the donut's slices (a fade-in) printed
+     as an empty grey ring on the Coverage PDF since 3.4.x. On paper every mark is drawn at once. */
+  .pvs-donut__arc,
+  .pvs-tgauge__value,
+  .pvs-gauge__knob {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+@media print {
+  .pvs-capture-stage {
+    display: none !important;
+  }
+
+  .pvs-gate,
+  .pvs-gate__title,
+  .pvs-panel.pvs-spec-hero,
+  .pvs-panel.pvs-spec-hero .pvs-spec-hero__title,
+  .pvs-panel.pvs-kpi,
+  .pvs-kpi__edge,
+  .pvs-spec-band__edge,
+  .pvs-figure[data-ink='spectrum'] .pvs-figure__value {
+    background: none !important;
+    -webkit-text-fill-color: currentColor !important;
+  }
+
+  .pvs-vault__seg,
+  .pvs-gauge__arc,
+  .pvs-gauge__knob,
+  .pvs-radar__area {
+    filter: none !important;
+  }
+
+  .pvs-inv__icon,
+  .pvs-bars[data-spectrum] .pvs-bars__fill,
+  .pvs-area__peak,
+  .pvs-steps__index {
+    box-shadow: none !important;
+  }
+
+  /* A solid fill stays under every painted bar and segment: only the paint goes. */
+  .pvs-bars[data-spectrum] .pvs-bars__fill,
+  .pvs-share__seg,
+  .pvs-criteria__fill,
+  .pvs-track__fill {
+    background-image: none !important;
+  }
+
+  .pvs-area__line,
+  .pvs-tgauge__value,
+  .pvs-stackmap__node[data-emphasis='true'] .pvs-stackmap__box {
+    filter: none !important;
+  }
+
+  .pvs-area__cursor,
+  .pvs-area__dot,
+  .pvs-area__tip {
+    display: none;
+  }
+
+  .pvs-gauge__arc,
+  .pvs-gauge__knob,
+  .pvs-stackmap__flow {
+    animation: none !important;
+  }
+
+  .pvs-stackmap__flow {
+    display: none;
+  }
+
+  /* A step number is white on the paint on screen; on paper it is ink in a ring. */
+  .pvs-steps__index {
+    background: none !important;
+    color: var(--dt-colors-text-neutral-default) !important;
+    border: 1px solid var(--dt-colors-border-neutral-default);
+  }
+}
+
+/* ------------------------------------------------------------------ 3.3.7: cockpit glow */
+
+/* The Assist card: the one panel of the cockpit lit from within, like the reference's AI card. */
+.pvs-assist {
+  background:
+    radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--dt-colors-charts-categorical-color-04-default) 16%, transparent), transparent 60%),
+    radial-gradient(100% 80% at 100% 100%, color-mix(in srgb, var(--dt-colors-charts-categorical-color-01-default) 12%, transparent), transparent 55%),
+    var(--dt-colors-background-surface-default);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--dt-colors-charts-categorical-color-04-default) 35%, transparent);
+}
+
+.pvs-assist__fact {
+  background: color-mix(in srgb, var(--dt-colors-charts-categorical-color-01-default) 8%, var(--dt-colors-background-surface-default));
+}
+
+@media print {
+  .pvs-assist,
+  .pvs-assist__fact {
+    background: none;
+    box-shadow: none;
+  }
+}
+
+/* ------------------------------------------------------------------ 3.3.8: KPI meter */
+
+/* The measured split of a KPI without a time series: same slot and height as the sparkline. */
+.pvs-kpi__meter {
+  display: flex;
+  gap: 2px;
+  height: 10px;
+  margin-top: var(--dt-spacings-size-12);
+  overflow: hidden;
+  border-radius: 999px;
+}
+
+.pvs-kpi__meter-seg {
+  min-width: 3px;
+  flex-basis: 0;
+  background: var(--pvs-sp-to);
+}
+
+.pvs-kpi__meter-seg[data-step='0'] { background: var(--pvs-sp-to); }
+.pvs-kpi__meter-seg[data-step='1'] { background: color-mix(in srgb, var(--pvs-sp-to) 70%, var(--pvs-sp-from)); }
+.pvs-kpi__meter-seg[data-step='2'] { background: color-mix(in srgb, var(--pvs-sp-from) 75%, transparent); }
+.pvs-kpi__meter-seg[data-step='3'] { background: color-mix(in srgb, var(--pvs-sp-from) 40%, transparent); }
+.pvs-kpi__meter-seg[data-tone='critical'] { background: var(--dt-colors-charts-status-critical-default); }
+.pvs-kpi__meter-seg[data-tone='warning'] { background: var(--dt-colors-charts-status-warning-default); }
+.pvs-kpi__meter-seg[data-tone='good'] { background: var(--dt-colors-charts-status-good-default); }
+.pvs-kpi__meter-seg[data-tone='ideal'] { background: var(--dt-colors-charts-status-ideal-default); }
+.pvs-kpi__meter-seg[data-tone='muted'] { background: color-mix(in srgb, var(--dt-colors-border-neutral-default) 70%, transparent); }
+
+/* ------------------------------------------------------------------ 3.3.8: compact stack map */
+
+/* Pills on one line, never drawn larger than their own size; centred in a wide panel. */
+.pvs-stackmap[data-variant='compact'] .pvs-stackmap__svg {
+  margin-inline: auto;
+}
+
+.pvs-stackmap[data-variant='compact'] .pvs-stackmap__column {
+  font-size: 12px;
+}
+
+.pvs-stackmap[data-variant='compact'] .pvs-stackmap__name {
+  fill: var(--dt-colors-text-neutral-default);
+  font-size: 13px;
+}
+
+.pvs-stackmap[data-variant='compact'] .pvs-stackmap__count {
+  font-size: 16px;
+}
+
+/* ------------------------------------------------------------------ 3.3.9: compact flow map */
+
+/* The RCA trail, the frontend → backend flow and the call map: 48 px nodes, never upscaled. */
+.pvs-flowmap[data-variant='compact'] .pvs-stackmap__svg {
+  margin-inline: auto;
+}
+
+.pvs-flowmap[data-variant='compact'] .pvs-stackmap__column {
+  font-size: 12px;
+}
+
+.pvs-flowmap[data-variant='compact'] .pvs-stackmap__name {
+  font-size: 12px;
+}
+
+.pvs-flowmap[data-variant='compact'] .pvs-stackmap__count {
+  font-size: 16px;
+}
+
+.pvs-flowmap[data-variant='compact'] .pvs-stackmap__unit {
+  font-size: 12px;
+}
+
+/* ------------------------------------------------------------------ 3.3.9: compact inventory tile */
+
+/* The icon on the name's line; the row fits seven tiles without breaking a word. */
+.pvs-inv[data-compact='true'] .pvs-inv__head {
+  display: flex;
+  align-items: center;
+  gap: var(--dt-spacings-size-8);
+  min-width: 0;
+}
+
+.pvs-inv[data-compact='true'] .pvs-inv__icon {
+  width: 28px;
+  height: 28px;
+}
+
+.pvs-inv[data-compact='true'] .pvs-label {
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: manual;
+}
+
+/* ---------------------------------------------------------------- 3.4.7: the maturity spectrum and rings
+ * Five steps on one continuous spectrum: each reached segment shows its slice of the same gradient (the
+ * background is five segments wide and shifted by the step's index), steps ahead stay neutral. */
+.pvs-mat-spectrum__step[data-position='reached'] .pvs-mat-spectrum__bar,
+.pvs-mat-spectrum__step[data-position='current'] .pvs-mat-spectrum__bar {
+  background-image: linear-gradient(90deg, var(--pvs-spec-a), var(--pvs-spec-b), var(--pvs-spec-c));
+  background-size: 500% 100%;
+  background-position: calc(var(--pvs-i, 0) * 25%) 0;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.pvs-mat-spectrum__step[data-position='current'] .pvs-mat-spectrum__bar {
+  box-shadow: 0 0 0 2px var(--dt-colors-background-surface-default), 0 0 0 4px var(--pvs-spec-b);
+}
+
+.pvs-mat-rings__arc {
+  fill: none;
+  stroke-linecap: round;
+}
+
+.pvs-mat__dot,
+.pvs-mat__ptag::before {
+  background-image: linear-gradient(135deg, var(--pvs-sp-from), var(--pvs-sp-to));
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+/* ------------------------------------------------------------------ 3.5.2: life in the Strato anatomy
+   (owner's validation of 3.5.1: "os números ficaram monótonos, sem vida" and "manter o degradê com a brand da
+   Dynatrace no cabeçalho"). The platform's components stay; the app adds colour where the platform's own apps do —
+   an accent per card, a coloured icon badge, a brand gradient behind the Overview's header. Tokens only. */
+
+.pvs-skpi-row > .pvs-skpi {
+  --pvs-skpi-accent: var(--dt-colors-charts-categorical-vivid-color-01-default);
+  position: relative;
+  overflow: hidden;
+}
+
+.pvs-skpi[data-accent] {
+  position: relative;
+  overflow: hidden;
+}
+
+.pvs-skpi-row > .pvs-skpi:nth-child(6n + 2) {
+  --pvs-skpi-accent: var(--dt-colors-charts-categorical-vivid-color-02-default);
+}
+
+.pvs-skpi-row > .pvs-skpi:nth-child(6n + 3) {
+  --pvs-skpi-accent: var(--dt-colors-charts-categorical-vivid-color-03-default);
+}
+
+.pvs-skpi-row > .pvs-skpi:nth-child(6n + 4) {
+  --pvs-skpi-accent: var(--dt-colors-charts-categorical-vivid-color-04-default);
+}
+
+.pvs-skpi-row > .pvs-skpi:nth-child(6n + 5) {
+  --pvs-skpi-accent: var(--dt-colors-charts-categorical-vivid-color-05-default);
+}
+
+.pvs-skpi-row > .pvs-skpi:nth-child(6n + 6) {
+  --pvs-skpi-accent: var(--dt-colors-charts-categorical-vivid-color-06-default);
+}
+
+/* A thin accent along the top of the card, fading out, and a soft wash of the same colour behind the number. */
+.pvs-skpi-row > .pvs-skpi::after,
+.pvs-skpi[data-accent]::after {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--pvs-skpi-accent), color-mix(in srgb, var(--pvs-skpi-accent) 0%, transparent));
+  pointer-events: none;
+}
+
+.pvs-skpi-row > .pvs-skpi:not([data-missing='true']),
+.pvs-skpi[data-accent]:not([data-missing='true']) {
+  background-image: radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--pvs-skpi-accent) 9%, transparent), transparent 60%);
+}
+
+.pvs-skpi .pvs-skpi__badge {
+  color: var(--pvs-skpi-accent, var(--dt-colors-charts-categorical-vivid-color-01-default));
+  background: color-mix(in srgb, var(--pvs-skpi-accent, var(--dt-colors-charts-categorical-vivid-color-01-default)) 16%, transparent);
+}
+
+/* The Overview's header over the Dynatrace brand: two soft light sources (the platform's blue and purple) on the
+   surface, in both themes. 3.7.6 (the owner): the banner's thin brand strip along the top too, and the Executive summary's
+   banner (`.pvs-spec-hero[data-brand='true']`) on the same background. */
+.pvs-sheader.pvs-panel,
+.pvs-panel.pvs-spec-hero[data-brand='true'] {
+  background-color: var(--dt-colors-background-surface-default);
+  background-image:
+    linear-gradient(90deg, var(--pvs-spec-a), var(--pvs-spec-c)),
+    radial-gradient(90% 140% at 0% 0%, color-mix(in srgb, var(--dt-colors-charts-categorical-vivid-color-03-default) 24%, transparent), transparent 60%),
+    radial-gradient(80% 160% at 100% 100%, color-mix(in srgb, var(--dt-colors-charts-categorical-vivid-color-01-default) 22%, transparent), transparent 62%),
+    linear-gradient(115deg, color-mix(in srgb, var(--dt-colors-background-container-primary-accent) 14%, transparent), transparent 70%);
+  background-position: top, 0 0, 0 0, 0 0;
+  background-size: 100% 3px, auto, auto, auto;
+  background-repeat: no-repeat;
+  border-color: color-mix(in srgb, var(--dt-colors-border-primary-accent) 40%, var(--dt-colors-border-neutral-default));
+}
+
+@media print {
+  .pvs-skpi-row > .pvs-skpi,
+  .pvs-skpi[data-accent],
+  .pvs-sheader.pvs-panel,
+  .pvs-panel.pvs-spec-hero[data-brand='true'] {
+    background-image: none;
+  }
+}
+
+
+/* ------------------------------------------------------------------ 3.5.3: the environment flow */
+
+/* The Overview's "From the user to the cloud, now" (components/spectrum/EnvironmentFlow.tsx): a disc per layer in its
+   column's Categorical Vivid hue, curves for the stack's hierarchy, particles along them on screen only, and a pulse on
+   a layer with something measured to review. Text keeps the text tokens; the hue lives on the marks. */
+.pvs-eflow {
+  --pvs-eflow-neutral: var(--dt-colors-charts-status-neutral-default);
+  display: grid;
+  gap: var(--dt-spacings-size-8);
+  min-width: 0;
+}
+
+.pvs-eflow__scroll {
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.pvs-eflow__svg {
+  display: block;
+  width: 100%;
+  min-width: 760px;
+  height: auto;
+  overflow: visible;
+}
+
+@media print {
+  .pvs-eflow__svg {
+    min-width: 0;
+  }
+}
+
+.pvs-eflow__column {
+  fill: var(--dt-colors-text-neutral-subdued);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.pvs-eflow__link {
+  fill: none;
+  opacity: 0.35;
+  stroke-linecap: round;
+}
+
+.pvs-eflow__particle {
+  opacity: 0.9;
+}
+
+.pvs-eflow__disc {
+  fill: var(--dt-colors-background-surface-default);
+  stroke: var(--pvs-eflow-hue);
+  stroke-width: 2.5;
+}
+
+.pvs-eflow__node[data-missing='true'] .pvs-eflow__disc {
+  stroke-dasharray: 4 4;
+  stroke: var(--dt-colors-border-neutral-default);
+}
+
+.pvs-eflow__icon {
+  color: var(--pvs-eflow-hue);
+  fill: var(--pvs-eflow-hue);
+}
+
+.pvs-eflow__count {
+  fill: var(--dt-colors-text-neutral-default);
+  font-size: 20px;
+  font-weight: 600;
+  font-variant-numeric: proportional-nums;
+}
+
+.pvs-eflow__name {
+  fill: var(--dt-colors-text-neutral-subdued);
+  font-size: 13px;
+}
+
+.pvs-eflow__reason {
+  fill: var(--dt-colors-text-neutral-default);
+  font-size: 12px;
+}
+
+.pvs-eflow__reason-dot {
+  fill: var(--dt-colors-charts-status-critical-default);
+}
+
+.pvs-eflow__pulse {
+  fill: var(--dt-colors-charts-status-critical-default);
+  opacity: 0.18;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pvs-eflow-pulse 1.8s ease-out infinite;
+}
+
+@keyframes pvs-eflow-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(1.55);
+    opacity: 0;
+  }
+}
+
+.pvs-eflow__node[data-href] {
+  cursor: pointer;
+}
+
+.pvs-eflow__node[data-href]:hover .pvs-eflow__disc,
+.pvs-eflow__node[data-href]:focus-visible .pvs-eflow__disc {
+  stroke-width: 4;
+}
+
+.pvs-eflow__node:focus-visible {
+  outline: 2px solid var(--dt-colors-border-primary-accent);
+  outline-offset: 3px;
+}
+
+.pvs-eflow__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dt-spacings-size-8) var(--dt-spacings-size-20);
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: var(--dt-typography-text-small-default-size);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pvs-eflow__particle {
+    display: none;
+  }
+
+  .pvs-eflow__pulse {
+    animation: none;
+    opacity: 0.22;
+    transform: scale(1.25);
+  }
+}
+
+@media print {
+  .pvs-eflow__particle {
+    display: none;
+  }
+
+  .pvs-eflow__pulse {
+    animation: none;
+    opacity: 0.22;
+  }
+}
+
+/* ------------------------------------------------------------------ 3.5.4: the RCA propagation */
+
+/* AIOps & RCA's "Propagation" tab (features/rca/RcaPropagation.tsx): the incident in columns by hop — cause → callers
+   → affected → users — under a ruler of what the platform reports (start, duration, open or closed). Cards keep the
+   text tokens; the hop's hue lives on the card's edge and icon. */
+.pvs-prop {
+  --pvs-prop-cause: var(--dt-colors-charts-status-critical-default);
+  --pvs-prop-callers: var(--dt-colors-charts-categorical-vivid-color-05-default);
+  --pvs-prop-affected: var(--dt-colors-charts-categorical-vivid-color-02-default);
+  --pvs-prop-users: var(--dt-colors-charts-categorical-vivid-color-01-default);
+  display: grid;
+  gap: var(--dt-spacings-size-16);
+  min-width: 0;
+}
+
+.pvs-prop__ruler {
+  display: grid;
+  grid-template-columns: auto minmax(24px, 1fr) auto minmax(24px, 1fr) auto;
+  align-items: center;
+  gap: var(--dt-spacings-size-12);
+}
+
+.pvs-prop__tick {
+  display: grid;
+  gap: 2px;
+}
+
+.pvs-prop__tick[data-edge='mid'] {
+  text-align: center;
+}
+
+.pvs-prop__tick[data-edge='end'] {
+  text-align: end;
+}
+
+.pvs-prop__tick-label {
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.pvs-prop__tick-value {
+  font-weight: 600;
+  font-variant-numeric: proportional-nums;
+}
+
+.pvs-prop__span {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--pvs-prop-cause), var(--pvs-prop-users));
+  opacity: 0.55;
+}
+
+.pvs-prop__span[data-active='true'] {
+  opacity: 0.9;
+}
+
+.pvs-prop__cols {
+  display: grid;
+  grid-template-columns: repeat(var(--pvs-prop-cols, 4), minmax(0, 1fr));
+  gap: var(--dt-spacings-size-24);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pvs-prop__col {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: var(--dt-spacings-size-12);
+  min-width: 0;
+}
+
+/* The arrow to the next hop. */
+.pvs-prop__col + .pvs-prop__col::before {
+  content: '';
+  position: absolute;
+  top: 62px;
+  left: calc(-1 * var(--dt-spacings-size-24) + 4px);
+  width: calc(var(--dt-spacings-size-24) - 8px);
+  height: 2px;
+  background: var(--dt-colors-border-neutral-default);
+}
+
+.pvs-prop__col + .pvs-prop__col::after {
+  content: '';
+  position: absolute;
+  top: 58px;
+  left: -10px;
+  border-left: 6px solid var(--dt-colors-border-neutral-default);
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+}
+
+.pvs-prop__head {
+  display: grid;
+  gap: 2px;
+  min-height: 44px;
+}
+
+.pvs-prop__hop {
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.pvs-prop__label {
+  font-weight: 600;
+}
+
+.pvs-prop__cards {
+  display: grid;
+  gap: var(--dt-spacings-size-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pvs-prop__box {
+  display: flex;
+  align-items: center;
+  gap: var(--dt-spacings-size-8);
+  padding: var(--dt-spacings-size-8) var(--dt-spacings-size-12);
+  border: var(--dt-borders-width-default) var(--dt-borders-style-default) var(--dt-colors-border-neutral-default);
+  border-inline-start: 3px solid var(--pvs-prop-hue, var(--dt-colors-border-neutral-default));
+  border-radius: var(--dt-borders-radius-container-default);
+  background: var(--dt-colors-background-surface-default);
+  color: var(--dt-colors-text-neutral-default);
+  text-decoration: none;
+  min-width: 0;
+}
+
+a.pvs-prop__box:hover,
+a.pvs-prop__box:focus-visible {
+  border-color: var(--dt-colors-border-primary-accent);
+  border-inline-start-color: var(--pvs-prop-hue, var(--dt-colors-border-primary-accent));
+}
+
+.pvs-prop__col[data-col='cause'] { --pvs-prop-hue: var(--pvs-prop-cause); }
+.pvs-prop__col[data-col='callers'] { --pvs-prop-hue: var(--pvs-prop-callers); }
+.pvs-prop__col[data-col='affected'] { --pvs-prop-hue: var(--pvs-prop-affected); }
+.pvs-prop__col[data-col='users'] { --pvs-prop-hue: var(--pvs-prop-users); }
+
+.pvs-prop__col[data-col='cause'] .pvs-prop__box {
+  background: color-mix(in srgb, var(--pvs-prop-cause) 7%, var(--dt-colors-background-surface-default));
+}
+
+.pvs-prop__icon {
+  display: inline-flex;
+  flex: none;
+  color: var(--pvs-prop-hue, var(--dt-colors-text-neutral-subdued));
+}
+
+.pvs-prop__text {
+  display: grid;
+  min-width: 0;
+}
+
+.pvs-prop__name {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.pvs-prop__kind {
+  color: var(--dt-colors-text-neutral-subdued);
+  font-size: 12px;
+}
+
+.pvs-prop-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.pvs-prop-table th,
+.pvs-prop-table td {
+  padding: var(--dt-spacings-size-8) var(--dt-spacings-size-12);
+  border-bottom: var(--dt-borders-width-default) var(--dt-borders-style-default) var(--dt-colors-border-neutral-default);
+  text-align: start;
+}
+
+.pvs-prop-table thead th {
+  color: var(--dt-colors-text-neutral-subdued);
+  font-weight: 600;
+}
+
+.pvs-prop-table__name {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dt-spacings-size-8);
+}
+
+@media screen and (max-width: 900px) {
+  .pvs-prop__cols {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pvs-prop__col + .pvs-prop__col::before,
+  .pvs-prop__col + .pvs-prop__col::after {
+    display: none;
+  }
+
+  .pvs-prop__ruler {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pvs-prop__tick[data-edge='mid'],
+  .pvs-prop__tick[data-edge='end'] {
+    text-align: start;
+  }
+
+  .pvs-prop__span {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------------ 3.5.4: the service quadrants */
+
+/* Services → "Quadrants" (features/services/ServiceQuadrants.tsx): points in the "Status and health" tones with a
+   surface ring, recessive grid, the two review lines dashed in neutral ink, the "look first" corner washed lightly. */
+.pvs-quad {
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.pvs-quad__svg {
+  display: block;
+  width: 100%;
+  /* On a phone the chart keeps a readable text size (≈ 11 px of its 12) and scrolls sideways. */
+  min-width: 880px;
+  height: auto;
+  overflow: visible;
+}
+
+.pvs-quad__grid line {
+  stroke: var(--dt-colors-border-neutral-default);
+  stroke-width: 1;
+  opacity: 0.6;
+}
+
+.pvs-quad__tick,
+.pvs-quad__axis {
+  fill: var(--dt-colors-text-neutral-subdued);
+  font-size: 12px;
+}
+
+.pvs-quad__axis {
+  font-weight: 600;
+}
+
+.pvs-quad__hot {
+  opacity: 0.06;
+}
+
+.pvs-quad__line {
+  stroke: var(--dt-colors-text-neutral-default);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+  opacity: 0.7;
+}
+
+.pvs-quad__line-label {
+  fill: var(--dt-colors-text-neutral-default);
+  font-size: 12px;
+}
+
+.pvs-quad__corner {
+  fill: var(--dt-colors-text-neutral-subdued);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.pvs-quad__dot {
+  fill-opacity: 0.78;
+  stroke: var(--dt-colors-background-surface-default);
+  stroke-width: 2;
+}
+
+.pvs-quad__dot:hover {
+  fill-opacity: 1;
+}
+
+.pvs-quad__name {
+  fill: var(--dt-colors-text-neutral-default);
+  font-size: 12px;
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: var(--dt-colors-background-surface-default);
+  stroke-width: 3px;
+}
+
+.pvs-quad__counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dt-spacings-size-8) var(--dt-spacings-size-20);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pvs-quad__count {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--dt-spacings-size-6);
+}
+
+.pvs-quad__swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  align-self: center;
+}
+
+.pvs-quad__count-value {
+  font-size: 20px;
+  font-weight: 600;
+  font-variant-numeric: proportional-nums;
+}
+
+.pvs-quad__count-name {
+  color: var(--dt-colors-text-neutral-subdued);
+}

@@ -1,0 +1,77 @@
+/*
+ * Group A page styles: the Overview story map, the PoC timeline and the SE Report
+ * tab host.
+ *
+ * Tokens only (`--dt-*` from Strato, `--pvs-*` from engine.css): no raw colour, no
+ * ramp, no shadow. Nothing here animates, so there is no reduced-motion block.
+ */
+
+/* ───────────────────────── story map (Overview) ───────────────────────── */
+
+/* The step badge is a flex item of a column; keep it badge-sized, not full width. */
+.pvs-story__link .pvs-step {
+  align-self: flex-start;
+}
+
+/* The page count sits at the foot of every card, so a row of cards lines up. */
+.pvs-story__count {
+  margin-block-start: auto;
+}
+
+/* ───────────────────────── PoC timeline ───────────────────────── */
+
+/*
+ * One plain rule down the left edge with a short connector to each milestone.
+ * Position is carried by the numbered badge inside the card; the rule only joins
+ * the milestones, so it is a single neutral line, never a hue.
+ */
+.pvs-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pvs-gap-group);
+  margin: 0;
+  padding: 0;
+  padding-inline-start: var(--pvs-gap-section);
+  list-style: none;
+  border-inline-start: var(--dt-borders-width-emphasized) var(--dt-borders-style-default)
+    var(--dt-colors-border-neutral-default);
+}
+
+.pvs-timeline__item {
+  position: relative;
+  min-width: 0;
+}
+
+/* Joins the rule to the vertical centre of the card's step badge. */
+.pvs-timeline__item::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: calc(-1 * var(--pvs-gap-section));
+  inset-block-start: calc(var(--pvs-pad-default) + var(--dt-spacings-size-12));
+  width: var(--pvs-gap-section);
+  border-block-start: var(--dt-borders-width-emphasized) var(--dt-borders-style-default)
+    var(--dt-colors-border-neutral-default);
+}
+
+.pvs-timeline__impact {
+  font-weight: var(--dt-typography-heading-level-5-weight);
+}
+
+/* ───────────────────────── SE Report (tab host) ───────────────────────── */
+
+/*
+ * Strato's tab panel clips its content (`overflow: hidden`), which would cut the
+ * focus ring off any card that touches the panel edge. The page below it already
+ * sizes itself to the content area, so the panel does not need to clip.
+ */
+.pvs-sereport [role='tabpanel'] {
+  overflow: visible;
+}
+
+@media print {
+  /* The tab bar is screen chrome. Hides the tablist and its scroll arrows. */
+  .pvs-sereport [role='tablist'],
+  .pvs-sereport :has(> [role='tablist']) {
+    display: none;
+  }
+}

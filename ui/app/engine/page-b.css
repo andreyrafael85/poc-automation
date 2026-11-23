@@ -1,0 +1,263 @@
+/*
+ * Page stylesheet, group B — Problems, RCA, Security and Competitor pages.
+ *
+ * Only what the engine does not already express: the root-cause trail, row
+ * lists, the severity legend and the comparison points. Strato `--dt-*` tokens
+ * and `--pvs-*` variables only; no raw colour, gradient, shadow or blur. Layout
+ * answers to the content area (`@container pvs-page`), never to the viewport.
+ */
+
+/* A list used as a stack of rows: no bullets, no browser indent. */
+.pvs-b-plain {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ───────────────────────── root-cause trail ───────────────────────── */
+
+/*
+ * Stages read left to right: root cause, affected entities, Kubernetes context.
+ * Connectors are arrow icons, not glyphs. When the content area is narrow the
+ * stages stack and each connector turns to point down.
+ */
+.pvs-b-trail {
+  display: flex;
+  align-items: stretch;
+  gap: var(--pvs-gap-group);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pvs-b-trail__stage {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  gap: var(--pvs-gap-tight);
+  min-width: 0;
+}
+
+.pvs-b-trail__link {
+  display: inline-flex;
+  flex: none;
+  align-self: center;
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+@container pvs-page (max-width: 900px) {
+  .pvs-b-trail {
+    flex-direction: column;
+  }
+
+  .pvs-b-trail__stage {
+    flex: none;
+  }
+
+  .pvs-b-trail__link {
+    transform: rotate(90deg);
+  }
+}
+
+/* One entity: an icon, its name and what kind of thing it is. */
+.pvs-b-node {
+  display: flex;
+  align-items: center;
+  gap: var(--pvs-gap-tight);
+  min-width: 0;
+}
+
+.pvs-b-node__icon {
+  display: inline-flex;
+  flex: none;
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-b-node__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dt-spacings-size-2);
+  min-width: 0;
+}
+
+/* ───────────────────────── Davis narrative ───────────────────────── */
+
+.pvs-b-narrative {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pvs-gap-tight);
+  max-width: var(--pvs-measure);
+}
+
+/* ───────────────────────── rows (other incidents) ───────────────────────── */
+
+.pvs-b-rows {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pvs-b-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--pvs-gap-tight) var(--pvs-gap-group);
+  padding-block: var(--pvs-gap-tight);
+  border-bottom: var(--dt-borders-width-default) var(--dt-borders-style-default)
+    var(--dt-colors-border-neutral-subdued);
+}
+
+.pvs-b-row:last-child {
+  border-bottom: none;
+}
+
+.pvs-b-row__main,
+.pvs-b-row__side {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--pvs-gap-tight);
+  min-width: 0;
+}
+
+/* ───────────────────────── security ───────────────────────── */
+
+/* The headline total beside the severity ladder; stacks when the area is narrow. */
+.pvs-b-lead {
+  display: grid;
+  grid-template-columns: minmax(240px, 340px) minmax(0, 1fr);
+  gap: var(--pvs-gap-group);
+  align-items: stretch;
+}
+
+@container pvs-page (max-width: 900px) {
+  .pvs-b-lead {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* The severity legend: word, icon, count and share, in the same order as the bar. */
+.pvs-b-sev {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr));
+  gap: var(--pvs-gap-group);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pvs-b-sev__item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dt-spacings-size-4);
+  min-width: 0;
+}
+
+.pvs-b-sev__name {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dt-spacings-size-6);
+}
+
+/* Only a measured condition (critical, high) takes a tone, and always beside its word. */
+.pvs-b-sev__item[data-tone='critical'] .pvs-b-sev__icon,
+.pvs-b-sevcell[data-tone='critical'] {
+  color: var(--dt-colors-text-critical-default);
+}
+
+.pvs-b-sev__item[data-tone='warning'] .pvs-b-sev__icon,
+.pvs-b-sevcell[data-tone='warning'] {
+  color: var(--dt-colors-text-warning-default);
+}
+
+.pvs-b-sev__icon {
+  display: inline-flex;
+  flex: none;
+}
+
+/* Severity inside a table cell: icon, then the word. */
+.pvs-b-sevcell {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dt-spacings-size-6);
+  font-weight: 600;
+}
+
+/* The top row of an act-now card: title on the left, score on the right. */
+.pvs-b-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--pvs-gap-tight);
+}
+
+.pvs-b-card__score {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--dt-spacings-size-2);
+}
+
+/* ───────────────────────── competitor ───────────────────────── */
+
+/* A comparison point: an icon, then the sentence. */
+.pvs-b-points {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pvs-gap-tight);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pvs-b-point {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--pvs-gap-tight);
+}
+
+.pvs-b-point__icon {
+  display: inline-flex;
+  flex: none;
+  margin-top: var(--dt-spacings-size-2);
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-b-names {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dt-spacings-size-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ───────────────────────── markdown table in the Davis narrative ───────────────────────── */
+
+.pvs-b-md-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-variant-numeric: tabular-nums;
+}
+
+.pvs-b-md-table th,
+.pvs-b-md-table td {
+  padding: var(--dt-spacings-size-8) var(--dt-spacings-size-12);
+  border: var(--dt-borders-width-default) var(--dt-borders-style-default)
+    var(--dt-colors-border-neutral-default);
+  text-align: start;
+  vertical-align: top;
+}
+
+.pvs-b-md-table th {
+  background: var(--dt-colors-background-container-neutral-default);
+  color: var(--dt-colors-text-neutral-default);
+  font-weight: var(--dt-typography-heading-level-6-weight);
+}

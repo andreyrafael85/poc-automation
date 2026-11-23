@@ -1,0 +1,389 @@
+/* Settings → Prerequisites (3.4.13). Strato tokens only, both themes; no gradient (those live in engine/spectrum.css). */
+
+/* 3.4.17: six cards, three by two on a wide screen and on the PDF; two columns, then one, on narrower screens. */
+.pvs-prq-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--dt-spacings-size-16);
+  align-items: stretch;
+}
+
+@media screen and (max-width: 1280px) {
+  .pvs-prq-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media screen and (max-width: 760px) {
+  .pvs-prq-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.pvs-prq-grid > .pvs-prq-card {
+  height: 100%;
+}
+
+.pvs-prq-head {
+  display: flex;
+  gap: var(--dt-spacings-size-12);
+  align-items: flex-start;
+}
+
+.pvs-prq-head__icon {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--dt-borders-radius-container-default);
+  background: var(--dt-colors-background-container-primary-accent);
+  color: var(--dt-colors-text-primary-on-accent-default);
+}
+
+.pvs-prq-head__icon svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.pvs-prq-list,
+.pvs-prq-steps {
+  margin: 0;
+  padding-inline-start: var(--dt-spacings-size-20);
+  display: grid;
+  gap: var(--dt-spacings-size-12);
+}
+
+.pvs-prq-list li,
+.pvs-prq-steps li {
+  display: grid;
+  gap: var(--dt-spacings-size-4);
+  line-height: 1.45;
+}
+
+.pvs-prq-list li::marker {
+  color: var(--dt-colors-text-primary-default);
+}
+
+.pvs-prq-steps li::marker {
+  color: var(--dt-colors-text-primary-default);
+  font-weight: 600;
+}
+
+.pvs-prq__docs {
+  font-size: var(--dt-typography-text-small-default-size);
+  color: var(--dt-colors-text-neutral-subdued);
+  overflow-wrap: anywhere;
+}
+
+.pvs-prq__docs-label {
+  font-weight: 600;
+}
+
+/* How the data reaches Dynatrace SaaS. */
+.pvs-prq-diagram {
+  width: 100%;
+  max-width: 56rem;
+  height: auto;
+  display: block;
+}
+
+.pvs-prq-diagram__zone {
+  fill: var(--dt-colors-background-container-neutral-subdued);
+  stroke: var(--dt-colors-border-neutral-default);
+}
+
+.pvs-prq-diagram__zone-label {
+  fill: var(--dt-colors-text-neutral-subdued);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.pvs-prq-diagram__wall {
+  stroke: var(--dt-colors-border-warning-accent);
+  stroke-width: 3;
+  stroke-dasharray: 6 5;
+}
+
+.pvs-prq-diagram__node {
+  fill: var(--dt-colors-background-container-neutral-default);
+  stroke: var(--dt-colors-border-neutral-accent);
+  stroke-width: 1.5;
+}
+
+.pvs-prq-diagram__node--optional {
+  stroke-dasharray: 6 4;
+}
+
+.pvs-prq-diagram__cloud {
+  fill: var(--dt-colors-background-container-primary-default);
+  stroke: var(--dt-colors-border-primary-accent);
+  stroke-width: 2;
+}
+
+.pvs-prq-diagram__title {
+  fill: var(--dt-colors-text-neutral-default);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.pvs-prq-diagram__title--fit {
+  font-size: 13px;
+}
+
+.pvs-prq-diagram__sub {
+  fill: var(--dt-colors-text-neutral-subdued);
+  font-size: 12px;
+}
+
+.pvs-prq-diagram__flow {
+  stroke: var(--dt-colors-border-primary-accent);
+  stroke-width: 2.5;
+}
+
+.pvs-prq-diagram__flow--alt {
+  stroke-dasharray: 7 5;
+  stroke-width: 2;
+}
+
+.pvs-prq-diagram__flow--rum {
+  stroke: var(--dt-colors-text-success-default);
+}
+
+.pvs-prq-diagram__head {
+  fill: var(--dt-colors-border-primary-accent);
+}
+
+.pvs-prq-diagram__port {
+  fill: var(--dt-colors-background-container-primary-accent);
+}
+
+.pvs-prq-diagram__port-text {
+  fill: var(--dt-colors-text-primary-on-accent-default);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Where to find the addresses: the steps beside a drawing of the installation page. */
+.pvs-prq-ips {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
+  gap: var(--dt-spacings-size-24);
+  align-items: start;
+}
+
+@media screen and (max-width: 900px) {
+  .pvs-prq-ips {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.pvs-prq-mock {
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  border-radius: var(--dt-borders-radius-container-default);
+  overflow: hidden;
+  background: var(--dt-colors-background-container-neutral-subdued);
+  margin-block-end: var(--dt-spacings-size-8);
+}
+
+.pvs-prq-mock__bar {
+  display: flex;
+  gap: var(--dt-spacings-size-4);
+  padding: var(--dt-spacings-size-6) var(--dt-spacings-size-8);
+  background: var(--dt-colors-background-container-neutral-emphasized);
+}
+
+.pvs-prq-mock__bar span {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--dt-colors-border-neutral-accent);
+}
+
+.pvs-prq-mock__body {
+  display: grid;
+  gap: var(--dt-spacings-size-8);
+  padding: var(--dt-spacings-size-12);
+}
+
+.pvs-prq-mock__title {
+  font-weight: 600;
+  color: var(--dt-colors-text-neutral-default);
+}
+
+.pvs-prq-mock__steps {
+  font-size: var(--dt-typography-text-small-default-size);
+  color: var(--dt-colors-text-neutral-subdued);
+}
+
+.pvs-prq-mock__lines {
+  display: grid;
+  gap: var(--dt-spacings-size-4);
+}
+
+.pvs-prq-mock__lines span {
+  height: 0.4rem;
+  border-radius: 0.2rem;
+  background: var(--dt-colors-border-neutral-default);
+}
+
+.pvs-prq-mock__lines span:nth-child(2) {
+  width: 80%;
+}
+
+.pvs-prq-mock__lines span:nth-child(3) {
+  width: 60%;
+}
+
+.pvs-prq-mock__box {
+  display: grid;
+  gap: var(--dt-spacings-size-2);
+  padding: var(--dt-spacings-size-8);
+  border: 2px solid var(--dt-colors-border-warning-accent);
+  border-radius: var(--dt-borders-radius-container-default);
+  background: var(--dt-colors-background-container-warning-default);
+}
+
+.pvs-prq-mock__box-title {
+  font-weight: 600;
+  font-size: var(--dt-typography-text-small-default-size);
+  color: var(--dt-colors-text-neutral-default);
+}
+
+.pvs-prq-mock__box code {
+  font-size: var(--dt-typography-text-small-default-size);
+  color: var(--dt-colors-text-neutral-default);
+}
+
+/* ------------------------------------------------------------------ 3.4.17: the PDF (print dialog → Save as PDF) */
+
+/* The print document lives in a portal under <body> only while printing; it never shows on screen. */
+@media screen {
+  .pvs-prq-print {
+    display: none;
+  }
+}
+
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 10mm;
+  }
+
+  /* Only the print document: the app (every Settings tab, the header, the navigation) is left out. */
+  html.pvs-printing-prq body > *:not(.pvs-prq-print) {
+    display: none !important;
+  }
+
+  html.pvs-printing-prq body {
+    background: #ffffff;
+  }
+
+  .pvs-prq-print {
+    display: block;
+    color: #1b1b22;
+    font-size: 8.5pt;
+    line-height: 1.3;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .pvs-prq-print h1 {
+    margin: 0 0 2pt;
+    font-size: 16pt;
+    font-weight: 600;
+  }
+
+  .pvs-prq-print h2,
+  .pvs-prq-print h3,
+  .pvs-prq-print h2[data-dt-component],
+  .pvs-prq-print h3[data-dt-component] {
+    margin: 0;
+    font-size: 10.5pt;
+    font-weight: 600;
+  }
+
+  .pvs-prq-print__head p,
+  .pvs-prq-print__foot {
+    margin: 0 0 2pt;
+  }
+
+  .pvs-prq-print__for {
+    font-weight: 600;
+  }
+
+  .pvs-prq-print__diagram {
+    break-inside: avoid;
+    margin: 6pt 0 8pt;
+  }
+
+  /* 3.5.0 (owner's validation of 3.4.18): the drawing larger on the page, its labels at a readable size. */
+  .pvs-prq-print .pvs-prq-diagram {
+    max-width: 235mm;
+  }
+
+  .pvs-prq-print .pvs-prq-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6pt;
+    break-before: page;
+  }
+
+  /* The items keep the print size (the app's text styles would set them at screen size). */
+  .pvs-prq-print .pvs-prq-list li,
+  .pvs-prq-print .pvs-prq-steps li,
+  .pvs-prq-print .pvs-prq-list li > span,
+  .pvs-prq-print .pvs-prq-steps li > span,
+  .pvs-prq-print p,
+  .pvs-prq-print [data-dt-component] {
+    font-size: 8.5pt;
+    line-height: 1.3;
+  }
+
+  .pvs-prq-print .pvs-panel {
+    padding: 6pt 8pt;
+  }
+
+  .pvs-prq-print .pvs-prq-card,
+  .pvs-prq-print .pvs-prq-steps-panel {
+    break-inside: avoid;
+  }
+
+  .pvs-prq-print .pvs-prq-steps-panel {
+    margin-top: 6pt;
+  }
+
+  .pvs-prq-print .pvs-prq-head__icon {
+    width: 16pt;
+    height: 16pt;
+  }
+
+  .pvs-prq-print .pvs-prq-head__icon svg {
+    width: 11pt;
+    height: 11pt;
+  }
+
+  .pvs-prq-print .pvs-prq-list,
+  .pvs-prq-print .pvs-prq-steps {
+    gap: 3pt;
+    padding-inline-start: 11pt;
+  }
+
+  .pvs-prq-print .pvs-prq__docs,
+  .pvs-prq-print .pvs-prq__docs [data-dt-component] {
+    font-size: 7.5pt;
+  }
+
+  .pvs-prq-print .pvs-prq__docs-label {
+    display: none;
+  }
+
+  .pvs-prq-print .pvs-caption {
+    font-size: 8pt;
+  }
+
+  .pvs-prq-print__foot {
+    margin-top: 6pt;
+    font-size: 7.5pt;
+    color: #4d4d57;
+  }
+}
