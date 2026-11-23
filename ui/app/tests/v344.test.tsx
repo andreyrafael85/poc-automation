@@ -73,9 +73,9 @@ describe('the adoption index (DPA method)', () => {
 });
 
 describe('the page', () => {
-  it('sits in the Impact stage, visible in executive mode, never for a viewer without access, no money', () => {
+  it('sits in the Coverage stage (3.7.9; Impact until 3.7.8), visible in executive mode, never for a viewer without access, no money', () => {
     expect(NAVIGATION.some((section) => section.route === '/adoption')).toBe(true);
-    expect(STORY_STAGES.find((stage) => stage.id === 'impact')?.routes).toEqual(['/executive', '/adoption', '/consumption']);
+    expect(STORY_STAGES.find((stage) => stage.id === 'coverage')?.routes).toEqual(['/coverage', '/adoption']);
     expect(EXECUTIVE_HIDDEN_ROUTES.has('/adoption')).toBe(false);
     expect(RESTRICTED_ROUTES.has('/adoption')).toBe(false);
     expect(SE_ONLY_ROUTES.has('/adoption')).toBe(false);

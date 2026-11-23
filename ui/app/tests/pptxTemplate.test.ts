@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 import JSZip from 'jszip';
 import { describe, expect, it } from 'vitest';
@@ -8,7 +9,6 @@ import type { WrapupModel } from '../features/wrapup/deck';
 import { captureImageRect } from '../features/wrapup/geometry';
 import { buildTemplateDeck, esc, patchTemplate, renderSlides } from '../features/wrapup/pptxTemplate';
 import { BUDGET, buildDeckSpec, fit, type CaptureSlide, type DeckCapture, type ExecutiveInput, type SectionSlide } from '../features/wrapup/spec';
-import { TEMPLATE, TEMPLATE_PATH, itWithTemplate } from './fixtures/brandTemplate';
 
 /**
  * The SE deck (3.2.4): one specification (`spec.ts`), written into the corporate template.
@@ -153,7 +153,7 @@ const spec = buildDeckSpec(model, {
 });
 
 function templateBytes(): Uint8Array {
-  return TEMPLATE;
+  return new Uint8Array(readFileSync(join(process.cwd(), 'ui/assets/techwrapup-brand-template.pptx')));
 }
 
 const meta = { dtLogo: PNG, seName: 'Ada Lovelace' };
@@ -252,7 +252,7 @@ describe('the deck written into the template', () => {
     expect(rect.w / rect.h).toBeCloseTo(2, 5);
   });
 
-  itWithTemplate('produces a coherent package: one part, one id and one relationship per slide', async () => {
+  it('produces a coherent package: one part, one id and one relationship per slide', async () => {
     const zip = await patchTemplate(spec, templateBytes(), meta);
     const presentation = (await zip.file('ppt/presentation.xml')?.async('string')) ?? '';
     const rels = (await zip.file('ppt/_rels/presentation.xml.rels')?.async('string')) ?? '';
@@ -271,12 +271,12 @@ describe('the deck written into the template', () => {
     if (out !== undefined && out !== '') writeFileSync(out, bytes);
   });
 
-  itWithTemplate('returns a Blob from the public builder', async () => {
+  it('returns a Blob from the public builder', async () => {
     const blob = await buildTemplateDeck(spec, templateBytes(), meta);
     expect(blob.size).toBeGreaterThan(10_000);
   });
 
-  itWithTemplate('declares a content-type for a webp logo (a missing one makes PowerPoint repair)', async () => {
+  it('declares a content-type for a webp logo (a missing one makes PowerPoint repair)', async () => {
     const webp = buildDeckSpec({ ...model, customerLogo: 'data:image/webp;base64,UklGRg==', customerLogoAspect: 2 }, { profile: 'customer' });
     const zip = await patchTemplate(webp, templateBytes(), meta);
     const types = (await zip.file('[Content_Types].xml')?.async('string')) ?? '';
@@ -285,7 +285,7 @@ describe('the deck written into the template', () => {
 });
 
 describe('the corporate template (E2)', () => {
-  itWithTemplate('carries no third-party personal data, add-in or SharePoint bookkeeping, and only the four layouts the deck uses', async () => {
+  it('carries no third-party personal data, add-in or SharePoint bookkeeping, and only the four layouts the deck uses', async () => {
     const zip = await JSZip.loadAsync(templateBytes());
     const names = Object.keys(zip.files);
     expect(names.some((name) => name.endsWith('authors.xml'))).toBe(false);
@@ -303,8 +303,8 @@ describe('the corporate template (E2)', () => {
     expect(core).toContain('<cp:lastModifiedBy>Dynatrace</cp:lastModifiedBy>');
   });
 
-  itWithTemplate('is the file `scripts/clean-pptx-template.cjs` produced (its SHA-256 is pinned)', () => {
-    const path = TEMPLATE_PATH;
+  it('is the file `scripts/clean-pptx-template.cjs` produced (its SHA-256 is pinned)', () => {
+    const path = join(process.cwd(), 'ui/assets/techwrapup-brand-template.pptx');
     expect(existsSync(path)).toBe(true);
     const sha = createHash('sha256').update(readFileSync(path)).digest('hex');
     expect(sha).toBe('a9c1f37cf5d5834bc88652a3ecfabd938c51e1bfb2ff7435a566b0a76716300c');

@@ -92,9 +92,9 @@ describe('every rule has an audience, and every audience its content', () => {
 describe('the opening figures are measured, never estimated', () => {
   it('uses only what the Assessment read, and leaves out what it could not', () => {
     const reading = maturity(SIGNALS, 80);
-    const input = { signals: SIGNALS, index: INDEX, maturity: reading, findings: [finding('ASM-13', 'critical')] };
+    const input = { signals: SIGNALS, index: INDEX, valueEvents: reading.level, findings: [finding('ASM-13', 'critical')] };
     const executive = openingFigures('executive', input, String);
-    expect(executive.map((figure) => figure.key)).toEqual(['asm.persona.fig.index', 'asm.persona.fig.maturity', 'asm.persona.fig.critical', 'asm.persona.fig.tools']);
+    expect(executive.map((figure) => figure.key)).toEqual(['asm.persona.fig.index', 'asm.persona.fig.valueEvents', 'asm.persona.fig.critical', 'asm.persona.fig.tools']);
     expect(executive.find((figure) => figure.key === 'asm.persona.fig.tools')?.params.count).toBe('2');
     const security = openingFigures('security', { ...input, signals: { ...SIGNALS, vulnerabilities: null } }, String);
     expect(security).toEqual([]);
@@ -110,7 +110,7 @@ describe('the guide on the page', () => {
           findings={[finding('ASM-04', 'critical'), finding('ASM-26'), finding('ASM-14')]}
           signals={SIGNALS}
           index={INDEX}
-          maturity={maturity(SIGNALS, 80)}
+          valueEvents={12}
           t={EN_TEXT.t}
           formatNumber={EN_TEXT.formatNumber}
         />

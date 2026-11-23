@@ -53,7 +53,6 @@ export const NAVIGATION: readonly NavigationSection[] = [
   { route: '/competitor', label: 'Competitor overlap', labelKey: 'nav.competitor' },
   { route: '/report', label: 'SE Report', labelKey: 'nav.report' },
   { route: '/value', label: 'Value & ROI', labelKey: 'nav.roi' },
-  { route: '/roadmap', label: 'Roadmap', labelKey: 'nav.roadmap' },
   { route: '/settings', label: 'Settings', labelKey: 'nav.settings' },
   // 3.6.6: what the SE creates on the tenant for the PoC (dashboards first), one click per kit.
   { route: '/builder', label: 'PoC Builder', labelKey: 'nav.builder' },
@@ -78,7 +77,6 @@ export type StoryStageId =
   | 'context'
   | 'objectives'
   | 'coverage'
-  | 'discoveries'
   | 'evidence'
   | 'impact'
   | 'value'
@@ -96,29 +94,36 @@ export interface StoryStage {
 }
 
 export const STORY_STAGES: readonly StoryStage[] = [
-  // 3.6.6 (the owner: Settings moves to a stage 10 of its own, with the page that creates things on the tenant).
+  // 3.6.6 (the owner: Settings moves to a stage of its own, with the page that creates things on the tenant).
+  // 3.7.9 (the owner): nine stages — Coverage keeps the Coverage and Platform adoption pages; "Discoveries" and "Evidence"
+  // become one stage, Evidence, with every page that read the environment; the Roadmap page left (its 30-60-90 action plan
+  // is a tab of Opportunities).
   { id: 'context', labelKey: 'stage.context', blurbKey: 'stage.context.blurb', routes: ['/'] },
   { id: 'objectives', labelKey: 'stage.objectives', blurbKey: 'stage.objectives.blurb', routes: ['/timeline'] },
-  {
-    id: 'coverage',
-    labelKey: 'stage.coverage',
-    blurbKey: 'stage.coverage.blurb',
-    // 3.4.0: the Assessment opens the stage — what exists, what is observed, what was found.
-    routes: ['/coverage', '/topology', '/technologies', '/cloud', '/business', '/experience'],
-  },
-  {
-    id: 'discoveries',
-    labelKey: 'stage.discoveries',
-    blurbKey: 'stage.discoveries.blurb',
-    routes: ['/problems', '/rca', '/security', '/competitor'],
-  },
+  { id: 'coverage', labelKey: 'stage.coverage', blurbKey: 'stage.coverage.blurb', routes: ['/coverage', '/adoption'] },
   {
     id: 'evidence',
     labelKey: 'stage.evidence',
     blurbKey: 'stage.evidence.blurb',
-    routes: ['/services', '/infrastructure', '/kubernetes', '/logs', '/automation', '/ai-observability'],
+    routes: [
+      '/problems',
+      '/rca',
+      '/services',
+      '/infrastructure',
+      '/kubernetes',
+      '/cloud',
+      '/topology',
+      '/technologies',
+      '/logs',
+      '/experience',
+      '/business',
+      '/automation',
+      '/ai-observability',
+      '/security',
+      '/competitor',
+    ],
   },
-  { id: 'impact', labelKey: 'stage.impact', blurbKey: 'stage.impact.blurb', routes: ['/executive', '/adoption', '/consumption'] },
+  { id: 'impact', labelKey: 'stage.impact', blurbKey: 'stage.impact.blurb', routes: ['/executive', '/consumption'] },
   { id: 'value', labelKey: 'stage.value', blurbKey: 'stage.value.blurb', routes: ['/value', '/report'] },
   {
     id: 'recommendations',
@@ -126,7 +131,7 @@ export const STORY_STAGES: readonly StoryStage[] = [
     blurbKey: 'stage.recommendations.blurb',
     routes: ['/opportunities'],
   },
-  { id: 'next', labelKey: 'stage.next', blurbKey: 'stage.next.blurb', routes: ['/roadmap', '/licensing'] },
+  { id: 'next', labelKey: 'stage.next', blurbKey: 'stage.next.blurb', routes: ['/licensing'] },
   { id: 'manage', labelKey: 'stage.manage', blurbKey: 'stage.manage.blurb', routes: ['/builder', '/settings'] },
 ];
 

@@ -28,10 +28,7 @@ export const v349Strings = {
   },
 
   // ---------------------------------------------------------------- leadership
-  'asm.persona.executive.focus': {
-    en: 'What the leadership cares about: risk to the business, the cost of running several tools, and how fast the teams respond — the maturity journey is the frame.',
-    'pt-BR': 'O que importa para a liderança: risco para o negócio, o custo de manter várias ferramentas e a velocidade de resposta dos times — a jornada de maturidade é a moldura.',
-  },
+  'asm.persona.executive.focus': { en: 'What the leadership cares about: risk to the business, the cost of running several tools, and how fast the teams respond — the value cycle is the frame.', 'pt-BR': 'O que importa para a liderança: risco para o negócio, o custo de manter várias ferramentas e a velocidade de resposta dos times — o ciclo de valor é a moldura.' },
   'asm.persona.executive.q1': {
     en: 'Which digital journeys carry the most revenue or reputation, and how do you learn today that one of them is degraded?',
     'pt-BR': 'Quais jornadas digitais carregam mais receita ou reputação, e como vocês ficam sabendo hoje que uma delas está degradada?',
@@ -40,10 +37,7 @@ export const v349Strings = {
     en: 'How many monitoring tools and teams are involved in one incident today, and what would consolidating them be worth?',
     'pt-BR': 'Quantas ferramentas de monitoramento e times entram num incidente hoje, e quanto valeria consolidá-los?',
   },
-  'asm.persona.executive.q3': {
-    en: 'Which step of the maturity journey should the organisation reach in the next twelve months?',
-    'pt-BR': 'A qual etapa da jornada de maturidade a organização quer chegar nos próximos doze meses?',
-  },
+  'asm.persona.executive.q3': { en: 'Which autonomy target should the organisation agree for its critical services in the next twelve months?', 'pt-BR': 'Qual alvo de autonomia a organização quer combinar para os serviços críticos nos próximos doze meses?' },
 
   // ---------------------------------------------------------------- SRE and operations
   'asm.persona.sre.focus': {

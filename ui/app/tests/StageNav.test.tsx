@@ -125,12 +125,13 @@ describe('StageNav', () => {
 
   it('omits a stage whose pages are all technical instead of leaving an empty heading', async () => {
     renderNav();
-    // "Evidence" holds only technical pages, so it disappears in executive mode.
-    expect(screen.getByText('Evidence')).toBeInTheDocument();
+    // 3.7.9: Evidence keeps pages for every audience; "Settings & Build" holds only pages executive mode hides.
+    expect(screen.getByText('Settings & Build')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'to-exec' }));
     const nav = screen.getByRole('navigation', { name: 'The story of this PoC' });
     await within(nav).findByText('Technical pages are hidden in executive mode.');
-    expect(within(nav).queryByText('Evidence')).not.toBeInTheDocument();
+    expect(within(nav).queryByText('Settings & Build')).not.toBeInTheDocument();
+    expect(within(nav).getByText('Evidence')).toBeInTheDocument();
   });
 });
 
@@ -140,10 +141,11 @@ describe('StoryPager', () => {
     const pager = screen.getByRole('navigation', { name: 'Continue the story' });
     const links = within(pager).getAllByRole('link');
     // 3.4.12: the Assessment and Coverage are one page, which opens the Coverage stage after the timeline.
-    expect(links.map((link) => link.getAttribute('href'))).toEqual(['/timeline', '/topology']);
+    // 3.7.9: the Coverage stage holds Coverage and Platform adoption.
+    expect(links.map((link) => link.getAttribute('href'))).toEqual(['/timeline', '/adoption']);
     expect(sectionFor('/assessment')).toBeUndefined();
     expect(links[0]).toHaveTextContent(`Previous: ${sectionFor('/timeline')?.label ?? ''}`);
-    expect(links[1]).toHaveTextContent('Next: Topology');
+    expect(links[1]).toHaveTextContent('Next: Platform adoption');
   });
 
   it('has no previous link on the first page', () => {

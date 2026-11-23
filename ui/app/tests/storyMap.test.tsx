@@ -42,6 +42,8 @@ const renderMap = () =>
     </AppRoot>,
   );
 
+const VISIBLE = STORY_STAGES.filter((stage) => stage.id !== 'next');
+
 const getMap = () => screen.getByRole('region', { name: 'The story of this PoC' });
 
 describe('StoryMap', () => {
@@ -51,15 +53,16 @@ describe('StoryMap', () => {
     expect(within(map).getByRole('heading', { level: 2, name: 'The story of this PoC' })).toBeInTheDocument();
     expect(within(map).getByText(/Nine stages, from context to next steps/)).toBeInTheDocument();
     expect(within(map).getByRole('list').tagName).toBe('OL');
-    expect(within(map).getAllByRole('listitem')).toHaveLength(STORY_STAGES.length);
+    // 3.7.9: "Next steps" holds only Licensing (SE and partner), so a viewer without commercial data does not see it.
+    expect(within(map).getAllByRole('listitem')).toHaveLength(VISIBLE.length);
   });
 
   it('links each of the nine stages to a page of that stage', () => {
     renderMap();
     const links = within(getMap()).getAllByRole('link');
-    expect(links).toHaveLength(STORY_STAGES.length);
+    expect(links).toHaveLength(VISIBLE.length);
     links.forEach((link, index) => {
-      const stage = STORY_STAGES[index];
+      const stage = VISIBLE[index];
       // The first page of the stage, so the link opens the stage from its start.
       expect(stage?.routes, `stage ${index + 1}`).toContain(link.getAttribute('href'));
       expect(link.getAttribute('href'), `stage ${index + 1}`).toBe(stage?.routes[0]);
@@ -69,36 +72,36 @@ describe('StoryMap', () => {
   it('names each link by its stage, including the stage number, and counts its pages', () => {
     renderMap();
     const links = within(getMap()).getAllByRole('link');
-    expect(links[2]).toHaveAccessibleName('Open Stage 3 of 10 · Coverage achieved');
+    expect(links[2]).toHaveAccessibleName('Open Stage 3 of 9 · Coverage achieved');
     // Name and blurb are visible text; the number is the badge, hidden from the tree.
     expect(links[2]).toHaveTextContent('Coverage achieved');
-    // 3.4.0: the Assessment joined the stage.
-    expect(links[2]).toHaveTextContent('6 pages');
+    // 3.7.9: the Coverage stage holds Coverage and Platform adoption.
+    expect(links[2]).toHaveTextContent('2 pages');
     expect(links[1]).toHaveTextContent('1 page');
     expect(links[1]).not.toHaveTextContent('1 pages');
   });
 
   it('leaves the technical pages out in executive mode, and the stage that only had those', async () => {
     renderMap();
-    expect(screen.getByText('Evidence')).toBeInTheDocument();
+    expect(screen.getByText('Settings & Build')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'to-exec' }));
-    // "Evidence" holds only technical pages, so it goes once the mode is on.
-    await waitFor(() => expect(within(getMap()).queryByText('Evidence')).not.toBeInTheDocument());
+    // 3.7.9: Evidence keeps pages for every audience; the last stage (the PoC Builder and Settings) leaves executive mode.
+    await waitFor(() => expect(within(getMap()).queryByText('Settings & Build')).not.toBeInTheDocument());
 
     const map = getMap();
     const links = within(map).getAllByRole('link');
-    // 3.6.8: the last stage (the PoC Builder and Settings) leaves executive mode too.
-    expect(links).toHaveLength(STORY_STAGES.length - 2);
+    expect(within(map).getByText('Evidence')).toBeInTheDocument();
+    expect(links).toHaveLength(VISIBLE.length - 1);
     for (const link of links) {
       expect(EXECUTIVE_HIDDEN_ROUTES.has(link.getAttribute('href') ?? ''), link.getAttribute('href') ?? '').toBe(false);
     }
 
-    // Counts only the pages still reachable: Coverage keeps /coverage (one page with the Assessment since 3.4.12) and /cloud.
+    // Counts only the pages still reachable: Coverage keeps /coverage and /adoption (3.7.9).
     const coverage = links.find((link) => link.textContent?.includes('Coverage achieved'));
     expect(coverage).toHaveTextContent('2 pages');
     // Numbers are positions in the whole story, so they do not shift when a stage is left out.
-    expect(within(map).getByRole('link', { name: /Stage 6 of 10 · Impact/ })).toBeInTheDocument();
+    expect(within(map).getByRole('link', { name: /Stage 5 of 9 · Impact/ })).toBeInTheDocument();
   });
 
   it('translates stage names, blurbs and counts to pt-BR', async () => {
@@ -111,8 +114,8 @@ describe('StoryMap', () => {
     expect(screen.getByText('Objetivos da PoC')).toBeInTheDocument();
     expect(screen.queryByText('Coverage achieved')).not.toBeInTheDocument();
     expect(screen.queryByText('PoC objectives')).not.toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Abrir Etapa 3 de 10 · Cobertura alcançada' })).toBeInTheDocument();
-    expect(screen.getAllByText('6 páginas').length).toBeGreaterThan(0);
+    expect(screen.getByRole('link', { name: 'Abrir Etapa 3 de 9 · Cobertura alcançada' })).toBeInTheDocument();
+    expect(screen.getAllByText('2 páginas').length).toBeGreaterThan(0);
     expect(screen.getAllByText('1 página').length).toBeGreaterThan(0);
   });
 });

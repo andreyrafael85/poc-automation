@@ -101,7 +101,6 @@ const DigitalExperience = lazy(async () => ({
 const ImprovementOpportunities = lazy(async () => ({
   default: (await import('./pages/ImprovementOpportunities')).ImprovementOpportunities,
 }));
-const Roadmap = lazy(async () => ({ default: (await import('./pages/Roadmap')).Roadmap }));
 const Settings = lazy(async () => ({ default: (await import('./pages/Settings')).Settings }));
 
 const PageFallback = () => {
@@ -252,7 +251,8 @@ const Shell = () => {
                   <Route path="/security" element={<SecurityAndRuntimeRisk />} />
                   <Route path="/experience" element={<DigitalExperience />} />
                   <Route path="/opportunities" element={<ImprovementOpportunities />} />
-                  <Route path="/roadmap" element={<Roadmap />} />
+                  {/* 3.7.9: the Roadmap page became the 30-60-90 action plan, a tab of Opportunities. */}
+                  <Route path="/roadmap" element={<Navigate to={{ pathname: '/opportunities', search: '?tab=plan' }} replace />} />
                   <Route path="/settings" element={<SettingsRoute />} />
                   <Route path="/builder" element={<PocBuilder />} />
                   {/* 3.3.0: an address this app does not have renders a page that says so, instead

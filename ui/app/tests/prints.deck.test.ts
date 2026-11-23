@@ -67,7 +67,6 @@ import { LAYOUTS } from '../features/wrapup/prints/plan/pinTemplates';
 import { printDeckFileName, useDeckDownload } from '../features/wrapup/prints/deck/useDeckDownload';
 import type { AnalysisContent, EvidenceQueryId, EvidenceWindow, MethodologyContent, ShotKind, Sourced, SourceKind, StoryContent } from '../features/wrapup/prints/types';
 import { translate, type StringKey } from '../i18n/strings';
-import { TEMPLATE, itWithTemplate } from './fixtures/brandTemplate';
 
 /**
  * The real-prints deck (3.2.7, WP6): `buildPrintDeckSpec`, its two writers and the package.
@@ -78,6 +77,7 @@ import { TEMPLATE, itWithTemplate } from './fixtures/brandTemplate';
  * and one with no print at all. The Tech Wrapup's own deck is pinned by `deckFingerprint.test.ts`.
  */
 
+const TEMPLATE = new Uint8Array(readFileSync(join(process.cwd(), 'ui/assets/techwrapup-brand-template.pptx')));
 const t = (key: StringKey, params?: Readonly<Record<string, string | number>>) => translate(key, 'pt-BR', params);
 const LABELS = printDeckLabels(t);
 
@@ -420,7 +420,7 @@ describe('buildPrintDeckSpec plans the slides of each profile', () => {
     expect(of(buildPrintDeckSpec(input('se', { story: { ...STORY, steps: STORY.steps.slice(0, 2) } })), 'story')).toHaveLength(0);
   });
 
-  itWithTemplate('fills the thumbnail box of a step with no print in this deck with "Prova por DQL", never a blank half (3.2.7 review UX-L4)', async () => {
+  it('fills the thumbnail box of a step with no print in this deck with "Prova por DQL", never a blank half (3.2.7 review UX-L4)', async () => {
     const se = of(buildPrintDeckSpec(input('se')), 'story')[0] as StorySlide;
     expect(se.steps.map((step) => step.noPrint ?? null)).toEqual([null, null, null, null]);
     const spec = buildPrintDeckSpec(input('customer'));
@@ -871,7 +871,7 @@ describe('the PPTX writer draws the print deck into the brand template', () => {
     expect(printXml).toContain('<a:t> P-260914359, 12 min</a:t>');
   });
 
-  itWithTemplate('dedupes and stores media: one genimgN.jpeg per distinct print, STORE, jpeg declared, and a package PowerPoint can open', async () => {
+  it('dedupes and stores media: one genimgN.jpeg per distinct print, STORE, jpeg declared, and a package PowerPoint can open', async () => {
     for (const profile of ['se', 'customer'] as const) {
       const spec = buildPrintDeckSpec(input(profile));
       const zip = await patchTemplate(spec, TEMPLATE, { dtLogo: PNG, seName: 'Ada Lovelace', dedupeMedia: true, storeImages: true });
@@ -894,7 +894,7 @@ describe('the PPTX writer draws the print deck into the brand template', () => {
     }
   });
 
-  itWithTemplate('without the flags, writes one part per use (the Tech Wrapup default is untouched)', async () => {
+  it('without the flags, writes one part per use (the Tech Wrapup default is untouched)', async () => {
     const spec = buildPrintDeckSpec(input('se'));
     const zip = await patchTemplate(spec, TEMPLATE, { dtLogo: PNG, seName: null });
     const media = Object.keys(zip.files).filter((name) => /^ppt\/media\/genimg\d+\./.test(name));
@@ -903,14 +903,14 @@ describe('the PPTX writer draws the print deck into the brand template', () => {
     expect(await packageProblems(zip)).toEqual([]);
   });
 
-  itWithTemplate('keeps the unapproved print out of the customer package, byte for byte', async () => {
+  it('keeps the unapproved print out of the customer package, byte for byte', async () => {
     const zip = await patchTemplate(buildPrintDeckSpec(input('customer')), TEMPLATE, { dtLogo: PNG, seName: null, dedupeMedia: true, storeImages: true });
     const parts = await Promise.all(Object.keys(zip.files).filter((name) => name.startsWith('ppt/media/genimg')).map((name) => zip.file(name)?.async('base64')));
     const forbidden = [IMAGES.root, IMAGES.frontend].map((image) => image.dataUrl.split(',')[1]);
     expect(parts.filter((part) => forbidden.includes(part))).toEqual([]);
   });
 
-  itWithTemplate('buildTemplateDeck forwards the media flags (a smaller file for the same deck)', async () => {
+  it('buildTemplateDeck forwards the media flags (a smaller file for the same deck)', async () => {
     const spec = buildPrintDeckSpec(input('se'));
     const plain = await buildTemplateDeck(spec, TEMPLATE, { dtLogo: PNG, seName: null });
     const packed = await buildTemplateDeck(spec, TEMPLATE, { dtLogo: PNG, seName: null, dedupeMedia: true, storeImages: true });
@@ -1183,7 +1183,7 @@ describe('the download', () => {
     expect(printDeckFileName('  ', 'se', now, 'en')).toBe('TIP-Tech-Wrapup-Prints-poc-October-2026-SE-interno.pptx');
   });
 
-  itWithTemplate('builds the package with the media flags, hands it to an anchor and keeps the URL for the fallback link', async () => {
+  it('builds the package with the media flags, hands it to an anchor and keeps the URL for the fallback link', async () => {
     const created: string[] = [];
     const revoked: string[] = [];
     const createSpy = vi.fn((blob: Blob) => {

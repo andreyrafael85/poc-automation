@@ -1,5 +1,35 @@
 # Changelog
 
+## 3.7.9 — the Autonomous Value Cycle
+
+**Coverage tells the value the PoC delivered**
+
+- The **Autonomous Value Cycle** replaces the maturity journey on the Coverage page: around a Foundation, five links
+  that feed each other — Context, Cause, Impact, Action and Prevention — count the **value events** the PoC already
+  demonstrated, from what the app reads on the environment (nothing new is queried), with the **next wave** of each
+  link. No level, step or score: the count only grows over a PoC.
+- An **autonomy ladder** — Observe, Explain, Prioritise, Propose, Act — shows the rungs the PoC demonstrated and the
+  target agreed with the customer for this PoC, chosen on the panel and kept in the PoC plan.
+- AI Observability and runtime security run across the cycle; for the SE and the partner, each link also says what
+  Professional Services brings.
+- The Coverage card, the conversation guide and the Tech Wrapup (its Coverage section and a new "Value cycle"
+  capture) speak of value events.
+
+**A menu in nine stages**
+
+- Context · PoC objectives · Coverage achieved (Coverage, Platform adoption) · Evidence (every page that reads the
+  environment, from Dynatrace Intelligence to Competitor overlap) · Impact (Executive summary, Consumption and
+  events) · Demonstrated value · Recommendations · Next steps (Licensing, for the SE and partners) · Settings & Build.
+- The Roadmap page became the **30-60-90 action plan**, a tab of Opportunities (the old address opens it).
+
+**The Dynatrace brand kit included**
+
+- The deck template, the DT Flow typeface, the logos, product logomarks and technology glyphs are now part of the
+  repository, so the Tech Wrapup, the Real proofs and the PDFs come out in the Dynatrace brand — for Dynatrace
+  collaborators and official Dynatrace partners only; all rights belong to Dynatrace LLC (see the README's rights
+  notice). `npm run brand:strip` turns the app back to a neutral theme.
+- The tests that need the brand kit now run: 2,079 passing, none skipped.
+
 ## 3.7.8 — first public release of PoC Automation 3.0
 
 The all-in-one Dynatrace AppEngine app for running a proof of concept end to end.
@@ -38,7 +68,7 @@ The all-in-one Dynatrace AppEngine app for running a proof of concept end to end
 
 **Foundations**
 
-- 128 catalogued DQL queries with cost guards and validation records; every number a `Fact` with its evidence class,
-  query and read time; no money outside Licensing; nothing created on the tenant without a click.
+- 128 catalogued DQL queries with scan guards and validation records; every number a `Fact` with its evidence class,
+  query and read time; licensing figures only in Licensing; nothing created on the tenant without a click.
 - Strato Design System 3.18, React 18, TypeScript, Node 24; English and Brazilian Portuguese.
 - 25 scopes, each documented in [docs/PERMISSIONS.md](docs/PERMISSIONS.md).

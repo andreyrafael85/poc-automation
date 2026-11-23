@@ -51,8 +51,8 @@ describe('one Coverage page', () => {
     expect(entryFor('tw.asm.title')).toEqual({ en: 'Environment coverage', 'pt-BR': 'Cobertura do ambiente' });
   });
 
-  it('points the cross-links of the Roadmap and Opportunities at /coverage', () => {
-    for (const file of ['ui/app/pages/Roadmap.tsx', 'ui/app/pages/ImprovementOpportunities.tsx']) {
+  it('points the cross-links of Opportunities (with the action plan since 3.7.9) at /coverage', () => {
+    for (const file of ['ui/app/pages/ImprovementOpportunities.tsx']) {
       expect(read(file), file).toContain('to="/coverage"');
       expect(read(file), file).not.toContain('to="/assessment"');
     }

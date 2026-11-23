@@ -28,8 +28,9 @@ import { AdoptionList } from '../features/assessment/AdoptionList';
 import { DepthMap } from '../features/assessment/DepthMap';
 import { CoverageInventory } from '../features/assessment/CoverageInventory';
 import { CAPABILITY_LABEL } from '../features/assessment/adoption';
-import { MaturityJourney } from '../features/assessment/MaturityJourney';
-import { LEVEL_KEY } from '../features/assessment/maturity';
+import { ValueCycle } from '../features/assessment/ValueCycle';
+import type { AutonomyRung } from '../features/assessment/valueCycle';
+import type { PocPlan } from '../models/pocPlan';
 import { PersonaGuide } from '../features/assessment/PersonaGuide';
 import { PracticeList } from '../features/assessment/PracticeList';
 import { bandOf, radialBarsFor } from '../features/assessment/radar';
@@ -119,9 +120,16 @@ const FindingCard = ({ finding }: { finding: AssessmentFinding }) => {
   );
 };
 
+/** 3.7.9: the plan with the autonomy target the SE agreed (none removes it). */
+function withTarget(plan: PocPlan, rung: AutonomyRung | null): PocPlan {
+  const rest: PocPlan = { ...plan };
+  delete rest.autonomyTarget;
+  return rung === null ? rest : { ...rest, autonomyTarget: rung };
+}
+
 export const Assessment = () => {
   const { t, tWindow, formatNumber, formatDateTime, formatDay } = useTranslation();
-  const { parameters, timeframeLabel, executiveMode, resolvedTimeframe } = useStudio();
+  const { parameters, timeframeLabel, executiveMode, resolvedTimeframe, pocPlan, setPocPlan } = useStudio();
   const access = useAccess();
   // The conversation guide and the query ids are SE and partner material: not for executive mode or a viewer without access.
   const technical = !executiveMode && access.canWork;
@@ -292,10 +300,11 @@ export const Assessment = () => {
       detail: index.value === null ? t('p.asm.index.notCalculated') : t(bandOf(index.value)),
     },
     {
-      key: 'maturity',
-      label: t('asm.exec.maturity'),
-      value: assessment.isLoading ? loadingValue : `${assessment.maturity.level}/5`,
-      detail: t(LEVEL_KEY[assessment.maturity.level].name),
+      // 3.7.9: the value events the PoC demonstrated (the Value cycle), in place of the maturity step — a number that only grows.
+      key: 'valueEvents',
+      label: t('cycle.kpi.label'),
+      value: assessment.isLoading ? loadingValue : formatNumber(assessment.valueCycle.total),
+      detail: t('cycle.kpi.detail'),
     },
     {
       key: 'capabilities',
@@ -546,14 +555,25 @@ export const Assessment = () => {
             </Stack>
           </Panel>
 
-          {/* 3.4.3 — the maturity journey. */}
-          <Panel as="section" pad="roomy" data-print-section>
+          {/* 3.7.9 — the Autonomous Value Cycle, in place of the maturity journey (the owner's CVA framework). */}
+          <Panel as="section" pad="roomy" data-print-section data-testid="asm-value-cycle">
             <Stack gap="group">
               <Heading level={3} as="h2">
-                {t('asm.mat.title')}
+                {t('cycle.title')}
               </Heading>
-              <Text className="pvs-caption">{t('asm.mat.caption')}</Text>
-              {assessment.isLoading ? <Text>{t('p.asm.gap.loading')}</Text> : <MaturityJourney reading={assessment.maturity} t={t} formatNumber={formatNumber} />}
+              <Text className="pvs-caption">{t('cycle.caption')}</Text>
+              {assessment.isLoading ? (
+                <Text>{t('p.asm.gap.loading')}</Text>
+              ) : (
+                <ValueCycle
+                  reading={assessment.valueCycle}
+                  t={t}
+                  formatNumber={formatNumber}
+                  showServices={technical}
+                  target={pocPlan.autonomyTarget ?? null}
+                  {...(technical ? { onTarget: (rung: AutonomyRung | null) => setPocPlan(withTarget(pocPlan, rung)) } : {})}
+                />
+              )}
             </Stack>
           </Panel>
             {/* 2 — the snapshot: what the model holds, and the observable-coverage index beside its domains. */}
@@ -858,7 +878,7 @@ export const Assessment = () => {
                 {/* 3.4.3: the plan in horizons and the shortlist live on their own pages, not repeated here. */}
                 <Text className="pvs-caption" data-print-hide>
                   {t('xref.fromAssessment')}{' '}
-                  <Link as={RouterLink} to="/roadmap">
+                  <Link as={RouterLink} to="/opportunities?tab=plan">
                     {t('nav.roadmap')}
                   </Link>
                   {' · '}
@@ -885,7 +905,7 @@ export const Assessment = () => {
 
             {/* 3.4.1 — the conversation guide; 3.4.9 (F-08) — by audience. SE and partner only; printed on request. */}
             {technical && guideRows.length > 0 && (
-              <PersonaGuide findings={findings} signals={signals} index={index} maturity={assessment.maturity} t={t} formatNumber={formatNumber} />
+              <PersonaGuide findings={findings} signals={signals} index={index} valueEvents={assessment.isLoading ? null : assessment.valueCycle.total} t={t} formatNumber={formatNumber} />
             )}
 
             </Stack>

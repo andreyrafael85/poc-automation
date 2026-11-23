@@ -19,7 +19,6 @@ import {
   ListIcon,
   LogsIcon,
   MoneyIcon,
-  PathIcon,
   PieChartIcon,
   SecurityIcon,
   ServicesIcon,
@@ -87,7 +86,6 @@ const NAV_ICON: Record<string, React.ReactNode> = {
   '/value': <MoneyIcon />,
   '/report': <DocumentIcon />,
   '/opportunities': <IdeaIcon />,
-  '/roadmap': <PathIcon />,
   '/licensing': <KeyIcon />,
 };
 

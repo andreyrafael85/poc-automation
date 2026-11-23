@@ -9,7 +9,6 @@ import type { Translation } from '../../i18n/useTranslation';
 import type { CoverageIndex } from './coverageIndex';
 import { docFor } from './docLinks';
 import type { AssessmentFinding, AssessmentSignals } from './findings';
-import type { MaturityReading } from './maturity';
 import { findingsForPersona, openingFigures, PERSONA_KEY, PERSONA_SHOW, PERSONAS, personasOf, type Persona } from './personas';
 import './assessment.css';
 
@@ -25,14 +24,14 @@ export const PersonaGuide = ({
   findings,
   signals,
   index,
-  maturity,
+  valueEvents,
   t,
   formatNumber,
 }: {
   findings: readonly AssessmentFinding[];
   signals: AssessmentSignals;
   index: CoverageIndex;
-  maturity: MaturityReading;
+  valueEvents: number | null;
   t: Translation['t'];
   formatNumber: Translation['formatNumber'];
 }) => {
@@ -40,7 +39,7 @@ export const PersonaGuide = ({
   const [print, setPrint] = useState(false);
   const asked = findings.filter((finding) => finding.kind === 'finding' || finding.cls !== 'strength');
   const rows = choice === 'all' ? asked : findingsForPersona(choice, asked);
-  const figures = choice === 'all' ? [] : openingFigures(choice, { signals, index, maturity, findings }, formatNumber);
+  const figures = choice === 'all' ? [] : openingFigures(choice, { signals, index, valueEvents, findings }, formatNumber);
   return (
     <div data-print-hide={print ? undefined : true}>
       <Panel as="section" pad="roomy" data-testid="asm-guide" data-print-section={print ? true : undefined}>

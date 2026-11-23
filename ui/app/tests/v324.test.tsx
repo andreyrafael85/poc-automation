@@ -365,9 +365,7 @@ describe('captures of the app', () => {
 
   it('paints the pictures in the same DT Flow faces the stage lays the panels out in', () => {
     const css = captureFontCss();
-    // The DT Flow font is a brand asset not included in this repository (`fonts.ts` is an empty
-    // stub there); the stage rule below is checked either way.
-    if (css !== '') expect(css).toContain("font-family:'DTFlow'");
+    expect(css).toContain("font-family:'DTFlow'");
     const stage = readFileSync(join(process.cwd(), 'ui/app/engine/spectrum.css'), 'utf8');
     const rule = stage.slice(stage.indexOf('.pvs-capture-stage {'), stage.indexOf('}', stage.indexOf('.pvs-capture-stage {')));
     expect(rule).toContain("--pvs-capture-font: 'DTFlow'");

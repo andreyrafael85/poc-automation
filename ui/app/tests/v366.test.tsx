@@ -45,7 +45,8 @@ describe('the menu', () => {
     expect(last?.id).toBe('manage');
     expect(last?.routes).toEqual(['/builder', '/settings']);
     expect(STORY_STAGES[0]?.routes).toEqual(['/']);
-    expect(stageOf('/settings')?.position).toBe(10);
+    // 3.7.9: nine stages; Settings & Build is the ninth.
+    expect(stageOf('/settings')?.position).toBe(9);
     expect(entryFor('stage.manage')['pt-BR']).toBe('Configurações & Construção');
     expect(entryFor('stage.manage').en).toBe('Settings & Build');
     expect(entryFor('nav.builder')).toEqual({ en: 'PoC Builder', 'pt-BR': 'PoC Builder' });

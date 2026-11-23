@@ -1,6 +1,6 @@
 # Architecture
 
-> **App:** PoC Automation 3.0 · **id:** `my.poc.automation` · **platform:** Dynatrace AppEngine · **release:** 3.7.8
+> **App:** PoC Automation 3.0 · **id:** `my.poc.automation` · **platform:** Dynatrace AppEngine · **release:** 3.7.9
 >
 > The code is the source of truth. This document describes how the app is built and the rules it keeps.
 
@@ -8,7 +8,7 @@
 
 1. [Purpose and audience](#1-purpose-and-audience)
 2. [Platform pieces and folders](#2-platform-pieces-and-folders)
-3. [The ten stages: pages and routes](#3-the-ten-stages-pages-and-routes)
+3. [The nine stages: pages and routes](#3-the-nine-stages-pages-and-routes)
 4. [Access and roles](#4-access-and-roles)
 5. [Data: the query catalog and provenance](#5-data-the-query-catalog-and-provenance)
 6. [Persistence](#6-persistence)
@@ -30,20 +30,20 @@ concept into a traceable, auditable story of value:
 - **what the platform discovered** (problems, root cause, security);
 - **how the environment behaves** (services, infrastructure, Kubernetes, logs, automation, AI workloads);
 - **what the impact and value were** (executive summary, adoption, value and ROI);
-- **what to do next** (opportunities, roadmap, licensing);
+- **what to do next** (opportunities with the 30-60-90 action plan, licensing);
 - and **what the PoC can build on the environment** with one click (the PoC Builder).
 
 | Audience | What they do |
 | --- | --- |
 | **Sales Engineer (SE)** | Sets up the PoC (customer, scope, logos, success criteria), runs the demo, produces the reports and the Tech Wrapup, creates kits on the PoC Builder, sets the partner password. The only one who **writes** to the environment. |
 | **Partner** | Works with the SE: every page, commercial ones included, and the exports. Enters with the PoC password (or a master password) for a limited time. Creates nothing and manages no access. |
-| **Customer** | A read-only executive view (Overview, PoC timeline, Executive summary). Never sees prices, DPS or consumption. |
+| **Customer** | A read-only executive view (Overview, PoC timeline, Executive summary). Never sees licensing or consumption figures. |
 | **Executive mode** | Not a role but a presentation switch: hides technical pages, Settings, the PoC Builder and all commercial data. |
 
 What the app never does:
 
 - creates anything on the environment on its own — every kit needs the SE's click and a confirmation;
-- shows money outside Licensing, or to a customer (in the app or in an export);
+- shows licensing figures outside Licensing, or to a customer (in the app or in an export);
 - sums or counts a capped list;
 - invents a number — absence is stated as absence, never as zero;
 - runs DQL outside its catalog or concatenates an id into query text;
@@ -111,65 +111,83 @@ flowchart LR
 | `ui/app/config/` | Navigation, access, the PoC context, persistence, assumptions, PoC transfer, app info |
 | `ui/app/queries/` | The query catalog, parameterised templates, parameter rendering, Grail metadata |
 | `ui/app/hooks/` | `useCatalogQuery` — the single door to Grail — and hooks built on it |
-| `ui/app/models/` | Pure models: provenance, PoC plan, cost, licensing, RCA, series, maps |
+| `ui/app/models/` | Pure models: provenance, PoC plan, licensing, RCA, series, maps |
 | `ui/app/engine/` | Visual engine: panels, figures, evidence styles, print styles, `engine/strato/`, `engine/chart/` |
-| `ui/app/features/` | Features by domain: `builder`, `dashboard`, `triage`, `weekly`, `setup`, `wrapup`, `assessment`, `consumption`, `licensing`, `cockpit`, `rca`, `logs`… |
+| `ui/app/features/` | Features by domain: `builder`, `dashboard`, `triage`, `weekly`, `setup`, `wrapup`, `assessment` (with the value cycle), `opportunities` (the 30-60-90 action plan), `consumption`, `licensing`, `cockpit`, `rca`, `logs`… |
 | `ui/app/pages/` | One page per route |
 | `ui/app/i18n/` | The typed en / pt-BR dictionary, in fragments |
 | `ui/app/tests/` | Vitest + Testing Library |
 | `actions/` | The two workflow actions and their forms (widgets) |
-| `scripts/` | Release, gates, deploy, the visual harness, the catalog generator, the brand pack |
+| `scripts/` | Release, gates, deploy, the visual harness, the catalog generator, the brand pack (`brand:status`, `brand:install`, `brand:strip`) |
 
 Execution principles:
 
 - **Nothing is preloaded.** Every page is a lazily loaded chunk and every query lives inside a page.
 - **One error boundary per route.** A failing page shows a recovery card; header, menu and footer keep working.
 - **Unknown routes** show a "not found" page. **Old addresses** stay valid (`/assessment` → `/coverage`,
-  `/wrapup` and `/wrapup/prints` open the SE Report's tabs, `/settings?tab=dashboards` opens the PoC Builder).
+  `/wrapup` and `/wrapup/prints` open the SE Report's tabs, `/settings?tab=dashboards` opens the PoC Builder, `/roadmap`
+  opens the 30-60-90 action plan on Opportunities).
 
 ---
 
-## 3. The ten stages: pages and routes
+## 3. The nine stages: pages and routes
 
-The menu groups the pages into **ten stages** that follow the arc of a PoC (`STORY_STAGES` in
+The menu groups the pages into **nine stages** that follow the arc of a PoC (`STORY_STAGES` in
 `ui/app/config/navigation.ts`). The pager at the foot of each page leads to the next page of the story.
 
 | # | Stage | Page | Route | Purpose |
 | --- | --- | --- | --- | --- |
 | 1 | Context | Overview | `/` | The environment and the PoC on one screen: the flow from the user to the cloud, change since Day 0, problem arrivals |
 | 2 | PoC objectives | PoC timeline | `/timeline` | The days of the PoC, daily signals, success criteria |
-| 3 | Coverage achieved | Coverage | `/coverage` | What exists, what is covered and mapped, the depth map, the coverage index, maturity, findings and an action plan, before and after |
-| 3 | | Topology | `/topology` | Who calls whom and the layer map |
-| 3 | | Technologies | `/technologies` | Technologies and versions actually running |
-| 3 | | Cloud | `/cloud` | Which clouds and how deep |
-| 3 | | Business events | `/business` | Business observability |
-| 3 | | Digital experience | `/experience` | Real users: the experience funnel, Core Web Vitals, audience |
-| 4 | Discoveries | Dynatrace Intelligence | `/problems` | Problems, recurrence, status rows by category, the problem console |
+| 3 | Coverage achieved | Coverage | `/coverage` | What exists, what is covered and mapped, the depth map, the coverage index, the **Autonomous Value Cycle**, findings and an action plan, before and after |
+| 3 | | Platform adoption | `/adoption` | How many people use the platform, when, which apps, how much is AI-assisted |
+| 4 | Evidence | Dynatrace Intelligence | `/problems` | Problems, recurrence, status rows by category, the problem console |
 | 4 | | AIOps & RCA | `/rca` | From the noisiest incident to its cause: propagation, investigation, affected entities, history |
+| 4 | | Services & tracing | `/services` | Health, quadrants, trend, ranking |
+| 4 | | Infrastructure | `/infrastructure` | The estate and its saturation, a capacity map per host |
+| 4 | | Kubernetes | `/kubernetes` | Clusters, workloads, restarts, pressure |
+| 4 | | Cloud | `/cloud` | Which clouds and how deep |
+| 4 | | Topology | `/topology` | Who calls whom and the layer map |
+| 4 | | Technologies | `/technologies` | Technologies and versions actually running |
+| 4 | | Logs & data quality | `/logs` | Volume, levels, retention per bucket, a console of recent errors with counts |
+| 4 | | Digital experience | `/experience` | Real users: the experience funnel, Core Web Vitals, audience |
+| 4 | | Business events | `/business` | Business observability |
+| 4 | | Automation | `/automation` | What is automated and whether it is reliable |
+| 4 | | AI Observability | `/ai-observability` | GenAI tokens in and out, models, services and calls (tokens only), with a link to the platform's AI Observability app |
 | 4 | | Security | `/security` | Vulnerabilities reachable at runtime and where they run |
 | 4 | | Competitor overlap | `/competitor` | Other monitoring tools running in the environment |
-| 5 | Evidence | Services & tracing | `/services` | Health, quadrants, trend, ranking |
-| 5 | | Infrastructure | `/infrastructure` | The estate and its saturation, a capacity map per host |
-| 5 | | Kubernetes | `/kubernetes` | Clusters, workloads, restarts, pressure |
-| 5 | | Logs & data quality | `/logs` | Volume, levels, retention per bucket, a console of recent errors with counts |
-| 5 | | Automation | `/automation` | What is automated and whether it is reliable |
-| 5 | | AI Observability | `/ai-observability` | GenAI tokens in and out, models, services and calls (tokens only, never money), with a link to the platform's AI Observability app |
-| 6 | Impact | Executive summary | `/executive` | The verdict for sponsors: Day 0 against today, MTTR, operational cost |
-| 6 | | Platform adoption | `/adoption` | How many people use the platform, when, which apps, how much is AI-assisted |
-| 6 | | Consumption and events | `/consumption` | How use is spread across capabilities (SE and partner only) |
-| 7 | Demonstrated value | Value & ROI | `/value` | Measured and projected value from visible assumptions |
-| 7 | | SE Report | `/report` | The report, the first-day message, the Tech Wrapup deck and the real proofs |
-| 8 | Recommendations | Opportunities | `/opportunities` | Next capabilities to enable, from the findings |
-| 9 | Next steps | Roadmap | `/roadmap` | The adoption path after the PoC |
-| 9 | | Licensing | `/licensing` | DPS and classic, cost projection, the app's own consumption (commercial) |
-| 10 | Settings & Build | PoC Builder | `/builder` | What the PoC created on the environment and what else to create |
-| 10 | | Settings | `/settings` | Customer and engagement, PoC plan, operational cost, partner, rate card, prerequisites, assumptions, partner access |
+| 5 | Impact | Executive summary | `/executive` | The verdict for sponsors: Day 0 against today, MTTR |
+| 5 | | Consumption and events | `/consumption` | How use is spread across capabilities (SE and partner only) |
+| 6 | Demonstrated value | Value & ROI | `/value` | Measured and projected value from visible assumptions |
+| 6 | | SE Report | `/report` | The report, the first-day message, the Tech Wrapup deck and the real proofs |
+| 7 | Recommendations | Opportunities | `/opportunities` | Next capabilities to enable, from the findings, and the **30-60-90 action plan** (a tab) |
+| 8 | Next steps | Licensing | `/licensing` | Licensing, for the SE and partners |
+| 9 | Settings & Build | PoC Builder | `/builder` | What the PoC created on the environment and what else to create |
+| 9 | | Settings | `/settings` | Customer and engagement, PoC plan, the team's working figures, partner, prerequisites, assumptions, partner access |
+
+### The Autonomous Value Cycle
+
+On the Coverage page (`ui/app/features/assessment/valueCycle.ts`, `ValueCycle.tsx`) the cycle tells what the PoC
+already delivered. Around a **Foundation**, five links feed each other — **Context, Cause, Impact, Action,
+Prevention** — and Prevention feeds the Context again. Each link holds **value events**: an event is *demonstrated*
+when a read the app already does proves it (nothing new is queried), the *next wave* when the read answered and does
+not prove it yet, and left out when its read did not answer. The count of value events demonstrated only grows over
+a PoC; there is no level, step or score. An **autonomy ladder** (Observe → Explain → Prioritise → Propose → Act)
+shows the rungs the PoC demonstrated and the target the SE agreed with the customer (`autonomyTarget` in the PoC
+plan). AI Observability and runtime security run across the cycle as lenses. The Coverage card, the conversation
+guide and the Tech Wrapup (its Coverage section and a "Value cycle" capture) speak of value events.
+
+### The 30-60-90 action plan
+
+A tab of Opportunities (`ui/app/features/opportunities/ActionPlan.tsx`): the same live insights as the
+opportunities list, placed into three horizons — 30, 60 and 90 days — by effort and dependency. An item appears only
+when the environment produced a signal for it; owners are named by role, never by person.
 
 Who sees what:
 
 | Set | Routes | Effect |
 | --- | --- | --- |
-| `EXECUTIVE_HIDDEN_ROUTES` | `/builder`, `/settings` and the technical pages | Leave the menu in executive mode (the whole stage 10 disappears) |
+| `EXECUTIVE_HIDDEN_ROUTES` | `/builder`, `/settings` and the technical pages | Leave the menu in executive mode (the whole stage 9 disappears) |
 | `SE_ONLY_ROUTES` | `/licensing`, `/consumption` | Commercial material: SE and partner only, outside executive mode; blocked even by URL |
 | `RESTRICTED_ROUTES` | `/`, `/executive`, `/timeline` | What a customer without access can open; everything else asks for the partner password |
 
@@ -198,8 +216,7 @@ Files: `ui/app/config/access.ts` (pure rules), `ui/app/config/AccessContext.tsx`
   Customers and executive mode never see it.
 - **Commercial data and executive mode.** Commercial data is native to the SE and the partner; `CommercialScope`
   reduces it for the whole tree when executive mode is on, so pages, menu, `SeOnly` blocks and the export profile
-  all follow. Money appears only in Licensing. The operational cost counts only problems with a named root cause;
-  MTTR and problem counts use every problem.
+  all follow. Licensing figures appear only in Licensing.
 
 ---
 
@@ -249,7 +266,7 @@ sequenceDiagram
   end
 ```
 
-The hook memoises the request, sends the cost guards as request fields, and **classifies** the result:
+The hook memoises the request, sends the scan guards as request fields, and **classifies** the result:
 `loading`, `ok`, `empty`, `no-permission`, `scan-limit`, `error`, `refused` — a missing scope is never shown as
 "no data". A test fails if `useDql` is imported anywhere else. The workflow actions, which run outside React, read
 the same catalog through the query execution client with each entry's guards.
@@ -273,13 +290,12 @@ Absence is `unavailable(...)`, never `?? 0`. Provenance is drawn in neutral styl
 provenance badge opens the exact DQL.
 
 - **Assumptions.** `ui/app/config/assumptions.ts` holds every number the app chose (thresholds, review lines,
-  default rates), each with its origin (platform, industry or convention) and audience; Settings → Assumptions
+  defaults), each with its origin (platform, industry or convention) and audience; Settings → Assumptions
   lists them.
 - **Capped lists.** A list with `| limit` or `maxResultRecords` shows "top N"; totals come from an aggregate
   companion query registered in `tests/catalogCaps.test.ts`.
 - **The app's own consumption.** A session meter adds up the bytes each Grail answer reports; a pre-flight projects
-  what one full visit reads on this environment; Licensing shows the expected cost of using the app and what the
-  app's queries were actually billed (from billing usage events), in money only with the rate card on.
+  what one full visit reads on this environment; Licensing → App consumption shows it, for the SE and the partner.
 
 ---
 
@@ -292,7 +308,7 @@ door is `ui/app/config/stateStore.ts`, which turns every outcome into a value (`
 | Key | Scope | Content |
 | --- | --- | --- |
 | `pvs.shared.v1` | app | The PoC: customer, engagement, scope, logos, partner, the customer's main web address, pillars and the **PoC plan** (no commercial data) |
-| `pvs.private.v1` | user | The SE's working figures: hourly cost, manual baseline, rate card, language, window, Tech Wrapup choices |
+| `pvs.private.v1` | user | The SE's working figures: manual baseline, language, window, Tech Wrapup choices and the other figures only the SE sees |
 | `pvs.access.v1` | app | The partner-password verifier, validity and admitted partners |
 | `pvs.assessment.history.v1` | app | Kept Coverage readings (before and after), up to 12 |
 | `pvs.assessment.plan.v1` | app | The agreed action plan (owner, due date, state) by finding |
@@ -333,7 +349,7 @@ environment never travel.
 
 ## 8. The PoC Builder
 
-Route `/builder`, stage 10. Page `ui/app/pages/PocBuilder.tsx`; logic in `ui/app/features/builder/` and
+Route `/builder`, stage 9. Page `ui/app/pages/PocBuilder.tsx`; logic in `ui/app/features/builder/` and
 `ui/app/features/dashboard/`.
 
 **Principles.** Nothing is created automatically: each kit writes only after the SE's click and a confirmation,
@@ -443,19 +459,28 @@ action log and the e-mail is still sent.
 
 ## 10. Exports
 
-Every export has a **profile**: *Customer* (default, no licensing, DPS, consumption or price) or *SE* (keeps
+Every export has a **profile**: *Customer* (default, no licensing nor consumption figures) or *SE* (keeps
 commercial data and marks each page "SE internal", available only while commercial data is visible).
 
 | Export | Where | How | Content |
 | --- | --- | --- | --- |
 | **SE Report** | SE Report → Report | Browser print (PDF) | The value report with provenance; the first-day message |
-| **Coverage** | Coverage → "Download as PDF" | Browser print | Every Coverage tab, both logos on the cover, "Method and sources"; also a JSON reading (each figure with its query id, DQL and read time — never a tenant id, token or price) and the action plan as CSV |
+| **Coverage** | Coverage → "Download as PDF" | Browser print | Every Coverage tab, both logos on the cover, "Method and sources"; also a JSON reading (each figure with its query id, DQL and read time — never a tenant id or token) and the action plan as CSV |
 | **Prerequisites** | Settings → Prerequisites | A print document of its own, A4 landscape | A guide for the customer: connectivity drawing, where to find the addresses to allow, six checklists with documentation links |
 | **Tech Wrapup** | SE Report → Tech Wrapup | PPTX written in the browser + an HTML preview that prints a 16:9 PDF | The closing deck: sections by domain, Coverage, pictures of the app's panels with 3–5 numbered pins anchored on the app's text and a "How to read" legend |
 | **Real proofs** | SE Report → Real proofs | PPTX / PDF | The platform's own screens, read by the app (it finds the platform's labels by drawing them in the platform's typeface and correlating), pinned only where found, masked when the deck is built; screenshots from blocked tenants are refused by SHA-256 |
 
 A fingerprint test (`tests/deckFingerprint.test.ts`) pins the Tech Wrapup deck's structure; a deck change re-pins it
 deliberately.
+
+**The Dynatrace brand.** The repository includes the Dynatrace brand kit — the deck template
+(`ui/assets/techwrapup-brand-template.pptx`), the vendor mark (`ui/assets/Dynatrace_Logo.svg`), the DT Flow typeface,
+the logos and product logomarks (`ui/app/features/wrapup/fonts.ts`, `brand.ts`, `productLogos.ts`), the technology
+glyphs (`components/spectrum/brandGlyphs.ts`) and the cloud logomarks (`models/cloudLogos.ts`) — so the decks and
+PDFs come out in the Dynatrace brand (`BRAND_PACK_INSTALLED` in `features/wrapup/brandPack.ts`; `npm run
+brand:status`). It is for Dynatrace collaborators and official Dynatrace partners only; all rights belong to
+Dynatrace LLC (see the rights notice in the README). `npm run brand:strip` replaces the Dynatrace assets with empty
+stubs: the app then writes every deck on a neutral template of its own (`features/wrapup/neutralTemplate.ts`).
 
 ---
 
@@ -479,8 +504,8 @@ deliberately.
 | **AppEngine** | The platform's runtime for apps (UI and functions) |
 | **App State** | The platform's key-value store per app; `app` (shared) or `user` (private) scope |
 | **Catalog** | The 128 validated DQL queries, the app's only data source |
+| **Autonomous Value Cycle** | The Coverage page's reading of the value the PoC delivered: a Foundation and five links of value events, with an autonomy ladder |
 | **Day 0** | The PoC's first day (start date in Settings), the base of "since Day 0" changes |
-| **DPS** | Dynatrace Platform Subscription, the consumption-based licensing model |
 | **Dynatrace Assist** | The platform's generative AI, used as a task in the triage and weekly workflows |
 | **Dynatrace Intelligence** | How the app refers to the platform's causal AI |
 | **Evidence class** | What kind of number a figure is (observed, derived, projection…) |

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import { useQueryScope } from '../../config/StudioContext';
+import { useQueryScope, useStudio } from '../../config/StudioContext';
 import { useCatalogQuery, type CatalogQueryResult } from '../../hooks/useCatalogQuery';
 import { useInsightSignals } from '../../hooks/useInsightSignals';
 import { useTranslation } from '../../i18n/useTranslation';
@@ -12,6 +12,7 @@ import { bool, num, str, type GrailRecord } from '../../utils/records';
 import { computeIndex, presenceDomain, ratioDomain, type CoverageIndex, type DomainReading, type ReadOutcome } from './coverageIndex';
 import { platformAdoption, type AdoptionRow } from './adoption';
 import { maturity as readMaturity, type MaturityReading } from './maturity';
+import { valueCycle, type ValueCycleReading } from './valueCycle';
 import { srePractices, type Practice } from './sre';
 import { deriveAssessmentFindings, type AssessmentFinding, type AssessmentSignals } from './findings';
 
@@ -56,6 +57,8 @@ export interface Assessment {
   adoption: AdoptionRow[];
   /** 3.4.3: the maturity journey and the SRE / platform-engineering practices. */
   maturity: MaturityReading;
+  /** 3.7.9: the Autonomous Value Cycle — the value events the PoC demonstrated, link by link (in place of the journey). */
+  valueCycle: ValueCycleReading;
   practices: Practice[];
   /** Reads that answered, of all the reads the page makes (the "x of y sources read" badge). */
   sourcesRead: number;
@@ -263,6 +266,25 @@ export function useAssessment(): Assessment {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [JSON.stringify(signals), index.value],
   );
+  // 3.7.9: the Value cycle also counts what the PoC Builder created and the AI apps in view (0 B, outside `reads`).
+  const { pocPlan } = useStudio();
+  const ai = useCatalogQuery('ai.tokens', scope);
+  const aiServices = ai.outcome === 'ok' ? new Set(ai.records.map((record) => str(record, 'service.name') ?? '')).size : null;
+  const extras = {
+    dashboards: Object.values(pocPlan.specialtyDashboards ?? {}).filter((ref) => ref !== undefined).length,
+    slos: pocPlan.slos?.length ?? 0,
+    monitors: pocPlan.monitors?.length ?? 0,
+    detectors: pocPlan.detectors?.length ?? 0,
+    pipeline: pocPlan.pipeline !== undefined,
+    planDates: pocPlan.startDate !== null && pocPlan.endDate !== null,
+    criteria: pocPlan.criteria.length,
+    aiServices,
+  };
+  const cycleReading = useMemo(
+    () => valueCycle(signals, extras),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [JSON.stringify(signals), JSON.stringify(extras)],
+  );
   const practices = useMemo(
     () => srePractices(signals, index, text),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -276,6 +298,7 @@ export function useAssessment(): Assessment {
     findings,
     adoption,
     maturity: maturityReading,
+    valueCycle: cycleReading,
     practices,
     sourcesRead: all.filter(answered).length,
     sourcesTotal: all.length,

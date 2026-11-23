@@ -11,7 +11,6 @@ import type { CoverInput, DeckProfile, DeckSpec } from '../features/wrapup/spec'
 import { buildPrintDeckSpec, printDeckCoverTitle, printDeckLabels, type PrintDeckShot } from '../features/wrapup/prints/deck/buildPrintDeckSpec';
 import type { AnalysisContent, EvidenceWindow, MethodologyContent, Sourced, StoryContent } from '../features/wrapup/prints/types';
 import { ALL_KEYS, LOCALES, entryFor, translate, type Locale, type StringKey } from '../i18n/strings';
-import { TEMPLATE, itWithTemplate } from './fixtures/brandTemplate';
 
 /**
  * Privacy and money guards of the real-prints deck (3.2.7, spec §2.9 and §7.3).
@@ -26,6 +25,7 @@ import { TEMPLATE, itWithTemplate } from './fixtures/brandTemplate';
 
 const ROOT = process.cwd();
 const PRINTS = join(ROOT, 'ui/app/features/wrapup/prints');
+const TEMPLATE = new Uint8Array(readFileSync(join(ROOT, 'ui/assets/techwrapup-brand-template.pptx')));
 
 const MONEY = /R\$|US\$|€|£|\bDPS\b|licen[cç]|\bcusto\b|\bcost\b|\bpreço\b|\bprice\b/i;
 const TENANT_HOST = 'abc12345.apps.dynatrace.com';
@@ -266,7 +266,7 @@ describe('the rendered deck', () => {
     }
   });
 
-  itWithTemplate('carries none of the pixels of a print the customer profile does not keep', async () => {
+  it('carries none of the pixels of a print the customer profile does not keep', async () => {
     const customer = deck('customer', 'pt-BR');
     const unkept = jpeg('root-cause--b');
     expect(JSON.stringify(customer)).not.toContain(unkept.dataUrl);

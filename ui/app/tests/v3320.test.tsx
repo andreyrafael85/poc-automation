@@ -67,8 +67,8 @@ describe('the pages', () => {
     expect(page).toContain('<ImpactEffortMatrix');
     expect(page).toContain("{ id: 'rank', header: '#', accessor: 'rank'");
   });
-  it('Roadmap opens on the horizon strip, Value & ROI on its cockpit row', () => {
-    expect(read('ui/app/pages/Roadmap.tsx')).toContain('<HorizonStrip');
+  it('the 30-60-90 action plan (the Roadmap until 3.7.8) opens on the horizon strip, Value & ROI on its cockpit row', () => {
+    expect(read('ui/app/features/opportunities/ActionPlan.tsx')).toContain('<HorizonStrip');
     expect(read('ui/app/pages/ValueRoiEngine.tsx')).toContain('<CockpitRow data-testid="roi-cockpit" split="even" align="start">');
   });
 });

@@ -18,14 +18,14 @@ over any document.
    `--optimize --enable-code-splitting` (`docs/DEPLOYMENT.md`). The manifest's `environmentUrl` stays a placeholder.
 4. **Scopes**: a new or removed scope is a manifest change with a comment, a line in `docs/PERMISSIONS.md` and a
    deploy. `ui/app/tests/catalog.test.ts` checks that every catalog scope is declared and every storage scope used.
-5. **Money only in Licensing.** Prices, DPS cost and currency appear only in Licensing and as `projection` figures
+5. **Commercial figures only in Licensing.** Licensing figures appear only in Licensing and as `projection` figures
    inside `SeOnly` / `commercialVisible`; executive mode (`CommercialScope`) hides them; never in a customer export.
 6. **Never sum or count a capped list.** A list with `| limit` or `maxResultRecords` shows "top N"; totals come from
    an aggregate companion query registered in `ui/app/tests/catalogCaps.test.ts`.
 7. **Every number has provenance**: a `Fact` with its evidence class, query id and read time. Absence is
    `unavailable(...)`, never `?? 0`. No invented or AI-made numbers.
 8. **Data goes through the catalog.** New queries are entries in `ui/app/queries/catalog.ts` (purpose, DQL without
-   interpolation or window, `requiredScope`, `timeframe`, cost `guards`, a `validation` record) read with
+   interpolation or window, `requiredScope`, `timeframe`, scan `guards`, a `validation` record) read with
    `useCatalogQuery`. A query that needs an id is a parameterised entry in `queries/catalogTemplates.ts`, rendered
    only by `queries/params.ts` — never concatenate an id into DQL. Dashboard tiles and notebook sections read a
    catalog entry or a validated query of `features/dashboard/blueprints.ts`. The workflow actions read only catalog

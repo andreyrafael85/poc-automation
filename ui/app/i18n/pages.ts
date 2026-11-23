@@ -1373,7 +1373,7 @@ export const pageStrings = {
   'p.report.recommended': { en: 'Recommended: {value}', 'pt-BR': 'Recomendado: {value}' },
 
   // ======================================================= page: roadmap extras
-  'p.roadmap.title': { en: 'Recommended roadmap', 'pt-BR': 'Roadmap recomendado' },
+  'p.roadmap.title': { en: '30-60-90 action plan', 'pt-BR': 'Plano de ação 30-60-90' },
   'p.roadmap.question': {
     en: 'What should happen in the next 30, 60 and 90 days, and how will we know each step worked?',
     'pt-BR':
@@ -1384,7 +1384,7 @@ export const pageStrings = {
     'pt-BR':
       'Cada item remete a uma medição feita neste ambiente. Nada aqui é um modelo genérico de maturidade.',
   },
-  'p.roadmap.howToRead': { en: 'How to read this roadmap', 'pt-BR': 'Como ler este roadmap' },
+  'p.roadmap.howToRead': { en: 'How to read this plan', 'pt-BR': 'Como ler este plano' },
   'p.roadmap.howToReadBody1': {
     en: 'Colour marks the horizon, not a severity. Items in the first horizon either block the assessment itself or are cheap enough to commit to immediately; the second needs building; the third needs sustained effort.',
     'pt-BR':
@@ -1395,24 +1395,15 @@ export const pageStrings = {
     'pt-BR':
       'Os responsáveis são sugeridos por papel, nunca por nome. Os critérios de sucesso são escritos para poderem ser verificados contra a linha de base registrada por este app — e é por isso que nenhum deles é expresso como economia ou ganho percentual.',
   },
-  'p.roadmap.partialTitle': {
-    en: 'Roadmap is built on partial information',
-    'pt-BR': 'O roadmap está construído sobre informação parcial',
-  },
+  'p.roadmap.partialTitle': { en: 'The plan is built on partial information', 'pt-BR': 'O plano está construído sobre informação parcial' },
   'p.roadmap.partialBody': {
     en: '{count} sources could not be read, so items those sources would have produced are missing: {list}',
     'pt-BR':
       '{count} fontes não puderam ser lidas, então os itens que elas teriam produzido estão faltando: {list}',
   },
-  'p.roadmap.derivingAria': {
-    en: 'Building roadmap from live signals',
-    'pt-BR': 'Construindo o roadmap a partir de sinais ao vivo',
-  },
-  'p.roadmap.deriving': {
-    en: 'Deriving roadmap from measured signals…',
-    'pt-BR': 'Derivando o roadmap a partir dos sinais medidos…',
-  },
-  'p.roadmap.none': { en: 'No roadmap items were generated', 'pt-BR': 'Nenhum item de roadmap foi gerado' },
+  'p.roadmap.derivingAria': { en: 'Building the action plan from live signals', 'pt-BR': 'Construindo o plano de ação a partir de sinais ao vivo' },
+  'p.roadmap.deriving': { en: 'Deriving the action plan from measured signals…', 'pt-BR': 'Derivando o plano de ação a partir dos sinais medidos…' },
+  'p.roadmap.none': { en: 'No action was generated for the plan', 'pt-BR': 'Nenhuma ação foi gerada para o plano' },
   'p.roadmap.emptyHorizon': {
     en: 'Nothing in this horizon from the current measurements.',
     'pt-BR': 'Nada neste horizonte a partir das medições atuais.',
@@ -1710,10 +1701,7 @@ export const pageStrings = {
     'pt-BR':
       'Experiência digital e postura de segurança legível são as duas capacidades comprovadamente não exercitadas neste escopo.',
   },
-  'f.score.d.expansion.rec': {
-    en: 'See the Roadmap page, which is generated from the gaps recorded on this scorecard.',
-    'pt-BR': 'Veja a página de Roadmap, que é gerada a partir das lacunas registradas neste placar.',
-  },
+  'f.score.d.expansion.rec': { en: 'See the 30-60-90 action plan in Opportunities, generated from the gaps recorded on this scorecard.', 'pt-BR': 'Veja o plano de ação 30-60-90 em Oportunidades, gerado a partir das lacunas registradas neste placar.' },
 
   // ----------------------------------------------- improvement opportunities
   'f.insight.recurring.title': {

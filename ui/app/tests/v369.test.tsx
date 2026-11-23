@@ -121,9 +121,9 @@ describe('the register and the clean-up', () => {
 });
 
 describe('What’s new', () => {
-  it('keeps 3.6.9 among the ten releases', () => {
-    // 3.7.0: newer releases come first.
-    expect(WHATS_NEW).toContainEqual({ key: 'help.whatsNew.i111', published: '2026-11-22' });
+  it('lets 3.6.9 leave the ten releases (3.7.9), its text kept', () => {
+    // 3.7.9: i121 opened the list and i111 left it to keep ten.
+    expect(WHATS_NEW.some((entry) => entry.key === 'help.whatsNew.i111')).toBe(false);
     expect(WHATS_NEW.length).toBe(10);
     expect(entryFor('help.whatsNew.i111').en.startsWith('3.6.9 — ')).toBe(true);
   });

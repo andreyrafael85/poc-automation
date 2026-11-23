@@ -11,7 +11,9 @@ PoC Automation 3.0 is deployed with the Dynatrace App Toolkit (`dt-app`, a dev d
    - `ui/app/config/access.ts` — the partner master-password verifier (`deadbeef…` placeholder, matches nothing);
    - `ui/app/config/appInfo.ts` — the footer's contact address (`se@example.com`);
    - `ui/app/features/wrapup/prints/capture/tenantGuard.ts` — the SHA-256 of environment ids the Real proofs refuse.
-4. Optional: brand assets. Without them the decks use a neutral theme; `npm run brand:status` reports which.
+4. The Dynatrace brand kit is included, for Dynatrace collaborators and official Dynatrace partners only (see the
+   README's rights notice); anyone else runs `npm run brand:strip` first, and the decks then use a neutral theme.
+   `npm run brand:status` reports which one is in use.
 
 `app.config.json` keeps `environmentUrl` as a placeholder (`https://YOUR-ENVIRONMENT-ID.apps.dynatrace.com/`) on
 purpose: the target environment is always given on the command line, so every deploy names its destination.

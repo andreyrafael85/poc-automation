@@ -25,40 +25,25 @@ export const v31Strings = {
     'pt-BR': 'A jornada da PoC e o que ela se propôs a comprovar.',
   },
   'stage.coverage': { en: 'Coverage achieved', 'pt-BR': 'Cobertura alcançada' },
-  'stage.coverage.blurb': {
-    en: 'What is monitored, how completely, and what this review could not read.',
-    'pt-BR': 'O que está monitorado, com que completude e o que esta avaliação não conseguiu ler.',
-  },
+  'stage.coverage.blurb': { en: 'What is monitored, how completely, and how the platform is used.', 'pt-BR': 'O que está monitorado, com que completude e como a plataforma é usada.' },
   'stage.discoveries': { en: 'Discoveries', 'pt-BR': 'Descobertas' },
   'stage.discoveries.blurb': {
     en: 'What Dynatrace found on its own, with no rule written for this review.',
     'pt-BR': 'O que a Dynatrace encontrou por conta própria, sem nenhuma regra escrita para esta avaliação.',
   },
   'stage.evidence': { en: 'Evidence', 'pt-BR': 'Evidências' },
-  'stage.evidence.blurb': {
-    en: 'The measurements behind each finding, traceable down to the query.',
-    'pt-BR': 'As medições por trás de cada descoberta, rastreáveis até a consulta.',
-  },
+  'stage.evidence.blurb': { en: 'What Dynatrace found on its own, and the measurements behind each finding, traceable down to the query.', 'pt-BR': 'O que a Dynatrace encontrou por conta própria e as medições por trás de cada descoberta, rastreáveis até a consulta.' },
   'stage.impact': { en: 'Impact', 'pt-BR': 'Impacto' },
-  'stage.impact.blurb': {
-    en: 'What the findings cost in time, exposure and consumption.',
-    'pt-BR': 'O que as descobertas custam em tempo, exposição e consumo.',
-  },
+  'stage.impact.blurb': { en: 'The headline for the sponsors, and how the platform is used and consumed.', 'pt-BR': 'O resumo para os patrocinadores e como a plataforma é usada e consumida.' },
   'stage.value': { en: 'Demonstrated value', 'pt-BR': 'Valor demonstrado' },
   'stage.value.blurb': {
     en: 'What the PoC proved, and the deliverables that carry it away.',
     'pt-BR': 'O que a PoC comprovou e os entregáveis que levam isso adiante.',
   },
   'stage.recommendations': { en: 'Recommendations', 'pt-BR': 'Recomendações' },
-  'stage.recommendations.blurb': {
-    en: 'Improvements, each with the measurement that justifies it.',
-    'pt-BR': 'Melhorias, cada uma com a medição que a justifica.',
-  },
+  'stage.recommendations.blurb': { en: 'Improvements, each with the measurement that justifies it, and the 30-60-90 action plan.', 'pt-BR': 'Melhorias, cada uma com a medição que a justifica, e o plano de ação 30-60-90.' },
   'stage.next': { en: 'Next steps', 'pt-BR': 'Próximos passos' },
-  'stage.next.blurb': {
-    en: 'The roadmap beyond the PoC, and how to size it.',
-    'pt-BR': 'O roteiro além da PoC e como dimensioná-lo.',
-  },
+  'stage.next.blurb': { en: 'How to size what comes after the PoC.', 'pt-BR': 'Como dimensionar o que vem depois da PoC.' },
 
   // ------------------------------------------------------------------ shell
   'shell.nav.label': { en: 'The story of this PoC', 'pt-BR': 'A história desta PoC' },

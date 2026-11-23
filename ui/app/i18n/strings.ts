@@ -112,6 +112,7 @@ import { v375Strings } from './v375';
 import { v376Strings } from './v376';
 import { v377Strings } from './v377';
 import { v378Strings } from './v378';
+import { v379Strings } from './v379';
 
 export { LOCALES, LOCALE_LABELS, LOCALE_TAG, type Locale, type Entry } from './locales';
 
@@ -164,7 +165,7 @@ export const coreStrings = {
   'nav.story': { en: 'Demo story', 'pt-BR': 'Roteiro de demo' },
   'nav.report': { en: 'SE Report', 'pt-BR': 'Relatório SE' },
   'nav.evidence': { en: 'Evidence', 'pt-BR': 'Evidências' },
-  'nav.roadmap': { en: 'Roadmap', 'pt-BR': 'Roadmap' },
+  'nav.roadmap': { en: '30-60-90 action plan', 'pt-BR': 'Plano de ação 30-60-90' },
   'nav.appendix': { en: 'Appendix', 'pt-BR': 'Apêndice' },
   'nav.settings': { en: 'Settings', 'pt-BR': 'Configurações' },
 
@@ -918,6 +919,7 @@ const dictionary = {
   ...v376Strings,
   ...v377Strings,
   ...v378Strings,
+  ...v379Strings,
 } as const satisfies Record<string, Entry>;
 
 export type StringKey = keyof typeof dictionary;

@@ -246,10 +246,7 @@ describe('the numbers beside a capture read whole', () => {
   // 3.2.7 final review D2: "216,…", "22.9 …", "P-91…" on the capture slides of the existing deck.
 
   /** The advance width (ems) of a character in the 800 face of `fonts.ts` (what weight 700 draws in the preview), read from the font's own tables. */
-  // The DT Flow font is a brand asset not included in this repository: `fonts.ts` is an empty stub
-  // there, so the tests that measure against the embedded face run only when it is supplied.
-  const HAS_DTFLOW = /font-weight:800;[^}]*?base64,/.test(DTFLOW_FONT_CSS);
-  const buildEmbeddedBold = (): ((char: string) => number) => {
+  const embeddedBold = ((): ((char: string) => number) => {
     const font = Buffer.from(/font-weight:800;[^}]*?base64,([A-Za-z0-9+/=]+)\)/.exec(DTFLOW_FONT_CSS)?.[1] ?? '', 'base64');
     const u16 = (at: number) => font.readUInt16BE(at);
     const tables = new Map<string, number>();
@@ -278,14 +275,12 @@ describe('the numbers beside a capture read whole', () => {
     };
     expect(unitsPerEm).toBeGreaterThan(0);
     return (char) => u16(hmtx + 4 * Math.min(glyphOf(char.codePointAt(0) ?? 0), longMetrics - 1)) / unitsPerEm;
-  };
-  let boldWidths: ((char: string) => number) | undefined;
-  const embeddedBold = (char: string): number => (boldWidths ??= buildEmbeddedBold())(char);
+  })();
   const fontEm = (text: string) => [...text].reduce((sum, char) => sum + embeddedBold(char), 0);
   /** A capture-side tile's width for its value, in points: the tile minus the text box's insets. */
   const roomPt = (count: number) => (captureLayout({ kpis: count, assist: false }).kpis[0]?.w ?? 0) / 12700 - 2 * 7.2;
 
-  it.skipIf(!HAS_DTFLOW)('measures a value in the deck’s own bold face, never narrower than the font draws it', () => {
+  it('measures a value in the deck’s own bold face, never narrower than the font draws it', () => {
     const sample = '0123456789 .,:%-–—…·×µ/()ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzáãâçéêíóõôúÁÉÇ';
     for (const char of sample) {
       expect(deckBoldEm(char), char).toBeGreaterThanOrEqual(embeddedBold(char) - 0.0005);
@@ -295,7 +290,7 @@ describe('the numbers beside a capture read whole', () => {
     expect(deckBoldEm('漢')).toBeGreaterThan(deckBoldEm('W'));
   });
 
-  it.skipIf(!HAS_DTFLOW)('sets a 6, 7 or 9 character value whole beside a capture, at the size its tile holds, in the file and on the screen', () => {
+  it('sets a 6, 7 or 9 character value whole beside a capture, at the size its tile holds, in the file and on the screen', () => {
     const values = ['61,200', '216,431', 'P-9100100'];
     for (const value of values) {
       const size = captureKpiFit(value, 3);
@@ -379,7 +374,7 @@ describe('the numbers beside a capture read whole', () => {
     expect(capture.slice(0, capture.indexOf('</li>'))).not.toContain('…');
   });
 
-  it.skipIf(!HAS_DTFLOW)('leaves out a value no readable size fits, or one its budget cut, instead of printing it cut', () => {
+  it('leaves out a value no readable size fits, or one its budget cut, instead of printing it cut', () => {
     const long = 'svc-payments-checkout-eu-01';
     expect(captureKpiFit(long, 2)).toBeNull();
     // Beside a short value it does not fit a two-tile row, so the row keeps the one that does.

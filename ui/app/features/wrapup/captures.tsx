@@ -8,7 +8,7 @@ import { TrendChart, type TrendSeries } from '../../components/TrendChart';
 import { BarList } from '../../components/viz/BarList';
 import { DonutBreakdown } from '../../components/viz/DonutBreakdown';
 import { MAX_CAPTURES_PER_SECTION, type CaptureChoice } from '../../config/persistence';
-import { useQueryScope } from '../../config/StudioContext';
+import { useQueryScope, useStudio } from '../../config/StudioContext';
 import { Cluster, Grid, Panel, Stack } from '../../engine';
 import type { CatalogId } from '../../queries/catalog';
 import { useCatalogQuery, type QueryOutcome } from '../../hooks/useCatalogQuery';
@@ -33,7 +33,7 @@ import { RcaTrail } from '../rca/RcaTrail';
 import { logTrendSeries } from '../trends/trendSeries';
 import { DTFLOW_FONT_CSS } from './fonts';
 import { ProblemCalendarPanel, ProblemRingsPanel } from '../cockpit/aiPanels';
-import { MaturityJourney } from '../assessment/MaturityJourney';
+import { ValueCycle } from '../assessment/ValueCycle';
 import { bandOf, radialBarsFor } from '../assessment/radar';
 import { useAssessment } from '../assessment/useAssessment';
 import { RadialBars } from '../../engine/chart/RadialBars';
@@ -443,19 +443,20 @@ const ProblemRingsCapture = () => {
   return <ProblemRingsPanel />;
 };
 
-/** 3.4.10 (F-02): the Assessment's maturity journey and its coverage radar, as the page draws them. */
-const AssessmentMaturityCapture = () => {
+/** 3.7.9: the Coverage page's Autonomous Value Cycle — the ring, the links' counts and the ladder (in place of the maturity journey). */
+const AssessmentCycleCapture = () => {
   const { t, formatNumber } = useTranslation();
   const assessment = useAssessment();
+  const { pocPlan } = useStudio();
   if (assessment.isLoading) return <Loading />;
   if (anyFailed(assessment.reads.inventory)) return <Failed />;
   return (
     <Panel pad="roomy">
       <Stack gap="group">
         <Heading level={4} as="h2">
-          {t('asm.mat.title')}
+          {t('cycle.title')}
         </Heading>
-        <MaturityJourney reading={assessment.maturity} t={t} formatNumber={formatNumber} compact />
+        <ValueCycle reading={assessment.valueCycle} t={t} formatNumber={formatNumber} showServices={false} target={pocPlan.autonomyTarget ?? null} compact />
       </Stack>
     </Panel>
   );
@@ -1302,47 +1303,37 @@ export const CAPTURE_REGISTRY: readonly CaptureEntry[] = [
       textPin(t, (root) => root.querySelector('.pvs-consol__side[data-side="dynatrace"] .pvs-label'), 'cap.d.comp.platform', 'platform', 'left'),
     ],
   },
-  // 3.4.10 (F-02): the Assessment — its maturity rings by default, the coverage radar as the option.
+  // 3.7.9: the Assessment — its Value cycle by default (was the maturity rings), the coverage radar as the option.
   {
     sectionId: 'assessment',
-    captureId: 'assessment.maturity',
-    label: 'cap.opt.assessment.maturity',
-    node: () => <AssessmentMaturityCapture />,
+    captureId: 'assessment.cycle',
+    label: 'cap.opt.assessment.cycle',
+    node: () => <AssessmentCycleCapture />,
     width: 1100,
-    ready: (root) => root.querySelector('.pvs-mat-rings') !== null,
-    pins: ({ t }) => [
-      {
-        // 3.5.6: on the step the rings state (was the sentence's corner).
-        find: (root) => root.querySelector('.pvs-mat-rings__level'),
+    ready: (root) => root.querySelector('.pvs-cycle__ring') !== null,
+    pins: ({ t }) => {
+      const count = (row: Element) => Number.parseInt(text(row.querySelector('.pvs-cycle__legendcount')).replace(/\D/g, ''), 10) || 0;
+      const rowPin = (pick: (rows: Element[]) => Element | null, detail: StringKey, capability: CapabilityKey): PinSpec => ({
+        find: (root) => pick([...root.querySelectorAll('.pvs-cycle__legend li')])?.querySelector('.pvs-cycle__legendname') ?? null,
         label: (element) => {
-          const value = text(element.closest('.pvs-mat')?.querySelector('.pvs-mat-rings__name'));
-          return value === '' ? null : t('cap.pin.assessment.level', { value: `${text(element)} ${value}` });
+          const value = text(element.parentElement?.querySelector('.pvs-cycle__legendcount'));
+          return value === '' ? null : t('cap.pin2.row', { name: text(element), value });
         },
         at: 'left',
-        ...reading(t, 'cap.d.asm.level', 'assessment'),
-      },
-      textPin(t, (root) => root.querySelector('.pvs-mat__inplace'), 'cap.d.asm.inplace', 'assessment'),
-      {
-        find: nth('.pvs-mat__pillar-name', 0),
-        label: (element) => {
-          const level = text(element.parentElement?.querySelector('.pvs-mat__pillar-level'));
-          return level === '' ? null : t('cap.pin2.row', { name: text(element), value: level });
+        ...reading(t, detail, capability),
+      });
+      return [
+        {
+          find: (root) => root.querySelector('[data-testid="cycle-total"]'),
+          label: (element) => (text(element) === '' ? null : t('cap.pin.cycle.total', { n: text(element) })),
+          at: 'left',
+          ...reading(t, 'cap.d.cycle.total', 'assessment'),
         },
-        at: 'left',
-        ...reading(t, 'cap.d.asm.pillar', 'assessment'),
-      },
-      // The first next step (a pillar's own line is not one).
-      textPin(t, (root) => [...root.querySelectorAll('.pvs-mat li')].find((item) => item.querySelector('.pvs-mat__pillar-name') === null && text(item) !== '') ?? null, 'cap.d.asm.next', 'assessment'),
-      {
-        find: (root) => [...root.querySelectorAll('.pvs-mat-spectrum__here')].find((here) => text(here) !== '') ?? null,
-        label: (element) => {
-          const name = text(element.closest('.pvs-mat')?.querySelector('.pvs-mat-rings__name'));
-          return name === '' ? null : t('cap.pin2.here', { here: text(element), name });
-        },
-        at: 'left',
-        ...reading(t, 'cap.d.asm.here', 'assessment'),
-      },
-    ],
+        rowPin((rows) => rows.reduce<Element | null>((kept, row) => (kept === null || count(row) > count(kept) ? row : kept), null), 'cap.d.cycle.best', 'platform'),
+        rowPin((rows) => rows.find((row) => (row as HTMLElement).dataset.link === 'cause') ?? null, 'cap.d.cycle.cause', 'rootCause'),
+        textPin(t, (root) => root.querySelector('[data-testid="cycle-ladder-reading"]'), 'cap.d.cycle.ladder', 'automation'),
+      ];
+    },
   },
   {
     sectionId: 'assessment',

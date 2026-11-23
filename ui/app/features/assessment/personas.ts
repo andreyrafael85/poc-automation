@@ -1,7 +1,6 @@
 import type { StringKey } from '../../i18n/strings';
 import type { CoverageIndex } from './coverageIndex';
 import type { AssessmentFinding, AssessmentSignals } from './findings';
-import type { MaturityReading } from './maturity';
 
 /**
  * The conversation guide by audience (3.4.9, proposal §C8 F-08: "roteiro por persona — CIO, SRE, desenvolvimento,
@@ -79,15 +78,16 @@ export interface OpeningFigure {
  */
 export function openingFigures(
   persona: Persona,
-  input: { signals: AssessmentSignals; index: CoverageIndex; maturity: MaturityReading; findings: readonly AssessmentFinding[] },
+  input: { signals: AssessmentSignals; index: CoverageIndex; valueEvents: number | null; findings: readonly AssessmentFinding[] },
   formatNumber: (value: number) => string,
 ): OpeningFigure[] {
-  const { signals, index, maturity, findings } = input;
+  const { signals, index, valueEvents, findings } = input;
   const out: OpeningFigure[] = [];
   const critical = findings.filter((finding) => finding.cls === 'critical').length;
   if (persona === 'executive') {
     if (index.value !== null) out.push({ key: 'asm.persona.fig.index', params: { value: formatNumber(index.value) } });
-    out.push({ key: 'asm.persona.fig.maturity', params: { level: String(maturity.level) } });
+    // 3.7.9: the value events the PoC demonstrated (the Value cycle), never a maturity step.
+    if (valueEvents !== null) out.push({ key: 'asm.persona.fig.valueEvents', params: { count: formatNumber(valueEvents) } });
     out.push({ key: 'asm.persona.fig.critical', params: { count: formatNumber(critical) } });
     if (signals.thirdPartyTools !== null && signals.thirdPartyTools.length > 0) {
       out.push({ key: 'asm.persona.fig.tools', params: { count: formatNumber(signals.thirdPartyTools.length) } });

@@ -1,4 +1,6 @@
 import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 import { render } from '@testing-library/react';
 import { createElement } from 'react';
@@ -10,7 +12,6 @@ import { patchTemplate, renderSlides } from '../features/wrapup/pptxTemplate';
 import { buildDeckSpec, type DeckCapture, type DeckSpec, type ExecutiveInput } from '../features/wrapup/spec';
 import { readTemplateArt, type TemplateArt } from '../features/wrapup/templateArt';
 import { setActiveLocaleTag } from '../utils/activeLocale';
-import { HAS_TEMPLATE, TEMPLATE, itWithTemplate } from './fixtures/brandTemplate';
 
 /**
  * The golden guard of the Tech Wrapup deck (3.2.7, WP1 of the real-prints deck).
@@ -29,6 +30,13 @@ import { HAS_TEMPLATE, TEMPLATE, itWithTemplate } from './fixtures/brandTemplate
  * in the commit.
  *
  * ## Re-pin log
+ *
+ * - **3.7.9, `slides` / `package` / `preview` of `customer`, `se` and `options`** — the owner's approval of the Value
+ *   cycle proposal (2026-11-23, "seguir com a 3.7.9", decision D3 "Sim, refazer o golden (Recommended)"): the Coverage
+ *   section of the deck shows the value events the PoC demonstrated (the Autonomous Value Cycle) in place of the maturity
+ *   step, and its capture is `assessment.cycle` (the ring, the links' counts and the autonomy ladder) in place of the
+ *   maturity rings. The fixture's coverage section and its capture pins follow. The `.pptx` changes **deliberately**;
+ *   `bare` has no coverage section and did not move.
  *
  * - **3.5.6, `slides` / `package` / `preview` of `customer` and `se`** — the owner's validation of 3.5.5
  *   (2026-11-21: "no deck techwrapup ainda com os pins errados da captura do app e poucas explicações; recomendei
@@ -100,25 +108,26 @@ const GOLDEN = {
     bare: 'cover,agenda,end',
   },
   slides: {
-    customer: '59b4ebd504542e09b9f553121273e0189d6042f618df69d066e6ee783301341a',
-    se: '8462a924034d9ba3279107dbe2b8b5add9f690861b7887f3ff3f7ff7158f5bfb',
-    options: 'f36b925fe8b9f4f7b25b5b86eda039ee805d7520ce2d83af58fdd4fbf8bad276',
+    customer: 'b9c88a36c58230e15d67fcc7cfbdf060fb6560b297d60d3cf6df9e230520fea7',
+    se: '0367699d04c2520906ee172a880d56c38626ae4274c063b77366af51875ced12',
+    options: '844ba52311cfa1dac1ed0da1dfe3fcb60432c1ae3cf756f357dbdad5961e76e4',
     bare: 'f5d17042a9ca19201fb6ff235151d6c4b835c63fee4066ce60f9e56077d447fe',
   },
   package: {
-    customer: '06d06e5df8d72534dd4d2714fec28d003e4ef1c6940394a3991e6bba3adf4d9c',
-    se: '64dde8c9276851c0ff9454695202b94109c737217f74d8d13dc371474afbb7b4',
-    options: '58c5c883550362d077a1fbad07defcd1b1a0b08b890da8742448c978e3be7246',
+    customer: '22186e4ea6a2bf5cca3875f5e9a71ddafe7636962e77cc4ae94a9946bc6fe148',
+    se: '2afb9dbc7483af5caa077cb4cb3dd077b88c4c7e80945d19005b716a0cfe9b5f',
+    options: 'd9da403f5a59c5effe7c6cfe24d3faf2849ba6ed92db9d9825b034d456c1c93e',
     bare: '2f60e5bfbc70ce15c63d949c2af1ea70a63a092f720beca130550ab0baa8c2f4',
   },
   preview: {
-    customer: 'b04fcbed4e55163b95965bd16b9a9b2acd9d468030897ff300405a585a7c767a',
-    se: 'b0761f5e099b4c256d5652bc39c7df4bd20ba53f9dc787fd0f9e115989d383ec',
-    options: '50914f8bc8fc5c70b980108900edb2c4d8fbefec355963440037c1a55a4a9f1a',
+    customer: '99b3addf33b400aa069e6402ea6c955efd07fa940567e318250bc0c259f661a1',
+    se: '95279b28be7e0eaedd519627fc3f3975c23c8bb6b69f7879ec7d362ac115cd2a',
+    options: 'aa941daf1a653734cfea1be49bb033e8ed099e61dc123fb59a8b9feda56be3c7',
     bare: '74202726cc498efd641d9343d5cf3529c9d216fbe84745a41855acdd60c41943',
   },
 } as const;
 
+const TEMPLATE = new Uint8Array(readFileSync(join(process.cwd(), 'ui/assets/techwrapup-brand-template.pptx')));
 
 // Two 4 × 2 PNGs with different pixels (the fixtures of pptxTemplate.test.ts and v324.test.tsx): high-entropy bytes, not secrets.
 const PNG_A =
@@ -207,16 +216,16 @@ const MODEL: WrapupModel = {
     },
   ],
   business: [
-    // 3.4.10 (F-02): the Assessment opens the business part, with its capture (the maturity rings).
+    // 3.4.10 (F-02): the Assessment opens the business part, with its capture. 3.7.9: the Value cycle, not the maturity rings.
     {
       id: 'assessment',
-      title: 'Environment assessment',
-      subtitle: 'Coverage, maturity and the next steps',
+      title: 'Environment coverage',
+      subtitle: 'What Dynatrace covers and maps, the value cycle and the next steps',
       highlight: { value: '80/100', caption: 'observable coverage of the environment' },
-      narrative: ['Today the environment is at step 2 of the maturity journey, Foundational.', 'Findings: critical 3, attention 9, opportunities 6.'],
+      narrative: ['The PoC already demonstrated 12 value events across the value cycle — Context, Cause, Impact, Action.', 'Findings: critical 3, attention 9, opportunities 6.'],
       kpis: [
         { label: 'Observable coverage', value: '80/100' },
-        { label: 'Maturity', value: '2/5 · Foundational' },
+        { label: 'Value events', value: '12' },
         { label: 'Capabilities in use', value: '8/13' },
         { label: 'Critical findings', value: '3', status: 'warn' },
       ],
@@ -268,7 +277,10 @@ const CAPTURES: Readonly<Record<string, DeckCapture>> = {
     dataUrl: PNG_A,
     width: 1100,
     height: 420,
-    pins: [{ n: 1, x: 0.4, y: 0.2, label: 'Step reached: Foundational' }],
+    pins: [
+      { n: 1, x: 0.18, y: 0.5, label: '12 value events demonstrated', detail: 'Every value event comes from a read of this environment: a number that only grows as the PoC delivers.', capability: 'Assessment' },
+      { n: 2, x: 0.62, y: 0.2, label: '02 Cause: 3 demonstrated', detail: 'Cause: problems detected and explained by Dynatrace Intelligence, with the root cause found without a war room.', capability: 'Dynatrace Intelligence · root cause' },
+    ],
   },
   rca: {
     dataUrl: PNG_B,
@@ -391,7 +403,7 @@ let art: TemplateArt = {};
 beforeAll(async () => {
   // `decimal()` (bar values) reads the module-level locale; pin it so the hashes do not depend on test order.
   setActiveLocaleTag('en-GB');
-  if (HAS_TEMPLATE) art = await readTemplateArt(TEMPLATE);
+  art = await readTemplateArt(TEMPLATE);
 });
 
 describe('the Tech Wrapup deck is byte-identical to the pinned golden', () => {
@@ -403,15 +415,15 @@ describe('the Tech Wrapup deck is byte-identical to the pinned golden', () => {
     expect(slidesFingerprint(specFor(variant))).toBe(GOLDEN.slides[variant]);
   });
 
-  itWithTemplate.each(VARIANTS)('writes the same template package (%s)', async (variant) => {
+  it.each(VARIANTS)('writes the same template package (%s)', async (variant) => {
     expect(await packageFingerprint(specFor(variant), AUTHOR[variant])).toBe(GOLDEN.package[variant]);
   });
 
-  itWithTemplate.each(VARIANTS)('draws the same preview (%s)', (variant) => {
+  it.each(VARIANTS)('draws the same preview (%s)', (variant) => {
     expect(previewFingerprint(specFor(variant), art)).toBe(GOLDEN.preview[variant]);
   });
 
-  itWithTemplate('is deterministic: two renders of one spec hash the same', async () => {
+  it('is deterministic: two renders of one spec hash the same', async () => {
     const spec = specFor('customer');
     expect(slidesFingerprint(spec)).toBe(slidesFingerprint(spec));
     expect(await packageFingerprint(spec, AUTHOR.customer)).toBe(await packageFingerprint(spec, AUTHOR.customer));
@@ -425,8 +437,7 @@ describe('the Tech Wrapup deck is byte-identical to the pinned golden', () => {
     const xml = renderSlides(customer, PNG_A).map((slide) => slide.xml).join('');
     expect(xml).toContain('<p:pic>');
     expect(xml).not.toContain('admin@contoso.com');
-    // The template art exists only with the brand template (not included in this repository).
-    if (HAS_TEMPLATE) expect(art.coverBackground ?? '').toMatch(/^data:image\//);
+    expect(art.coverBackground ?? '').toMatch(/^data:image\//);
   });
 
   it('covers every option of the cover, agenda and end helpers, away from its default and at its emptiest', () => {

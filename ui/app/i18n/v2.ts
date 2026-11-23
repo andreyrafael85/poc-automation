@@ -69,7 +69,7 @@ export const v2Strings = {
   'cc.chapter.investigate.blurb': { en: 'Root cause, affected entities and recurring exposure.', 'pt-BR': 'Causa raiz, entidades afetadas e exposição recorrente.' },
   'cc.chapter.optimize.blurb': { en: 'Consumption, data quality and query efficiency.', 'pt-BR': 'Consumo, qualidade de dados e eficiência de consultas.' },
   'cc.chapter.automate.blurb': { en: 'Workflows and the toil that automation removes.', 'pt-BR': 'Workflows e o trabalho manual que a automação elimina.' },
-  'cc.chapter.evolve.blurb': { en: 'Opportunities and the roadmap beyond the PoC.', 'pt-BR': 'Oportunidades e o roadmap além da PoC.' },
+  'cc.chapter.evolve.blurb': { en: 'Opportunities and the 30-60-90 action plan beyond the PoC.', 'pt-BR': 'Oportunidades e o plano de ação 30-60-90 além da PoC.' },
 
   // -------------------------------------------------------------- timeline
   'tl.eyebrow': { en: 'The PoC as a story', 'pt-BR': 'A PoC como uma história' },

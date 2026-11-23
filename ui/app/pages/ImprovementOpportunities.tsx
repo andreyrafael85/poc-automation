@@ -3,7 +3,9 @@ import React from 'react';
 import { Chip, ProgressCircle } from '@dynatrace/strato-components/content';
 import { DataTable, type DataTableColumnDef } from '@dynatrace/strato-components/tables';
 import { Heading, Link, Text } from '@dynatrace/strato-components/typography';
-import { Link as RouterLink } from 'react-router-dom';
+import { Tab, Tabs } from '@dynatrace/strato-components/navigation';
+import { Link as RouterLink, useLocation } from 'react-router-dom';
+import { ActionPlan } from '../features/opportunities/ActionPlan';
 
 import { SectionIntro } from '../components/SectionIntro';
 import { useCommercialVisible } from '../components/SeOnly';
@@ -119,6 +121,9 @@ export const ImprovementOpportunities = () => {
   const commercialVisible = useCommercialVisible();
   const insights = forAudience(prioritise(deriveInsights(signals, { t, formatNumber })), commercialVisible);
   const ranked: RankedInsight[] = insights.map((insight, index) => ({ ...insight, rank: index + 1 }));
+  // 3.7.9: the 30-60-90 action plan (the Roadmap page until 3.7.8) is this page's second tab; `/roadmap` opens it.
+  const { search } = useLocation();
+  const planFirst = new URLSearchParams(search).get('tab') === 'plan';
 
   return (
     <Stack gap="section">
@@ -151,54 +156,65 @@ export const ImprovementOpportunities = () => {
         </Callout>
       )}
 
-      {isLoading ? (
-        <Cluster justify="center" gap="tight">
-          <ProgressCircle aria-label={t('p.opp.derivingAria')} />
-          <Text>{t('p.opp.deriving')}</Text>
-        </Cluster>
-      ) : insights.length === 0 ? (
-        <Callout kind="note" title={t('p.opp.noneTitle')}>
-          {t('p.opp.noneBody')}
-        </Callout>
-      ) : (
-        <Stack as="section" gap="group">
-          <Heading level={4} as="h2">
-            {tCount('p.opp.count', insights.length, { count: insights.length })}
-          </Heading>
-          {/* Twelve columns of free text cannot be squeezed into the canvas: each has a
-              minimum width, and the table scrolls inside its own region instead of
-              rendering one character per line. */}
-          {/* 3.3.20 (Opportunities on the chart engine): where to act first, before the detail. */}
-          <Panel pad="roomy">
-            <Stack gap="group">
-              <Heading level={4} as="h3">
-                {t('opp.matrix.title')}
-              </Heading>
-              <Text className="pvs-caption">{t('opp.matrix.caption')}</Text>
-              <ImpactEffortMatrix
-                items={ranked.map((insight) => ({ key: insight.id, rank: insight.rank, title: insight.title, impact: insight.impact, effort: insight.effort }))}
-                labels={{
-                  impact: t('roadmap.impact'),
-                  effort: t('roadmap.effort'),
-                  level: { high: t('qual.high'), medium: t('qual.medium'), low: t('qual.low') },
-                  quickWins: t('opp.matrix.quickWins'),
-                }}
-                caption={t('opp.matrix.title')}
-              />
-            </Stack>
-          </Panel>
-          <DataTable
-            data={ranked}
-            columns={columns(t)}
-            fullWidth
-            lineWrap
-            sortable
-            aria-label={t('p.opp.tableAria')}
-          >
-            <DataTable.Pagination defaultPageSize={10} />
-          </DataTable>
-        </Stack>
-      )}
+      <Tabs defaultIndex={planFirst ? 1 : 0}>
+        <Tab title={t('p.opp.tab.list')} keepMounted>
+          <Stack gap="section" className="pvs-tabpane">
+            {isLoading ? (
+              <Cluster justify="center" gap="tight">
+                <ProgressCircle aria-label={t('p.opp.derivingAria')} />
+                <Text>{t('p.opp.deriving')}</Text>
+              </Cluster>
+            ) : insights.length === 0 ? (
+              <Callout kind="note" title={t('p.opp.noneTitle')}>
+                {t('p.opp.noneBody')}
+              </Callout>
+            ) : (
+              <Stack as="section" gap="group">
+                <Heading level={4} as="h2">
+                  {tCount('p.opp.count', insights.length, { count: insights.length })}
+                </Heading>
+                {/* Twelve columns of free text cannot be squeezed into the canvas: each has a
+                    minimum width, and the table scrolls inside its own region instead of
+                    rendering one character per line. */}
+                {/* 3.3.20 (Opportunities on the chart engine): where to act first, before the detail. */}
+                <Panel pad="roomy">
+                  <Stack gap="group">
+                    <Heading level={4} as="h3">
+                      {t('opp.matrix.title')}
+                    </Heading>
+                    <Text className="pvs-caption">{t('opp.matrix.caption')}</Text>
+                    <ImpactEffortMatrix
+                      items={ranked.map((insight) => ({ key: insight.id, rank: insight.rank, title: insight.title, impact: insight.impact, effort: insight.effort }))}
+                      labels={{
+                        impact: t('roadmap.impact'),
+                        effort: t('roadmap.effort'),
+                        level: { high: t('qual.high'), medium: t('qual.medium'), low: t('qual.low') },
+                        quickWins: t('opp.matrix.quickWins'),
+                      }}
+                      caption={t('opp.matrix.title')}
+                    />
+                  </Stack>
+                </Panel>
+                <DataTable
+                  data={ranked}
+                  columns={columns(t)}
+                  fullWidth
+                  lineWrap
+                  sortable
+                  aria-label={t('p.opp.tableAria')}
+                >
+                  <DataTable.Pagination defaultPageSize={10} />
+                </DataTable>
+              </Stack>
+            )}
+          </Stack>
+        </Tab>
+        <Tab title={t('p.opp.tab.plan')} keepMounted>
+          <div className="pvs-tabpane">
+            <ActionPlan insights={insights} isLoading={isLoading} unavailable={unavailable} />
+          </div>
+        </Tab>
+      </Tabs>
     </Stack>
   );
 };

@@ -14,7 +14,7 @@ export const v3410Strings = {
 
   // ---------------------------------------------------------------- the Assessment in the deck (F-02)
   'tw.asm.title': { en: 'Environment coverage', 'pt-BR': 'Cobertura do ambiente' },
-  'tw.asm.subtitle': { en: 'What Dynatrace covers and maps, maturity and the next steps', 'pt-BR': 'O que a Dynatrace cobre e mapeia, maturidade e próximos passos' },
+  'tw.asm.subtitle': { en: 'What Dynatrace covers and maps, the value cycle and the next steps', 'pt-BR': 'O que a Dynatrace cobre e mapeia, o ciclo de valor e os próximos passos' },
   'tw.asm.hi': { en: 'observable coverage of the environment', 'pt-BR': 'cobertura observável do ambiente' },
   'tw.asm.hiMaturity': { en: 'maturity step: {name}', 'pt-BR': 'etapa de maturidade: {name}' },
   'tw.asm.k.index': { en: 'Observable coverage', 'pt-BR': 'Cobertura observável' },

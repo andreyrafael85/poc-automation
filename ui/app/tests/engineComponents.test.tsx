@@ -363,7 +363,7 @@ describe('SectionIntro', () => {
       '/coverage',
     );
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
-    expect(screen.getByText('Stage 3 of 10 · Coverage achieved')).toBeInTheDocument();
+    expect(screen.getByText('Stage 3 of 9 · Coverage achieved')).toBeInTheDocument();
   });
 
   it('has no crumb on a route outside the story', () => {
@@ -416,7 +416,7 @@ describe('SectionIntro', () => {
       '/coverage',
     );
     fireEvent.click(screen.getByRole('button', { name: 'pt' }));
-    expect(await screen.findByText('Etapa 3 de 10 · Cobertura alcançada')).toBeInTheDocument();
+    expect(await screen.findByText('Etapa 3 de 9 · Cobertura alcançada')).toBeInTheDocument();
   });
 });
 

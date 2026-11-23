@@ -3,7 +3,7 @@
   "environmentUrl": "https://YOUR-ENVIRONMENT-ID.apps.dynatrace.com/",
   "app": {
     "name": "PoC Automation 3.0",
-    "version": "3.7.8",
+    "version": "3.7.9",
     "description": "All in One, automated Dynatrace PoC: coverage, evidence, value and Tech Wrapup",
     "id": "my.poc.automation",
     "scopes": [

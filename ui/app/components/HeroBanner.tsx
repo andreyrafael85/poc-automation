@@ -6,9 +6,9 @@ import { Heading, Paragraph, Text } from '@dynatrace/strato-components/typograph
 import { useStudio } from '../config/StudioContext';
 import { BRAND_COLOR } from '../design/palette';
 import { Panel } from '../engine';
-import { DYNATRACE_LOGO_COLOR } from '../features/wrapup/brand';
 import { useTranslation } from '../i18n/useTranslation';
 import { isSafeImageDataUrl } from '../utils/logo';
+import { BRAND_PACK_INSTALLED } from '../features/wrapup/brandPack';
 
 /**
  * Engagement banner: the customer's mark next to the Dynatrace mark.
@@ -80,13 +80,11 @@ export const HeroBanner = ({ title, subtitle, windowLabel, asOfIso, headingAs = 
                       : t('c.hero.namedLogoAlt', { name: parameters.customerName })
                   }
                 />
-                <span className="pvs-hero__rule" aria-hidden="true" />
+                {BRAND_PACK_INSTALLED && <span className="pvs-hero__rule" aria-hidden="true" />}
               </>
             )}
-            {/* The vendor logo is a brand asset not included in this repository: shown only when supplied (features/wrapup/brand.ts). */}
-            {DYNATRACE_LOGO_COLOR !== '' && (
-              <img className="pvs-hero__logo" data-brand="dynatrace" src={DYNATRACE_LOGO_COLOR} alt="Dynatrace" />
-            )}
+            {/* 3.3.5: the vendor mark is part of the brand pack; a copy without it shows none (no broken image). */}
+            {BRAND_PACK_INSTALLED && <img className="pvs-hero__logo" data-brand="dynatrace" src="./assets/Dynatrace_Logo.svg" alt="Dynatrace" />}
           </div>
 
           <div className="pvs-stack" style={{ '--pvs-gap': 'var(--dt-spacings-size-4)', alignItems: 'flex-end' } as React.CSSProperties}>

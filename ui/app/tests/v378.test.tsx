@@ -94,8 +94,9 @@ describe('the e-mails, richer in Markdown', () => {
 });
 
 describe('What’s new', () => {
-  it('opens on 3.7.8 and keeps ten', () => {
-    expect(WHATS_NEW[0]?.key).toBe('help.whatsNew.i120');
+  it('keeps 3.7.8 among the ten', () => {
+    // 3.7.9: newer releases come first.
+    expect(WHATS_NEW.some((entry) => entry.key === 'help.whatsNew.i120')).toBe(true);
     expect(WHATS_NEW).toHaveLength(10);
     expect(entryFor('help.whatsNew.i120').en).toMatch(/^3\.7\.8 — /);
   });

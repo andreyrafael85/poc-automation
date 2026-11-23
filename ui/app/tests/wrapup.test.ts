@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import JSZip from 'jszip';
 
 import { DECK, type WrapupModel } from '../features/wrapup/deck';
@@ -8,7 +11,6 @@ import { buildWrapupModel, type WrapupResults } from '../features/wrapup/model';
 import { buildTemplateDeck, patchTemplate, renderSlides, setCoreProp, stampAuthor } from '../features/wrapup/pptxTemplate';
 import { buildDeckSpec } from '../features/wrapup/spec';
 import { translate } from '../i18n/strings';
-import { TEMPLATE, itWithTemplate } from './fixtures/brandTemplate';
 
 /**
  * Feasibility guard for the Tech Wrapup deliverable.
@@ -20,6 +22,7 @@ import { TEMPLATE, itWithTemplate } from './fixtures/brandTemplate';
  * If deck generation ever breaks, this fails before the feature ships.
  */
 
+const TEMPLATE = new Uint8Array(readFileSync(join(process.cwd(), 'ui/assets/techwrapup-brand-template.pptx')));
 
 const sample: WrapupModel = {
   customerName: 'Contoso',
@@ -87,7 +90,7 @@ const sample: WrapupModel = {
 };
 
 describe('Tech Wrapup deck generation (PPTX)', () => {
-  itWithTemplate('produces a valid, non-trivial OOXML .pptx package on the corporate template', async () => {
+  it('produces a valid, non-trivial OOXML .pptx package on the corporate template', async () => {
     const spec = buildDeckSpec(sample, { profile: 'customer' });
     const blob = await buildTemplateDeck(spec, TEMPLATE, { dtLogo: sample.dtLogo, seName: sample.seName });
     expect(blob.size).toBeGreaterThan(1000);
@@ -97,7 +100,7 @@ describe('Tech Wrapup deck generation (PPTX)', () => {
     expect(zip.file('ppt/slides/slide1.xml')).not.toBeNull();
   });
 
-  itWithTemplate('emits a slide for every section plus cover, agenda, two dividers and the end', async () => {
+  it('emits a slide for every section plus cover, agenda, two dividers and the end', async () => {
     const spec = buildDeckSpec(sample, { profile: 'customer' });
     // cover + agenda + technical divider + 2 technical + business divider + 1 business + end = 8 slides.
     const expected = 1 + 1 + 1 + sample.technical.length + 1 + sample.business.length + 1;
@@ -250,7 +253,7 @@ describe('buildWrapupModel', () => {
     expect((k8s?.assist ?? []).length).toBeGreaterThan(0);
   });
 
-  itWithTemplate('still produces a valid deck when the operator excludes every technical section', async () => {
+  it('still produces a valid deck when the operator excludes every technical section', async () => {
     // Mirrors the section checkboxes clearing the technical half: the deck must
     // still assemble the title, agenda, why, business finish and close.
     const results: WrapupResults = {

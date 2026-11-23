@@ -358,8 +358,8 @@ describe('story navigation', () => {
   const sectionRoutes = NAVIGATION.map((section) => section.route);
   const storyRouteList = STORY_STAGES.flatMap((stage) => stage.routes);
 
-  it('has ten stages (the tenth, Settings & Build, since 3.6.6)', () => {
-    expect(STORY_STAGES).toHaveLength(10);
+  it('has nine stages (3.7.9: Discoveries and Evidence are one; the Roadmap left)', () => {
+    expect(STORY_STAGES).toHaveLength(9);
   });
 
   it('places every page in exactly one stage', () => {

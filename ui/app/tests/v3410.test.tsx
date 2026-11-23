@@ -8,6 +8,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { computeIndex, ratioDomain } from '../features/assessment/coverageIndex';
 import type { AssessmentSignals } from '../features/assessment/findings';
 import { maturity } from '../features/assessment/maturity';
+import { valueCycle } from '../features/assessment/valueCycle';
 import type { Assessment } from '../features/assessment/useAssessment';
 import { assessmentSection } from '../features/wrapup/assessmentSection';
 import { CAPTURE_REGISTRY, CaptureStage, resolveCaptureChoice, type CaptureOutcome, type CaptureTarget } from '../features/wrapup/captures';
@@ -110,19 +111,20 @@ const assessmentWith = (overrides: Partial<Assessment>): Assessment =>
       { id: 'logs', queryIds: [], state: ratioDomain(1, 100, ['ok']) },
     ]),
     maturity: maturity(SIGNALS, 80),
+    valueCycle: valueCycle(SIGNALS, { dashboards: 1, slos: 0, monitors: 0, detectors: 0, pipeline: false, planDates: true, criteria: 3, aiServices: null }),
     findings: [],
     adoption: [],
     ...overrides,
   }) as unknown as Assessment;
 
 describe('the Assessment in the Tech Wrapup (F-02)', () => {
-  it('builds a business section from the page’s own reading — coverage, maturity, findings, domains', () => {
+  it('builds a business section from the page’s own reading — coverage, value events (3.7.9), findings, domains', () => {
     const section = assessmentSection(assessmentWith({}), EN_TEXT.t, EN_TEXT.formatNumber);
     expect(section?.id).toBe('assessment');
-    expect(section?.kpis?.map((kpi) => kpi.label)).toEqual(['Observable coverage', 'Maturity', 'Capabilities in use', 'Critical findings']);
-    expect(section?.kpis?.[1]?.value).toBe('2/5 · Foundational');
+    expect(section?.kpis?.map((kpi) => kpi.label)).toEqual(['Observable coverage', 'Value events', 'Capabilities in use', 'Critical findings']);
     expect(section?.bars?.items.map((item) => item.value)).toEqual([90, 1]);
-    expect(section?.narrative.join(' ')).toContain('Today the environment is at step 2');
+    expect(section?.narrative.join(' ')).toContain('value events across the value cycle');
+    expect(section?.narrative.join(' ')).not.toMatch(/step \d|maturity/i);
   });
 
   it('stays out while the Assessment is reading, or when nothing of it was read', () => {
@@ -130,9 +132,9 @@ describe('the Assessment in the Tech Wrapup (F-02)', () => {
     expect(assessmentSection(assessmentWith({ index: computeIndex([]) }), EN_TEXT.t, EN_TEXT.formatNumber)).toBeNull();
   });
 
-  it('has its place in the deck and a picture to take, maturity first', () => {
+  it('has its place in the deck and a picture to take, the value cycle first (3.7.9)', () => {
     expect(DECK_SECTION_IDS.indexOf('assessment')).toBe(DECK_SECTION_IDS.indexOf('overview') - 1);
-    expect(resolveCaptureChoice('assessment', {})).toEqual(['assessment.maturity']);
+    expect(resolveCaptureChoice('assessment', {})).toEqual(['assessment.cycle']);
     expect(read('ui/app/features/wrapup/useWrapupViewModel.ts')).toContain('assessmentSection(assessment, t, formatNumber)');
     expect(read('ui/app/tests/deckFingerprint.test.ts')).toContain('**3.4.10, `kinds` / `slides` / `package` / `preview`');
   });

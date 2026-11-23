@@ -72,6 +72,8 @@ export interface PocPlan {
   detectors?: PocDetectorRef[];
   /** 3.7.4: the OpenPipeline logs pipeline this PoC created (a level for logs without one). */
   pipeline?: PocDashboardRef;
+  /** 3.7.9: the autonomy target the SE agreed with the customer for this PoC (the Value cycle's ladder). */
+  autonomyTarget?: 'observe' | 'explain' | 'prioritise' | 'propose' | 'act';
 }
 
 /** 3.6.9: the SLOs one service gets — requests without a failure, minutes within the response-time line. */
@@ -235,6 +237,8 @@ export function parsePocPlan(raw: unknown): PocPlan {
       })
     : [];
   const pipeline = dashboardRef(raw['pipeline'], MAX_SLO_ID);
+  const target = raw['autonomyTarget'];
+  const autonomyTarget = typeof target === 'string' && ['observe', 'explain', 'prioritise', 'propose', 'act'].includes(target) ? (target as PocPlan['autonomyTarget']) : undefined;
   return {
     startDate,
     endDate,
@@ -247,6 +251,7 @@ export function parsePocPlan(raw: unknown): PocPlan {
     ...(monitors.length > 0 ? { monitors } : {}),
     ...(detectors.length > 0 ? { detectors } : {}),
     ...(pipeline !== null ? { pipeline } : {}),
+    ...(autonomyTarget === undefined ? {} : { autonomyTarget }),
   };
 }
 

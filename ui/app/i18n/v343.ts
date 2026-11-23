@@ -100,14 +100,8 @@ export const v343Strings = {
   'asm.sre.security.m': { en: 'Open vulnerabilities tracked: {total}; to act on now: {actNow}.', 'pt-BR': 'Vulnerabilidades abertas acompanhadas: {total}; para agir agora: {actNow}.' },
 
   // ---------------------------------------------------------------- cross-references (no repeated content)
-  'xref.toAssessment.roadmap': {
-    en: 'This page plans the findings in time. Coverage, maturity, SRE practices and every finding with its evidence are in the Coverage page.',
-    'pt-BR': 'Esta página planeja os achados no tempo. Cobertura, maturidade, práticas de SRE e cada achado com a sua evidência estão na página Cobertura.',
-  },
-  'xref.toAssessment.opportunities': {
-    en: 'This page is the shortlist to discuss. Coverage, maturity, SRE practices and every finding with its evidence are in the Coverage page.',
-    'pt-BR': 'Esta página é a lista curta para discutir. Cobertura, maturidade, práticas de SRE e cada achado com a sua evidência estão na página Cobertura.',
-  },
+  'xref.toAssessment.roadmap': { en: 'This plan places the findings in time. Coverage, SRE practices and every finding with its evidence are in the Coverage page.', 'pt-BR': 'Este plano coloca os achados no tempo. Cobertura, práticas de SRE e cada achado com a sua evidência estão na página Cobertura.' },
+  'xref.toAssessment.opportunities': { en: 'This page is the shortlist to discuss, with its 30-60-90 action plan. Coverage, the value cycle, SRE practices and every finding with its evidence are in the Coverage page.', 'pt-BR': 'Esta página é a lista curta para discutir, com o plano de ação 30-60-90. Cobertura, ciclo de valor, práticas de SRE e cada achado com a sua evidência estão na página Cobertura.' },
   'xref.openAssessment': { en: 'Open Coverage', 'pt-BR': 'Abrir a Cobertura' },
   'xref.fromAssessment': { en: 'The plan in 30/60/90-day horizons and the shortlist to discuss:', 'pt-BR': 'O plano em horizontes de 30/60/90 dias e a lista curta para discutir:' },
 

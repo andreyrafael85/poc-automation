@@ -6,4 +6,4 @@
  * Without it the Tech Wrapup and the Real proof deck are built on the neutral template the app
  * writes itself (`neutralTemplate.ts`): every slide, the same layout, the deck's own colours.
  */
-export const BRAND_PACK_INSTALLED: boolean = false;
+export const BRAND_PACK_INSTALLED: boolean = true;

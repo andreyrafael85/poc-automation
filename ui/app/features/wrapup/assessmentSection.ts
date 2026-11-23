@@ -1,7 +1,7 @@
 import type { Translation } from '../../i18n/useTranslation';
 import { CAPABILITY_LABEL } from '../assessment/adoption';
 import { DOMAIN_LABEL } from '../assessment/DomainList';
-import { LEVEL_KEY, PILLAR_KEY } from '../assessment/maturity';
+import { LINK_KEY, LINK_ONWARD, RING_LINKS } from '../assessment/valueCycle';
 import { priorityOf } from '../assessment/findings';
 import type { Assessment } from '../assessment/useAssessment';
 import type { WrapupKpi, WrapupSection } from './deck';
@@ -10,38 +10,33 @@ import { PRODUCT_LOGOS } from './productLogos';
 /**
  * The Assessment in the Tech Wrapup (3.4.10, proposal §C8 F-02 — "capturas no deck do Tech Wrapup", the deck's
  * golden re-pinned at the owner's request). One business section built from the very reading the Assessment page
- * shows: the observable-coverage index and its domains, the maturity step, the capabilities in use, the findings
+ * shows: the observable-coverage index and its domains, the value events of the Value cycle (3.7.9, was the maturity step), the capabilities in use, the findings
  * and the first actions. Nothing is computed here that the page does not show, and nothing commercial is in it.
  * Absent while the Assessment is still reading, or when nothing of it was read.
  */
 export function assessmentSection(assessment: Assessment, t: Translation['t'], formatNumber: Translation['formatNumber']): WrapupSection | null {
   if (assessment.isLoading) return null;
-  const { index, maturity, findings, adoption } = assessment;
+  const { index, valueCycle: cycle, findings, adoption } = assessment;
   const measured = index.domains.filter((domain) => domain.state.kind === 'measured');
   if (index.value === null && measured.length === 0) return null;
   const count = (cls: string) => findings.filter((finding) => finding.cls === cls).length;
   const inUse = adoption.filter((row) => row.state === 'in-use').length;
-  const levelName = t(LEVEL_KEY[maturity.level].name);
   const kpis: WrapupKpi[] = [
     { label: t('tw.asm.k.index'), value: index.value === null ? '—' : `${formatNumber(index.value)}/100` },
-    { label: t('tw.asm.k.maturity'), value: `${maturity.level}/5 · ${levelName}` },
+    // 3.7.9: the value events the PoC demonstrated (the Value cycle), in place of the maturity step.
+    { label: t('tw.asm.k.valueEvents'), value: formatNumber(cycle.total) },
     { label: t('tw.asm.k.capabilities'), value: `${formatNumber(inUse)}/${formatNumber(adoption.length)}` },
     { label: t('tw.asm.k.critical'), value: formatNumber(count('critical')), ...(count('critical') > 0 ? { status: 'warn' as const } : {}) },
   ];
+  const shownLinks = RING_LINKS.filter((link) => cycle.demonstrated[link] > 0).map((link) => t(LINK_KEY[link].name));
   const narrative = [
     t('tw.asm.n1'),
-    t('tw.asm.i.maturity', { level: String(maturity.level), name: levelName }),
+    t('tw.asm.i.cycle', { n: formatNumber(cycle.total), links: shownLinks.length > 0 ? shownLinks.join(', ') : '—' }),
     t('tw.asm.i.findings', { critical: formatNumber(count('critical')), warning: formatNumber(count('warning')), opportunity: formatNumber(count('opportunity')) }),
   ];
-  const next = maturity.level < 5 ? maturity.criteria.filter((criterion) => criterion.level === maturity.level + 1 && criterion.state !== 'met') : [];
-  if (next.length > 0) {
-    narrative.push(
-      t('tw.asm.i.next', {
-        name: t(LEVEL_KEY[(maturity.level + 1) as 2 | 3 | 4 | 5].name),
-        pillars: [...new Set(next.map((criterion) => t(PILLAR_KEY[criterion.pillar])))].join(', '),
-      }),
-    );
-  }
+  // The next wave: the link with the fewest value events demonstrated, and what it brings next with Dynatrace.
+  const quietest = [...RING_LINKS].sort((a, b) => cycle.demonstrated[a] - cycle.demonstrated[b])[0];
+  if (quietest !== undefined) narrative.push(t('tw.asm.i.nextWave', { link: t(LINK_KEY[quietest].name), next: t(LINK_ONWARD[quietest]) }));
   const notDetected = adoption.filter((row) => row.state === 'not-detected').map((row) => t(CAPABILITY_LABEL[row.id]));
   // The first actions, in the order of the page's actions table (P1 first), by their recommendation.
   const actions = findings
@@ -59,7 +54,7 @@ export function assessmentSection(assessment: Assessment, t: Translation['t'], f
     logo: PRODUCT_LOGOS.platform,
     highlight:
       index.value === null
-        ? { value: `${maturity.level}/5`, caption: t('tw.asm.hiMaturity', { name: levelName }) }
+        ? { value: formatNumber(cycle.total), caption: t('tw.asm.hiCycle') }
         : { value: `${formatNumber(index.value)}/100`, caption: t('tw.asm.hi') },
     narrative,
     kpis,

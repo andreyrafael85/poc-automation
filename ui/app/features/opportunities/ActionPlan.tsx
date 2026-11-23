@@ -1,28 +1,18 @@
 import React from 'react';
 
 import { Chip, ProgressCircle } from '@dynatrace/strato-components/content';
-import { Heading, Link, Paragraph, Text } from '@dynatrace/strato-components/typography';
-import { Link as RouterLink } from 'react-router-dom';
+import { Heading, Paragraph, Text } from '@dynatrace/strato-components/typography';
 
-import { SectionIntro } from '../components/SectionIntro';
-import { useCommercialVisible } from '../components/SeOnly';
-import { forAudience } from '../features/insights/audience';
-import { Callout, Cluster, Grid, Panel, Stack } from '../engine';
-import '../engine/page-c.css';
-import { HorizonStrip } from '../engine/chart/HorizonStrip';
-import {
-  CATEGORY_KEY,
-  deriveInsights,
-  prioritise,
-  type Insight,
-  type Qualitative,
-} from '../features/insights/deriveInsights';
-import { useInsightSignals } from '../hooks/useInsightSignals';
-import type { StringKey } from '../i18n/strings';
-import { useTranslation } from '../i18n/useTranslation';
+import { Callout, Cluster, Grid, Panel, Stack } from '../../engine';
+import '../../engine/page-c.css';
+import { HorizonStrip } from '../../engine/chart/HorizonStrip';
+import { CATEGORY_KEY, type Insight, type Qualitative } from '../insights/deriveInsights';
+import type { StringKey } from '../../i18n/strings';
+import { useTranslation } from '../../i18n/useTranslation';
 
 /**
- * Recommended roadmap.
+ * 3.7.9 (the owner: "Página 'roadmap' não vamos mais ter… migrar tudo para oportunidades"; the term "roadmap" read as a
+ * product roadmap): the 30-60-90 action plan, a tab of Opportunities. Until 3.7.8 it was the "Recommended roadmap" page.
  *
  * Generated from the same live insights as the opportunities page, then placed
  * into horizons by effort and dependency. Nothing here is a template: if the
@@ -122,38 +112,24 @@ function successFor(insight: Insight): StringKey {
 const qualKey = (value: Qualitative): StringKey =>
   value === 'high' ? 'qual.high' : value === 'medium' ? 'qual.medium' : 'qual.low';
 
-export const Roadmap = () => {
-  const { signals, isLoading, unavailable } = useInsightSignals();
-  const { t, tCount, formatNumber } = useTranslation();
+export interface ActionPlanProps {
+  insights: readonly Insight[];
+  isLoading: boolean;
+  unavailable: readonly string[];
+}
 
-  const commercialVisible = useCommercialVisible();
-  const insights = forAudience(prioritise(deriveInsights(signals, { t, formatNumber })), commercialVisible);
-  const byHorizon = (horizon: Horizon) =>
-    insights.filter((insight) => horizonFor(insight) === horizon);
+export const ActionPlan = ({ insights, isLoading, unavailable }: ActionPlanProps) => {
+  const { t, tCount } = useTranslation();
+  const byHorizon = (horizon: Horizon) => insights.filter((insight) => horizonFor(insight) === horizon);
 
   return (
-    <Stack gap="section">
-      <SectionIntro
-        titleKey="p.roadmap.title"
-        questionKey="p.roadmap.question"
-        takeawayKey="p.roadmap.takeaway"
-      />
-
-      {/* 3.4.3: the full reading (coverage, maturity, SRE, every finding) is the Assessment's; this page plans it in time. */}
-      <Text className="pvs-caption" data-testid="roadmap-assessment-link">
-        {t('xref.toAssessment.roadmap')}{' '}
-        <Link as={RouterLink} to="/coverage">
-          {t('xref.openAssessment')}
-        </Link>
-      </Text>
-
+    <Stack gap="section" data-testid="action-plan">
       <Callout kind="note" title={t('p.roadmap.howToRead')}>
         <Stack gap="tight">
           <Paragraph>{t('roadmap.howToRead.horizon')}</Paragraph>
           <Paragraph>{t('p.roadmap.howToReadBody2')}</Paragraph>
         </Stack>
       </Callout>
-
       {/* Sources this synthesis could not read: a limit of the review, not a fault in the estate. */}
       {unavailable.length > 0 && (
         <Callout kind="limitation" title={t('p.roadmap.partialTitle')}>

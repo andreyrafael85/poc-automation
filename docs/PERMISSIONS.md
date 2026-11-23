@@ -15,7 +15,7 @@ scope is declared but never used.
 | `storage:entities:read` | The inventory of hosts, services, applications, processes, Kubernetes and synthetic monitors. Entity-model reads scan 0 bytes. |
 | `storage:smartscape:read` | Smartscape on Grail (`smartscapeNodes` / `smartscapeEdges`): cloud service families and Kubernetes pods. Without it those queries are refused. |
 | `storage:events:read` | Problems (`dt.davis.problems`), Kubernetes operational events and synthetic events. |
-| `storage:system:read` | `dt.system.events`: billing usage, workflow and query execution events, platform adoption, and the billing of the app's own queries (Licensing → App consumption). |
+| `storage:system:read` | `dt.system.events`: usage, workflow and query execution events, platform adoption, and the usage of the app's own queries (Licensing → App consumption). |
 | `storage:buckets:read` | `dt.system.buckets`: retention, volume and access per bucket. |
 | `storage:logs:read` | Log volume, levels and data quality. Every log read is scan-limited and sampled or kept to a short window. |
 | `storage:metrics:read` | Timeseries for hosts, services, Kubernetes and real users, the SLO indicators and the GenAI metrics of AI Observability. |
@@ -30,7 +30,7 @@ scope is declared but never used.
 | `state:app-states:read` | Read the shared PoC configuration (customer, scope, logos, plan, partner access, Coverage history and action plan). |
 | `state:app-states:write` | Save the shared PoC configuration, so it is still there when the app is reopened. |
 | `state:app-states:delete` | "New PoC": delete the shared configuration. |
-| `state:user-app-states:read` | Read the user's own working figures (rates, rate card, baseline, language, window). Readable only by that user. |
+| `state:user-app-states:read` | Read the user's own working figures (baseline, language, window and the other figures only the SE sees). Readable only by that user. |
 | `state:user-app-states:write` | Save the user's own working figures. |
 | `state:user-app-states:delete` | "New PoC": delete the user's own figures. |
 
