@@ -3,7 +3,7 @@
   "environmentUrl": "https://YOUR-ENVIRONMENT-ID.apps.dynatrace.com/",
   "app": {
     "name": "PoC Automation 3.0",
-    "version": "3.7.9",
+    "version": "3.8.0",
     "description": "All in One, automated Dynatrace PoC: coverage, evidence, value and Tech Wrapup",
     "id": "my.poc.automation",
     "scopes": [
@@ -101,7 +101,7 @@
       },
       {
         "name": "settings:objects:write",
-        "comment": "Since 3.7.4: creates the OpenPipeline logs pipeline that gives a level to logs written without one (builtin:openpipeline.logs.pipelines) and writes back the logs routing with the PoC's route — only on the SE's click — and removes them, and detectors the PoC registered, in the end-of-PoC clean-up."
+        "comment": "Since 3.7.4: creates the Davis anomaly detectors of the golden signals (builtin:davis.anomaly-detectors; since 3.8.0 run by a service user the SE picks) and the OpenPipeline logs pipeline that gives a level to logs written without one (builtin:openpipeline.logs.pipelines), and writes back the logs routing with the PoC's route — only on the SE's click — and removes them in the end-of-PoC clean-up."
       },
       {
         "name": "settings:objects:read",

@@ -178,7 +178,7 @@ describe('the words', () => {
     expect(WHATS_NEW).toContainEqual({ key: 'help.whatsNew.i113', published: '2026-11-22' });
     expect(WHATS_NEW.length).toBe(10);
     expect(entryFor('help.whatsNew.i113').en.startsWith('3.7.1 — ')).toBe(true);
-    expect(entryFor('help.whatsNew.title').en).toBe('What’s new in 3.7');
+    expect(entryFor('help.whatsNew.title').en).toBe('What’s new in 3.8');
   });
 });
 

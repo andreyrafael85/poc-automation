@@ -131,11 +131,12 @@ describe('the PoC Builder’s triage workflow', () => {
 });
 
 describe('What’s new', () => {
-  it('keeps 3.7.0 among the ten releases', () => {
+  it('keeps the 3.7.0 entry in its fragment', () => {
     // 3.7.1: newer releases come first.
-    expect(WHATS_NEW).toContainEqual({ key: 'help.whatsNew.i112', published: '2026-11-22' });
+    // 3.8.0: i112 left the ten What's new shows (the entry stays in its fragment).
+    expect(WHATS_NEW).not.toContainEqual({ key: 'help.whatsNew.i112', published: '2026-11-22' });
     expect(WHATS_NEW.length).toBe(10);
     expect(entryFor('help.whatsNew.i112').en.startsWith('3.7.0 — ')).toBe(true);
-    expect(entryFor('help.whatsNew.title').en).toBe('What’s new in 3.7');
+    expect(entryFor('help.whatsNew.title').en).toBe('What’s new in 3.8'); // 3.8.0: the minor bump
   });
 });

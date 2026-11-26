@@ -7,7 +7,7 @@ import { WHATS_NEW } from '../components/HelpPanels';
 import { appBilling, queryPractices } from '../features/consumption/queryPractices';
 import { buildWeeklyWorkflow, sloLink, TRIAGE_RESULT } from '../features/builder/pocAutomation';
 import {
-  ANOMALY_APP_LINK,
+  ANOMALY_SETTINGS_LINK,
   buildDetector,
   detectorQuery,
   OPENPIPELINE_LINK,
@@ -70,8 +70,8 @@ describe('the anomaly detectors', () => {
 describe('the Builder’s links and words', () => {
   it('open the right pages on the tenant (absolute, never resolved inside this app)', () => {
     expect(OPENPIPELINE_LINK).toContain('/ui/apps/dynatrace.settings/settings/openpipeline-logs/pipelines');
-    expect(OPENPIPELINE_ROUTING_LINK).toContain('/ui/apps/dynatrace.settings/settings/openpipeline-logs/routing');
-    expect(ANOMALY_APP_LINK).toContain('/ui/apps/dynatrace.davis.anomalydetection/');
+    expect(OPENPIPELINE_ROUTING_LINK).toContain('/ui/apps/dynatrace.settings/settings/openpipeline-logs/dynamic-routes'); // 3.8.0
+    expect(ANOMALY_SETTINGS_LINK).toContain('/ui/apps/dynatrace.settings/settings/all-alerts'); // 3.8.0
     expect(sloLink('slo-1')).toContain('/ui/apps/dynatrace.service.level.objectives/intent/view-slo#');
     expect(decodeURIComponent(sloLink('slo-1').split('#')[1] ?? '')).toBe('{"dt.slo.id":"slo-1"}');
   });

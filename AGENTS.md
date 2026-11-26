@@ -31,8 +31,8 @@ over any document.
    catalog entry or a validated query of `features/dashboard/blueprints.ts`. The workflow actions read only catalog
    entries. `ui/app/tests/td08.catalogParams.test.ts` fails if `useDql` is imported outside `useCatalogQuery`.
 9. **Nothing is created on the tenant automatically.** Every PoC Builder kit writes only after the SE's click and a
-   confirmation, is kept in the Register and can be removed by the clean-up; workflows and anomaly detectors are
-   handed to their platform apps and saved there by the user.
+   confirmation, is kept in the Register and can be removed by the clean-up; workflows are handed to the Workflows app
+   and saved there by the user, and anomaly detectors run as a service user the platform accepts.
 10. **The Tech Wrapup fingerprint** (`ui/app/tests/deckFingerprint.test.ts`) stays green; re-pin it only for a
     deliberate deck change, and record why in the test's re-pin log.
 11. **Languages**: every key exists in `en` and `pt-BR`; Portuguese UI text is positive and hedged. A new i18n

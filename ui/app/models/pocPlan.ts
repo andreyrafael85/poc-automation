@@ -74,6 +74,8 @@ export interface PocPlan {
   pipeline?: PocDashboardRef;
   /** 3.7.9: the autonomy target the SE agreed with the customer for this PoC (the Value cycle's ladder). */
   autonomyTarget?: 'observe' | 'explain' | 'prioritise' | 'propose' | 'act';
+  /** 3.8.0: the service user that runs the detectors the PoC Builder creates (a person's own id is refused as their actor). */
+  detectorActor?: string;
 }
 
 /** 3.6.9: the SLOs one service gets — requests without a failure, minutes within the response-time line. */
@@ -97,10 +99,12 @@ export interface PocMonitorRef extends PocDashboardRef {
 /** 3.7.4: a Davis anomaly detector the PoC Builder created — its settings object id and the golden signal it watches. */
 export interface PocDetectorRef extends PocDashboardRef {
   kind: string;
+  /** 3.8.0: the one service a per-service detector watches; absent for a detector over several (or every) service. */
+  serviceId?: string;
 }
 
-/** 3.7.4: at most this many detectors per PoC. */
-export const MAX_POC_DETECTORS = 6;
+/** 3.7.4: at most this many detectors per PoC (6 until 3.7.9; 3.8.0 adds one detector per service: 8 services × 3 signals). */
+export const MAX_POC_DETECTORS = 24;
 
 /** 3.7.3: at most this many HTTP monitors per PoC (each run is synthetic consumption). */
 export const MAX_POC_MONITORS = 10;
@@ -233,11 +237,15 @@ export function parsePocPlan(raw: unknown): PocPlan {
         const ref = dashboardRef(value, MAX_SLO_ID);
         const record = isRecord(value) ? value : {};
         const kind = text(record['kind'], 40);
-        return ref === null || kind === '' ? [] : [{ ...ref, kind }];
+        const serviceId = text(record['serviceId'], 40);
+        if (ref === null || kind === '') return [];
+        return [/^SERVICE-[0-9A-F]{16}$/.test(serviceId) ? { ...ref, kind, serviceId } : { ...ref, kind }];
       })
     : [];
   const pipeline = dashboardRef(raw['pipeline'], MAX_SLO_ID);
   const target = raw['autonomyTarget'];
+  const actor = raw['detectorActor'];
+  const detectorActor = typeof actor === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(actor) ? actor.toLowerCase() : undefined;
   const autonomyTarget = typeof target === 'string' && ['observe', 'explain', 'prioritise', 'propose', 'act'].includes(target) ? (target as PocPlan['autonomyTarget']) : undefined;
   return {
     startDate,
@@ -252,6 +260,7 @@ export function parsePocPlan(raw: unknown): PocPlan {
     ...(detectors.length > 0 ? { detectors } : {}),
     ...(pipeline !== null ? { pipeline } : {}),
     ...(autonomyTarget === undefined ? {} : { autonomyTarget }),
+    ...(detectorActor === undefined ? {} : { detectorActor }),
   };
 }
 

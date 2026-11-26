@@ -1108,9 +1108,15 @@ async function runStates({ browser, base }) {
         const signals = await page.locator('[data-testid^="builder-ad-kind-"]').count();
         // 3.7.8: one button per signal opens the Anomaly Detection app (an intent); nothing is clicked, nothing is created.
         const adButtons = await page.locator('[data-testid^="builder-ad-open-"]').count();
+        // 3.8.0: the service user that runs the detectors, one detector per service, and the create button (waits for an actor).
+        const actor = await page.getByTestId('builder-ad-actor').count();
+        await page.getByTestId('builder-ad-per-service').click({ timeout: 8000 });
+        const scope = (await page.getByTestId('builder-ad-scope').textContent({ timeout: 8000 })) ?? '';
+        const create = (await page.getByTestId('builder-ad-create').textContent({ timeout: 8000 })) ?? '';
+        const waits = await page.getByTestId('builder-ad-create').isDisabled();
         await page.getByTestId('builder-ad-how').scrollIntoViewIfNeeded();
-        const ok = /86\.7%/.test(preview) && opConfirm && services > 0 && signals === 3 && adButtons === 3;
-        return { ok, note: `preview: "${preview.slice(0, 60)}…"; pipeline confirmation: ${opConfirm}; services: ${services}; signals: ${signals}; detector buttons: ${adButtons}; nothing created` };
+        const ok = /86\.7%/.test(preview) && opConfirm && services > 0 && signals === 3 && adButtons === 3 && actor === 1 && /\b9\b/.test(create) && waits;
+        return { ok, note: `preview: "${preview.slice(0, 60)}…"; pipeline confirmation: ${opConfirm}; services: ${services}; signals: ${signals}; detector buttons: ${adButtons}; per service: "${scope.slice(0, 70)}"; create: "${create}" (waits for a service user: ${waits}); nothing created` };
       },
     },
     // ---- 3.6.7: the PoC Builder's notebook and launchpad kits — their tab, and the confirmation before a create ----

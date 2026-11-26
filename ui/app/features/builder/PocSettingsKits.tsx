@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { Button } from '@dynatrace/strato-components/buttons';
-import { Checkbox } from '@dynatrace/strato-components/forms';
+import { Checkbox, TextInput } from '@dynatrace/strato-components/forms';
 import { Heading, Link, Paragraph, Text } from '@dynatrace/strato-components/typography';
 import { ExternalLinkIcon } from '@dynatrace/strato-icons';
 
@@ -15,31 +15,47 @@ import { num, str } from '../../utils/records';
 import { appIdOrManifest } from './PocDocumentKit';
 import { Confirm, Result, SLO_SERVICES_PRESELECTED, SLO_SERVICES_SHOWN, failureKey, type Busy } from './PocAutomationKits';
 import {
-  ANOMALY_APP_LINK,
+  ANOMALY_SETTINGS_LINK,
   DETECTOR_KINDS,
   FAILURE_RATE_LINE,
   LOG_LEVEL_MATCHER,
   OPENPIPELINE_LINK,
   OPENPIPELINE_ROUTING_LINK,
   PIPELINE_SCHEMA,
+  DETECTOR_SCHEMA,
+  SERVICE_USER_ID,
+  buildDetector,
+  checkDetector,
   detectorIntent,
+  listDetectorActors,
   openDetectorInApp,
+  refusalOf,
+  responseBodyOf,
   buildLogLevelPipeline,
   createSettingsObject,
   routeMatcher,
   routeToPipeline,
   type RouteSource,
+  type DetectorActor,
   type DetectorKind,
+  type DetectorWords,
 } from './pocSettings';
+import { MAX_POC_DETECTORS, type PocDetectorRef } from '../../models/pocPlan';
 
 /**
  * 3.7.4 — the PoC Builder's anomaly detection kit: Davis anomaly detectors on the golden signals of the services the SE
- * picks (the busiest of the app's own ranking, three ticked), one detector per signal over those services, run as the SE
- * (the platform keeps a detector's queries to its actor). Created only after a confirmation; kept in the register.
+ * picks (the busiest of the app's own ranking, three ticked). 3.8.0 (the owner's validation of 3.7.9: the Anomaly Detection
+ * app refused the detector the intent opened — "Provided actor is not a valid service user or access is restricted" — and
+ * ticking services alone opened nothing): a detector runs as a **service user**, never as a person, so the SE picks one here
+ * (those already running detectors on the tenant are offered once the platform accepts them, or one is pasted), the app checks
+ * it with the settings service before anything is written (`validateOnly`), then creates the detectors itself after a
+ * confirmation — one per signal over the services ticked, or one per signal **and per service** — kept in the register and
+ * removed by the clean-up. Opening a detector in the Anomaly Detection app stays as a second way.
  */
 export const AnomalyKit = () => {
   const { t, formatNumber } = useTranslation();
-  const { parameters, pocPlan } = useStudio();
+  const { parameters, pocPlan, setPocPlan } = useStudio();
+  const access = useAccess();
   const ranking = useCatalogQuery('svc.ranking', useQueryScope());
   const services = (ranking.outcome === 'ok' ? ranking.records : [])
     .map((record) => ({ id: str(record, 'serviceId') ?? '', name: str(record, 'name') ?? '', requests: num(record, 'totalRequests') }))
@@ -48,10 +64,35 @@ export const AnomalyKit = () => {
   const [picked, setPicked] = useState<Set<string> | null>(null);
   const chosen = picked ?? new Set(services.slice(0, SLO_SERVICES_PRESELECTED).map((service) => service.id));
   const [kinds, setKinds] = useState<Set<DetectorKind>>(new Set(DETECTOR_KINDS));
-  // Detectors created by 3.7.4–3.7.7 stay in the register (and its clean-up); new ones are saved in the Anomaly Detection app.
+  const [perService, setPerService] = useState(false);
+  const [busy, setBusy] = useState<Busy>({ kind: 'idle' });
   const existing = pocPlan.detectors ?? [];
-  const planned = DETECTOR_KINDS.filter((kind) => kinds.has(kind));
   const customer = parameters.customerName.trim() === '' ? 'PoC' : parameters.customerName.trim();
+
+  // The service user: the one saved with the PoC, one offered from the tenant's detectors, or one pasted.
+  const [actors, setActors] = useState<DetectorActor[] | null>(null);
+  const [typed, setTyped] = useState('');
+  const [check, setCheck] = useState<{ id: string; state: 'checking' | 'ok' | 'refused'; reason?: string } | null>(null);
+  const saved = pocPlan.detectorActor ?? '';
+  const canCreate = access.canManageAccess;
+  useEffect(() => {
+    if (!canCreate) return;
+    let live = true;
+    listDetectorActors()
+      .then(async (found) => {
+        // Only the actors the platform accepts for this user are offered (a person's id is refused as an actor).
+        const accepted: DetectorActor[] = [];
+        for (const actor of found.slice(0, ACTORS_CHECKED)) {
+          const probe = buildDetector('traffic', [], probeWords, actor.id);
+          if (probe !== null && (await checkDetector(probe)) === null) accepted.push(actor);
+        }
+        if (live) setActors(accepted);
+      })
+      .catch(() => live && setActors([]));
+    return () => {
+      live = false;
+    };
+  }, [canCreate]);
 
   const toggle = <T,>(set: Set<T>, value: T) => {
     const next = new Set(set);
@@ -60,22 +101,82 @@ export const AnomalyKit = () => {
     return next;
   };
 
-  // 3.7.8: each ticked signal opens in the Anomaly Detection app, filled in; the SE saves it there, as themself.
   const ids = services.filter((service) => chosen.has(service.id)).map((service) => service.id);
+  const signals = DETECTOR_KINDS.filter((kind) => kinds.has(kind));
+  const split = perService && ids.length > 0;
+  const room = Math.max(0, MAX_POC_DETECTORS - existing.length);
+  // What would be created: one detector per signal over the ticked services (none ticked: every service), or one per signal and service.
+  const plan = (split ? signals.flatMap((kind) => ids.map((id) => ({ kind, serviceIds: [id] }))) : signals.map((kind) => ({ kind, serviceIds: ids }))).slice(0, room);
+  const nameOf = (id: string) => services.find((service) => service.id === id)?.name ?? id;
+  const words = (kind: DetectorKind, serviceIds: readonly string[]): DetectorWords => ({
+    title:
+      split && serviceIds[0] !== undefined
+        ? t('builder.ad.nameService', { signal: t(`builder.ad.kind.${kind}` as StringKey), service: nameOf(serviceIds[0]), customer })
+        : t('builder.ad.name', { signal: t(`builder.ad.kind.${kind}` as StringKey), customer }),
+    description: serviceIds.length === 0 ? t('builder.ad.descriptionAll') : t('builder.ad.description', { n: formatNumber(serviceIds.length) }),
+    eventName: t(`builder.ad.event.${kind}` as StringKey),
+    eventDescription: t('builder.ad.eventDescription'),
+  });
+
+  const verify = async (id: string) => {
+    const actor = id.trim().toLowerCase();
+    if (!SERVICE_USER_ID.test(actor)) {
+      setCheck({ id: actor, state: 'refused', reason: t('builder.ad.actor.notId') });
+      return;
+    }
+    setCheck({ id: actor, state: 'checking' });
+    const probe = buildDetector('traffic', [], probeWords, actor);
+    const refusal = probe === null ? t('builder.ad.actor.notId') : await checkDetector(probe);
+    if (refusal === null) {
+      setCheck({ id: actor, state: 'ok' });
+      setPocPlan({ ...pocPlan, detectorActor: actor });
+    } else setCheck({ id: actor, state: 'refused', reason: refusal });
+  };
+
+  const run = async () => {
+    setBusy({ kind: 'busy' });
+    const made: PocDetectorRef[] = [];
+    let failed = 0;
+    let reason: string | null = null;
+    for (const item of plan) {
+      const text = words(item.kind, item.serviceIds);
+      const value = buildDetector(item.kind, item.serviceIds, text, saved);
+      if (value === null) {
+        failed += 1;
+        continue;
+      }
+      try {
+        const id = await createSettingsObject(DETECTOR_SCHEMA, value);
+        const serviceId = split ? item.serviceIds[0] : undefined;
+        made.push({
+          id,
+          name: text.title,
+          kind: item.kind,
+          createdAt: new Date().toISOString(),
+          createdBy: access.identity.email || null,
+          shared: true,
+          ...(serviceId === undefined ? {} : { serviceId }),
+        });
+      } catch (error) {
+        failed += 1;
+        const refusal = refusalOf(await responseBodyOf(error), '');
+        reason = refusal === '' ? t(failureKey(error)) : refusal;
+      }
+    }
+    if (made.length > 0) setPocPlan({ ...pocPlan, detectors: [...existing, ...made] });
+    setBusy({ kind: 'done', ok: made.length, failed, reason });
+  };
+
   const open = (kind: DetectorKind) => {
-    const payload = detectorIntent(
-      kind,
-      ids,
-      {
-        title: t('builder.ad.name', { signal: t(`builder.ad.kind.${kind}` as StringKey), customer }),
-        description: ids.length === 0 ? t('builder.ad.descriptionAll') : t('builder.ad.description', { n: formatNumber(ids.length) }),
-        eventName: t(`builder.ad.event.${kind}` as StringKey),
-        eventDescription: t('builder.ad.eventDescription'),
-      },
-      appIdOrManifest(),
-    );
+    const payload = detectorIntent(kind, ids, words(kind, ids), appIdOrManifest());
     if (payload !== null) openDetectorInApp(payload);
   };
+
+  const scope = split
+    ? t('builder.ad.perServiceScope', { n: formatNumber(ids.length) })
+    : chosen.size === 0
+      ? t('builder.ad.noneMeansAll')
+      : t('builder.ad.chosen', { n: formatNumber(chosen.size) });
 
   return (
     <Panel pad="roomy" data-testid="builder-anomaly-kit">
@@ -114,28 +215,129 @@ export const AnomalyKit = () => {
               ))}
             </ul>
           )}
+          <Checkbox value={perService} onChange={() => setPerService(!perService)} disabled={ids.length === 0} data-testid="builder-ad-per-service">
+            {t('builder.ad.perService')}
+          </Checkbox>
         </Stack>
-          <Text className="pvs-caption" data-testid="builder-ad-scope">
-            {chosen.size === 0 ? t('builder.ad.noneMeansAll') : t('builder.ad.chosen', { n: formatNumber(chosen.size) })}
-          </Text>
-        {existing.length > 0 && <Text className="pvs-caption">{t('builder.ad.existing', { n: formatNumber(existing.length) })}</Text>}
-        <Text className="pvs-caption" data-testid="builder-ad-how">
-          {t('builder.ad.viaApp')}
+        <Text className="pvs-caption" data-testid="builder-ad-scope">
+          {scope}
         </Text>
-        <Cluster>
-          {planned.map((kind) => (
-            <Button key={kind} variant="emphasized" onClick={() => open(kind)} data-testid={`builder-ad-open-${kind}`}>
-              {t('builder.ad.openKind', { signal: t(`builder.ad.kind.${kind}` as StringKey) })}
-            </Button>
-          ))}
-          <Link href={ANOMALY_APP_LINK} target="_blank" rel="noopener noreferrer">
-            {t('builder.ad.openApp')} <ExternalLinkIcon />
-          </Link>
-        </Cluster>
+
+        <Stack gap="tight" data-testid="builder-ad-actor">
+          <Text className="pvs-label">{t('builder.ad.actor.title')}</Text>
+          <Text className="pvs-caption">{t('builder.ad.actor.why')}</Text>
+          {saved !== '' && (
+            <Text data-testid="builder-ad-actor-saved">✓ {t('builder.ad.actor.saved', { id: saved })}</Text>
+          )}
+          {canCreate && actors === null && <Text className="pvs-muted">{t('builder.ad.actor.looking')}</Text>}
+          {canCreate && actors !== null && actors.length > 0 && (
+            <Cluster>
+              {actors.map((actor) => (
+                <Button
+                  key={actor.id}
+                  variant={saved === actor.id ? 'accent' : 'default'}
+                  onClick={() => void verify(actor.id)}
+                  data-testid={`builder-ad-actor-${actor.id}`}
+                >
+                  {t('builder.ad.actor.offer', { id: actor.id.slice(0, 8), n: formatNumber(actor.detectors), example: actor.example.slice(0, 40) })}
+                </Button>
+              ))}
+            </Cluster>
+          )}
+          {canCreate && (
+            <Cluster>
+              <div className="pvs-ad-actor-input">
+                <TextInput
+                  value={typed}
+                  onChange={(value) => setTyped(value.slice(0, 60))}
+                  placeholder={t('builder.ad.actor.placeholder')}
+                  aria-label={t('builder.ad.actor.title')}
+                  data-testid="builder-ad-actor-input"
+                />
+              </div>
+              <Button variant="emphasized" onClick={() => void verify(typed)} disabled={typed.trim() === '' || check?.state === 'checking'} data-testid="builder-ad-actor-check">
+                {t('builder.ad.actor.check')}
+              </Button>
+            </Cluster>
+          )}
+          {check !== null && (
+            <Text className="pvs-caption" data-testid="builder-ad-actor-result" data-state={check.state}>
+              {check.state === 'checking'
+                ? t('builder.ad.actor.checking')
+                : check.state === 'ok'
+                  ? t('builder.ad.actor.ok')
+                  : t('builder.ad.actor.refused', { reason: check.reason ?? '' })}
+            </Text>
+          )}
+          <Text className="pvs-caption">{t('builder.ad.actor.how')}</Text>
+        </Stack>
+
+        {existing.length > 0 && <Text className="pvs-caption">{t('builder.ad.existing', { n: formatNumber(existing.length) })}</Text>}
+        {!canCreate ? (
+          <Text className="pvs-muted">{t('builder.seOnly')}</Text>
+        ) : busy.kind === 'confirm' ? (
+          <Confirm
+            title={t('builder.ad.confirm.title', { n: formatNumber(plan.length) })}
+            body={`${scope} ${t('builder.ad.confirm.body')}`}
+            onGo={() => void run()}
+            onCancel={() => setBusy({ kind: 'idle' })}
+            testId="builder-ad-confirm"
+          />
+        ) : (
+          <Stack gap="tight">
+            <Cluster>
+              <Button
+                variant="accent"
+                color="primary"
+                onClick={() => setBusy({ kind: 'confirm' })}
+                disabled={plan.length === 0 || saved === '' || busy.kind === 'busy'}
+                data-testid="builder-ad-create"
+              >
+                {t('builder.ad.createFor', {
+                  n: formatNumber(plan.length),
+                  services: split
+                    ? t('builder.ad.eachService', { n: formatNumber(ids.length) })
+                    : chosen.size === 0
+                      ? t('builder.ad.allServices')
+                      : t('builder.ad.someServices', { n: formatNumber(chosen.size) }),
+                })}
+              </Button>
+              <Link href={ANOMALY_SETTINGS_LINK} target="_blank" rel="noopener noreferrer" data-testid="builder-ad-settings-link">
+                {t('builder.ad.openApp')} <ExternalLinkIcon />
+              </Link>
+            </Cluster>
+            {signals.length === 0 && <Text className="pvs-caption">{t('builder.ad.pickSignal')}</Text>}
+            {signals.length > 0 && saved === '' && <Text className="pvs-caption">{t('builder.ad.pickActor')}</Text>}
+            {plan.length < (split ? signals.length * ids.length : signals.length) && (
+              <Text className="pvs-caption">{t('builder.ad.room', { n: formatNumber(MAX_POC_DETECTORS) })}</Text>
+            )}
+          </Stack>
+        )}
+        <Result busy={busy} />
+
+        <Stack gap="tight">
+          <Text className="pvs-label">{t('builder.ad.orApp')}</Text>
+          <Text className="pvs-caption" data-testid="builder-ad-how">
+            {t('builder.ad.viaApp')}
+          </Text>
+          <Cluster>
+            {signals.map((kind) => (
+              <Button key={kind} variant="default" onClick={() => open(kind)} data-testid={`builder-ad-open-${kind}`}>
+                {t('builder.ad.openKind', { signal: t(`builder.ad.kind.${kind}` as StringKey) })}
+              </Button>
+            ))}
+          </Cluster>
+        </Stack>
       </Stack>
     </Panel>
   );
 };
+
+/** How many of the tenant's detector actors are checked (each check writes nothing). */
+const ACTORS_CHECKED = 8;
+/** The words of the detector used only to ask the platform whether an actor is accepted (never written). */
+const PROBE_NAME = ['PoC Automation', 'actor check'].join(' · ');
+const probeWords: DetectorWords = { title: PROBE_NAME, description: '', eventName: PROBE_NAME, eventDescription: '' };
 
 /**
  * 3.7.6 (the owner: "como validamos se está totalmente funcional?"): once the pipeline exists, how many records went through

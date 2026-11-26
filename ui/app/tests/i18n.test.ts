@@ -110,6 +110,7 @@ import { v376Strings } from '../i18n/v376';
 import { v377Strings } from '../i18n/v377';
 import { v378Strings } from '../i18n/v378';
 import { v379Strings } from '../i18n/v379';
+import { v380Strings } from '../i18n/v380';
 
 /**
  * A half-translated screen in front of a customer is worse than an English one,
@@ -377,6 +378,7 @@ describe('dictionary fragments', () => {
       v377Strings,
       v378Strings,
       v379Strings,
+      v380Strings,
     };
     const owner = new Map<string, string>();
     const collisions: string[] = [];

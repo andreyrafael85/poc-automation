@@ -1,6 +1,6 @@
 # Architecture
 
-> **App:** PoC Automation 3.0 · **id:** `my.poc.automation` · **platform:** Dynatrace AppEngine · **release:** 3.7.9
+> **App:** PoC Automation 3.0 · **id:** `my.poc.automation` · **platform:** Dynatrace AppEngine · **release:** 3.8.0
 >
 > The code is the source of truth. This document describes how the app is built and the rules it keeps.
 
@@ -62,8 +62,8 @@ What the app never does:
 | **Document service** | Dashboards, notebook and launchpad of the Builder; the real-proofs set; the weekly notebook | `features/dashboard`, `features/builder/pocDocuments.ts`, `features/wrapup/prints`, `features/weekly/weeklyNotebook.ts` |
 | **SLO API** | Create and remove the PoC's SLOs | `features/builder/pocAutomation.ts` |
 | **Synthetic API** (Environment API v2) | List public locations; create and remove Browser and HTTP monitors | `features/builder/pocAutomation.ts` |
-| **Settings 2.0** | The OpenPipeline logs pipeline and its route in the logs routing | `features/builder/pocSettings.ts` |
-| **Intents** | Hand a ready workflow to the Workflows app, and an anomaly detector to the Anomaly Detection app; the SE saves them there | `pocAutomation.ts`, `pocSettings.ts` |
+| **Settings 2.0** | The anomaly detectors (run by a service user), the OpenPipeline logs pipeline and its route in the logs routing | `features/builder/pocSettings.ts` |
+| **Intents** | Hand a ready workflow to the Workflows app, and optionally an anomaly detector (event filled in) to the Anomaly Detection app; the SE saves them there | `pocAutomation.ts`, `pocSettings.ts` |
 | **Workflow actions** | "PoC Automation · Triage" and "PoC Automation · Weekly", offered inside Workflows | `actions/*.action.ts`, `features/triage`, `features/weekly` |
 | **Dynatrace Assist** | A workflow task that reads the summary and writes a short reading into the e-mail | `dynatrace.davis.copilot.workflow.actions:davis-copilot` |
 
@@ -366,7 +366,7 @@ each dashboard, notebook and launchpad.
 | **Workflows** | `WorkflowKit`, `WeeklyKit` | Triage and weekly workflows, handed to Workflows (or downloaded as `.json`) | Workflows intent |
 | **Synthetic** | `MonitorKit` | Browser and HTTP monitors of the customer's addresses | Synthetic API |
 | **OpenPipeline** | `OpenPipelineKit` | A logs pipeline, its route, and a check | Settings 2.0 |
-| **Anomaly detection** | `AnomalyKit` | Detectors on the golden signals, opened in the Anomaly Detection app | Anomaly Detection intent |
+| **Anomaly detection** | `AnomalyKit` | Detectors on the golden signals, run by a service user (or opened in the Anomaly Detection app) | Settings 2.0 (and the Anomaly Detection intent) |
 | **Register** | list + `CleanupPanel` | — | per type |
 
 **The dashboards** (`features/dashboard/blueprints.ts`): Environment health and SLOs (the platform's SLO tiles for
@@ -419,12 +419,17 @@ overwritten. The clean-up removes the route first, then the pipeline.
 
 **Anomaly detection.** One detector per golden signal: failure rate (static threshold above 5 % for 3 of 5 minutes),
 response time p90 (auto-adaptive, above) and a traffic drop (auto-adaptive, below). With no service ticked, a
-detector watches every service. The detector is opened in the **Anomaly Detection app** already filled in, through
-its documented intent, and saved there by the SE — the platform accepts a detector's owner only from its own app.
+detector watches every service; the SE may also create one detector per signal and per service ticked. A detector
+runs its query on behalf of an actor, and the platform takes a **service user** as that actor (a person's own account
+is refused). The kit offers the service users already running detectors on the environment, once the platform accepts
+them, or takes a pasted id; before anything is written it asks the settings service with a `validateOnly` call. The
+detectors are created only on the SE's click after a confirmation, kept in the Register and removed by the clean-up.
+A detector can also be opened in the **Anomaly Detection app** through its documented intent, with its event already
+filled in, and saved there by the SE (then it is not in the Register). The kit links to Settings → all the alerts.
 
 **Register and clean-up.** The Register lists everything the PoC created, with absolute links on the environment.
 The clean-up removes what the SE ticks: documents at their current version, SLOs with the optimistic lock, monitors,
-the pipeline (its route first); a 404 just leaves the Register.
+detectors, the pipeline (its route first); a 404 just leaves the Register.
 
 ---
 

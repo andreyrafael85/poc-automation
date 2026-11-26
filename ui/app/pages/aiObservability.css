@@ -86,3 +86,27 @@
 .pvs-aideeper__title {
   font-weight: 600;
 }
+
+/* 3.8.0 — the models in use beside the tokens by service and model (one column on a narrow screen). */
+.pvs-aimodels-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--dt-spacings-size-24);
+  align-items: start;
+}
+
+/* Each side keeps its own height (the table panel no longer stretches to the cards). */
+.pvs-aimodels-row > * {
+  align-self: start;
+  height: auto;
+  min-width: 0;
+}
+
+@media (min-width: 1100px) {
+  .pvs-aimodels-row[data-cols='2'] {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  }
+  .pvs-aimodels-row[data-cols='2'] .pvs-aimodels {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+}

@@ -38,7 +38,7 @@ import {
   statusOf,
   workflowFile,
 } from './pocAutomation';
-import { ANOMALY_APP_LINK, OPENPIPELINE_LINK, deleteSettingsObject, unrouteFromPipeline } from './pocSettings';
+import { ANOMALY_SETTINGS_LINK, OPENPIPELINE_LINK, deleteSettingsObject, unrouteFromPipeline } from './pocSettings';
 
 /**
  * 3.6.9 — the PoC Builder's SLO kit, its problem-triage workflow kit and the clean-up at the end of the PoC. Each writes
@@ -644,7 +644,7 @@ export function createdItems(plan: PocPlan, docLink: (id: string) => string | nu
   for (const slo of plan.slos ?? []) items.push({ key: `slo-${slo.id}`, type: 'slo', ref: slo, link: sloLink(slo.id) });
   for (const monitor of plan.monitors ?? []) items.push({ key: `mon-${monitor.id}`, type: monitor.type === 'BROWSER' ? 'browserMonitor' : 'monitor', ref: monitor, link: MONITOR_APP_LINK });
   // 3.7.4: the anomaly detectors and the OpenPipeline pipeline (settings objects).
-  for (const detector of plan.detectors ?? []) items.push({ key: `det-${detector.id}`, type: 'detector', ref: detector, link: ANOMALY_APP_LINK });
+  for (const detector of plan.detectors ?? []) items.push({ key: `det-${detector.id}`, type: 'detector', ref: detector, link: ANOMALY_SETTINGS_LINK });
   if (plan.pipeline) items.push({ key: 'pipeline', type: 'pipeline', ref: plan.pipeline, link: OPENPIPELINE_LINK });
   return items;
 }

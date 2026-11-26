@@ -4,7 +4,7 @@
 
 ### All in One — run a Dynatrace proof of concept end to end, from one app
 
-![Version](https://img.shields.io/badge/version-3.7.9-1496ff)
+![Version](https://img.shields.io/badge/version-3.8.0-1496ff)
 ![Dynatrace AppEngine](https://img.shields.io/badge/Dynatrace-AppEngine-6f2da8)
 ![Strato](https://img.shields.io/badge/Strato%20Design%20System-3.18-00a1b2)
 ![React](https://img.shields.io/badge/React-18-61dafb)
@@ -27,11 +27,16 @@ evidence class, the exact query and the time it was read — nothing estimated, 
 </p>
 <p align="center"><em>The Overview — stage 1 of 9 (fictitious company, synthetic data).</em></p>
 
-> **What's new in 3.7.9** — the **Autonomous Value Cycle** on the Coverage page (the value events the PoC demonstrated
-> on each link — Context, Cause, Impact, Action, Prevention —, the next wave of each link and the autonomy target agreed
-> with the customer), a menu in **nine stages**, the **30-60-90 action plan** as a tab of Opportunities, and the
-> **Dynatrace brand kit included** for Dynatrace collaborators and official partners (see the
-> [rights notice](#dynatrace-brand--rights-notice)).
+> **What's new in 3.8.0** — the PoC Builder's **anomaly detectors are created by the app again**, run by a
+> **service user** the SE picks: those already running detectors on the environment are offered once the platform
+> accepts them, or an id is pasted and checked with the platform's validate-only call before anything is written.
+> The SE creates one detector per golden signal over the services ticked, or one per signal and per service; they are
+> kept in the Register and removed by the clean-up. Opening a detector in the **Anomaly Detection app** instead arrives
+> with its event already filled in. The OpenPipeline link now goes to the **dynamic routes**, the detectors' link to
+> **Settings → all the alerts**, and on **AI Observability** the models in use sit beside the tokens by service and
+> model.
+>
+> Earlier releases: see the git history of this repository.
 
 ---
 
@@ -92,7 +97,7 @@ Portuguese).
 | **Workflows** | A problem-triage workflow and a weekly PoC summary, handed to the Workflows app ready to save. Both run the app's own workflow actions, add a Dynatrace Assist reading and send a formal Markdown e-mail; the weekly run also writes a notebook with the week's charts |
 | **Synthetic** | **Browser monitors** (a real browser: load times, Core Web Vitals, a screenshot on failure) and **HTTP monitors** of the customer's addresses |
 | **OpenPipeline** | A logs pipeline that gives a level to records written without one, the route that sends the sources the SE ticks to it, and a check of what went through |
-| **Anomaly detection** | Detectors on the golden signals (failure rate, response time p90, traffic drop), opened in the **Anomaly Detection app** already filled in, to be saved there |
+| **Anomaly detection** | Detectors on the golden signals (failure rate, response time p90, traffic drop) — one per signal over the services ticked, or one per signal and per service — created by the app and run by a **service user** the SE picks and the platform accepts; or opened in the **Anomaly Detection app** with the event already filled in |
 | **Register** | What the PoC created, with links, and the clean-up |
 
 ### Workflow actions
@@ -149,7 +154,7 @@ never in clear.
 - **Licensing stays with the SE and the partner.** The Licensing page is hidden in executive mode and never reaches
   a customer export.
 - **Nothing created on the tenant without a click.** Every Builder kit writes only after the SE clicks and
-  confirms; workflows and anomaly detectors are saved by the SE in their own platform apps.
+  confirms; workflows are saved by the SE in the Workflows app.
 - **The Dynatrace look.** The pages are built on the Strato Design System, with the platform's own charts wrapped
   in a thin layer (`ui/app/engine/strato/`) that also prints cleanly on paper.
 
@@ -234,8 +239,8 @@ The manifest (`app.config.json`) declares **25 scopes**, each with a comment. De
 | `slo:slos:write` | Create the PoC's SLOs and remove them in the clean-up |
 | `environment-api:synthetic:read` | List the public synthetic locations |
 | `environment-api:synthetic-monitors:write` | Create and remove the PoC's Browser and HTTP monitors |
-| `settings:objects:write` | Create and remove the OpenPipeline pipeline and write the PoC's route in the logs routing |
-| `settings:objects:read` | Read the logs routing, so that only the PoC's route is added or removed |
+| `settings:objects:write` | Create and remove the anomaly detectors and the OpenPipeline pipeline, and write the PoC's route in the logs routing |
+| `settings:objects:read` | Read the logs routing, so that only the PoC's route is added or removed, and the service users already running detectors |
 
 The app declares no `automation:*` scope: workflows are handed to the Workflows app and saved there with the
 user's own permissions.
@@ -244,11 +249,11 @@ user's own permissions.
 
 ## Quality
 
-| Gate | Command | Result for 3.7.9 |
+| Gate | Command | Result for 3.8.0 |
 | --- | --- | --- |
 | Types (UI and workflow actions) | `npm run typecheck` | clean |
 | Lint | `npm run lint` | clean |
-| Unit and component tests | `npm test` | **2,079 passed**, 0 skipped, 146 test files |
+| Unit and component tests | `npm test` | **2,087 passed**, 0 skipped, 147 test files |
 | Query catalog | `npm run docs:catalog` | 128 queries, regenerated |
 | AppEngine analysis | `npm run analyze` | part of `scripts/release-gates.sh` |
 | Delivery build | `npm run build -- --optimize --enable-code-splitting` | part of `scripts/release-gates.sh` |
@@ -308,7 +313,7 @@ Autônomo** —, Evidências — com a Observabilidade de IA —, Impacto, Valor
 **Plano de ação 30-60-90** —, Próximos passos e Configurações & Construção). O **PoC Builder** cria no tenant, com um clique e uma confirmação cada: oito Smart Dashboards, o
 notebook de investigação e o launchpad, SLOs, os workflows de triagem e de resumo semanal (com as ações próprias do
 app e a leitura do Dynatrace Assist), monitores Browser e HTTP, o pipeline e a rota do OpenPipeline e os detectores
-de anomalia (pelo app Anomaly Detection); tudo fica no Registro e sai na limpeza do fim da PoC. O app exporta o
+de anomalia (rodados por um usuário de serviço que o SE escolhe); tudo fica no Registro e sai na limpeza do fim da PoC. O app exporta o
 Relatório do SE, o PDF de Cobertura, o guia de pré-requisitos, o deck Tech Wrapup e as Provas reais. Cada número
 vem de uma consulta DQL catalogada, com a classe de evidência, a consulta e o momento da leitura; o Licenciamento
 fica só com o SE e o parceiro. A interface está em inglês e em português do Brasil.

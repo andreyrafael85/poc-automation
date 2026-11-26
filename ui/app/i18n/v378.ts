@@ -12,8 +12,8 @@ export const v378Strings = {
 
   // ------------------------------------------------------------------ anomaly detectors through the Anomaly Detection app
   'builder.ad.viaApp': {
-    en: 'Each button opens the Anomaly Detection app with that detector filled in — the query, the rule and the event. Review it and save it there: it runs as you. The platform accepts a detector’s owner only from its own app, so the PoC Builder does not save detectors itself; a detector saved there is removed in Anomaly Detection, not by the clean-up.',
-    'pt-BR': 'Cada botão abre o app Anomaly Detection com o detector já preenchido — a consulta, a regra e o evento. Revise e salve lá: ele roda em seu nome. A plataforma só aceita o dono de um detector pelo próprio app, então o PoC Builder não salva detectores sozinho; um detector salvo lá é removido no Anomaly Detection, não pela limpeza.',
+    en: 'Each button opens the Anomaly Detection app with that detector filled in — the query, the rule and the event. There, choose a service user as its actor before saving (a person’s own account is not accepted). A detector saved there is removed in Settings, not by the clean-up.',
+    'pt-BR': 'Cada botão abre o app Anomaly Detection com o detector já preenchido — a consulta, a regra e o evento. Lá, escolha um usuário de serviço como ator antes de salvar (a conta de uma pessoa não é aceita). Um detector salvo lá é removido em Configurações, não pela limpeza.',
   },
   'builder.ad.openKind': { en: '{signal}: open in Anomaly Detection', 'pt-BR': '{signal}: abrir no Anomaly Detection' },
 

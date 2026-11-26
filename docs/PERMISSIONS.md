@@ -50,16 +50,17 @@ scope is declared but never used.
 | `slo:slos:write` | Create the availability, performance and fleet SLOs the SE picks, and remove them in the clean-up. |
 | `environment-api:synthetic:read` | List the environment's public synthetic locations, so the SE picks where the monitors run. |
 | `environment-api:synthetic-monitors:write` | Create the Browser and HTTP monitors the SE confirms, and remove them in the clean-up. |
-| `settings:objects:write` | Create and remove the OpenPipeline logs pipeline (`builtin:openpipeline.logs.pipelines`) and write the logs routing back with the PoC's route. |
-| `settings:objects:read` | Read the OpenPipeline logs routing (`builtin:openpipeline.logs.routing`) — one settings object whose routes every pipeline shares — so only the PoC's route is added or removed. |
+| `settings:objects:write` | Create and remove the PoC's anomaly detectors (`builtin:davis.anomaly-detectors`, run by a service user; before writing, a `validateOnly` call asks the platform whether it accepts that actor) and the OpenPipeline logs pipeline (`builtin:openpipeline.logs.pipelines`), and write the logs routing back with the PoC's route. |
+| `settings:objects:read` | Read the OpenPipeline logs routing (`builtin:openpipeline.logs.routing`) — one settings object whose routes every pipeline shares — so only the PoC's route is added or removed; and the existing anomaly detectors, to offer the service users already running them. |
 
 ## What the app does not request
 
 - **No `automation:*` scope.** The platform reserves workflow writing to Dynatrace's own apps. The PoC Builder builds
   the workflow and hands it to the Workflows app through its intent; the SE saves it there with their own
   permissions.
-- **Anomaly detectors** are opened in the Anomaly Detection app through its intent and saved there by the SE, so no
-  extra scope is needed for them.
+- **No scope for service users.** The anomaly detectors run as a service user (the platform does not take a person's
+  own account as a detector's actor); the app never creates one — the SE creates it in Account Management and the app
+  only uses its id.
 - **No API token and no client secret.** Authentication is handled by AppEngine at runtime and by the `dt-app`
   session at deploy time.
 

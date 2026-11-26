@@ -307,10 +307,10 @@ export const v31Strings = {
   'help.about.creator': { en: 'Creator', 'pt-BR': 'Criador' },
   'help.about.contact': { en: 'Contact', 'pt-BR': 'Contato' },
 
-  'help.whatsNew.title': { en: 'What’s new in 3.7', 'pt-BR': 'Novidades da 3.7' },
+  'help.whatsNew.title': { en: 'What’s new in 3.8', 'pt-BR': 'Novidades da 3.8' },
   'help.whatsNew.intro': {
-    en: 'Version 3.7 lets the app act inside the platform: its own workflow action reads each problem as it opens and hands the team a ready summary — on top of 3.6’s v6 look and the PoC Builder, which creates dashboards, notebooks, a launchpad and SLOs on the SE’s click. Every figure keeps its query, and what was not read is never shown as zero. The last ten releases follow, newest first.',
-    'pt-BR': 'A versão 3.7 faz o app agir dentro da plataforma: a própria ação de workflow lê cada problema assim que ele abre e entrega ao time um resumo pronto — sobre o visual v6 da 3.6 e o PoC Builder, que cria dashboards, notebooks, um launchpad e SLOs no clique do SE. Cada número mantém a sua consulta, e o que não foi lido nunca aparece como zero. Abaixo, as dez últimas releases, da mais nova à mais antiga.',
+    en: 'Version 3.8 builds on 3.7’s value cycle and its own workflow actions: the PoC Builder creates dashboards, notebooks, a launchpad, SLOs, monitors and anomaly detectors on the SE’s click, each kept in the Register for the clean-up. Every figure keeps its query, and what was not read is never shown as zero. The last ten releases follow, newest first.',
+    'pt-BR': 'A versão 3.8 parte do ciclo de valor e das ações de workflow da 3.7: o PoC Builder cria dashboards, notebooks, um launchpad, SLOs, monitores e detectores de anomalia no clique do SE, cada um guardado no Registro para a limpeza. Cada número mantém a sua consulta, e o que não foi lido nunca aparece como zero. Abaixo, as dez últimas releases, da mais nova à mais antiga.',
   },
   'help.whatsNew.i1': {
     en: 'A story-led navigation: nine stages from Context to Next steps replace the flat list of pages.',

@@ -95,12 +95,19 @@ export function detectorQuery(kind: DetectorKind, serviceIds: readonly string[])
   return `timeseries requests = sum(dt.service.request.count), by: {dt.entity.service}${filter}`;
 }
 
-/** A Davis anomaly detector of one golden signal over the chosen services (none: every service), run as the SE (`actorId`). Pure; null without an actor. */
+/**
+ * A Davis anomaly detector of one golden signal over the chosen services (none: every service), run as `actorId`. Pure; null
+ * without an actor. 3.8.0: the actor is a service user — validated on the lab on 2026-11-26 with `dtctl create settings
+ * --validate-only`: a person's own user id is refused ("Provided actor is not a valid service user or access is restricted", in
+ * the API and in the Anomaly Detection app alike), a service user already running detectors there passes, for the three
+ * signals.
+ */
 export function buildDetector(kind: DetectorKind, serviceIds: readonly string[], words: DetectorWords, actorId: string): Record<string, unknown> | null {
   // No service means every service; ids given but none valid is refused (nothing is guessed).
   if (actorId === '' || (serviceIds.length > 0 && !serviceIds.some((id) => SERVICE_ID.test(id)))) return null;
   const common = [
-    { key: 'query', value: detectorQuery(kind, serviceIds) },
+    // 3.8.0: the key the Anomaly Detection app itself writes (read from the lab's detectors on 2026-11-26).
+    { key: 'query.expression', value: detectorQuery(kind, serviceIds) },
     { key: 'alertOnMissingData', value: 'false' },
     { key: 'violatingSamples', value: '3' },
     { key: 'slidingWindow', value: '5' },
@@ -125,11 +132,85 @@ export function buildDetector(kind: DetectorKind, serviceIds: readonly string[],
         { key: 'event.name', value: words.eventName.slice(0, 200) },
         { key: 'event.description', value: words.eventDescription.slice(0, 500) },
         { key: 'event.type', value: eventType },
-        { key: 'dt.source_entity', value: '{dt.entity.service}' },
+        // 3.8.0: a dimension placeholder reads `{dims:<name>}` (the form of the lab's own detectors).
+        { key: 'dt.source_entity', value: '{dims:dt.entity.service}' },
       ],
     },
     executionSettings: { actor: actorId },
   };
+}
+
+// ------------------------------------------------------------------ 3.8.0: the service user that runs the detectors
+
+/** A service user's id (a UUID). */
+export const SERVICE_USER_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** An actor already running detectors on the tenant: its id, how many it runs and one of their titles. */
+export interface DetectorActor {
+  id: string;
+  detectors: number;
+  example: string;
+}
+
+/** The actors of the tenant's detectors, most used first (read under `settings:objects:read`, declared since 3.7.6). Pure. */
+export function detectorActors(objects: readonly { value?: { title?: unknown; executionSettings?: { actor?: unknown } } }[]): DetectorActor[] {
+  const byId = new Map<string, DetectorActor>();
+  for (const object of objects) {
+    const actor = object.value?.executionSettings?.actor;
+    if (typeof actor !== 'string' || !SERVICE_USER_ID.test(actor)) continue;
+    const title = typeof object.value?.title === 'string' ? object.value.title : '';
+    const known = byId.get(actor);
+    if (known === undefined) byId.set(actor, { id: actor, detectors: 1, example: title });
+    else known.detectors += 1;
+  }
+  return [...byId.values()].sort((a, b) => b.detectors - a.detectors || a.id.localeCompare(b.id));
+}
+
+/** Reads the tenant's detectors and returns their actors. */
+export async function listDetectorActors(): Promise<DetectorActor[]> {
+  const response = await httpClient.send({
+    url: `${SETTINGS_API}?${new URLSearchParams({ schemaIds: DETECTOR_SCHEMA, scopes: 'environment', fields: 'objectId,value', pageSize: '500' }).toString()}`,
+    method: 'GET',
+  });
+  const page = await bodyOf<{ items?: { value?: { title?: unknown; executionSettings?: { actor?: unknown } } }[] }>(response);
+  return detectorActors(page.items ?? []);
+}
+
+export async function responseBodyOf(error: unknown): Promise<unknown> {
+  const response = (error as { response?: { body?: (type?: 'json') => unknown } } | null)?.response;
+  if (typeof response?.body !== 'function') return null;
+  try {
+    return await response.body('json');
+  } catch {
+    return null;
+  }
+}
+
+/** The platform's own words for a refused settings value: its first constraint violation, else its message. Pure. */
+export function refusalOf(body: unknown, fallback: string): string {
+  const first = Array.isArray(body) ? (body[0] as unknown) : body;
+  const error = (first as { error?: { message?: unknown; constraintViolations?: { message?: unknown }[] } } | null)?.error;
+  const violation = error?.constraintViolations?.find((entry) => typeof entry.message === 'string')?.message;
+  const text = typeof violation === 'string' ? violation : typeof error?.message === 'string' ? error.message : fallback;
+  return text.slice(0, 300);
+}
+
+/**
+ * Asks the settings service whether a detector would be accepted, without writing it (`validateOnly`): the way to know, before
+ * anything is created, that the platform takes this actor. Returns null when accepted, or the platform's own words.
+ */
+export async function checkDetector(value: unknown): Promise<string | null> {
+  try {
+    await httpClient.send({
+      url: `${SETTINGS_API}?validateOnly=true`,
+      method: 'POST',
+      body: [{ schemaId: DETECTOR_SCHEMA, scope: 'environment', value }],
+      headers: { 'Content-Type': 'application/json' },
+    });
+    return null;
+  } catch (error) {
+    return refusalOf(await responseBodyOf(error), error instanceof Error ? error.message : 'refused');
+  }
 }
 
 // ------------------------------------------------------------------ 3.7.8: the detectors handed to the Anomaly Detection app
@@ -144,6 +225,12 @@ export function buildDetector(kind: DetectorKind, serviceIds: readonly string[],
  */
 export const DETECTOR_INTENT_LABEL = 'system.configurable-as-anomaly-detector';
 
+/** A detector value's event properties as one object (`{ "event.name": …, … }`), the form the intent takes. Pure. */
+export function eventTemplateMap(value: Record<string, unknown>): Record<string, string> {
+  const template = value['eventTemplate'] as { properties?: { key: string; value: string }[] } | undefined;
+  return Object.fromEntries((template?.properties ?? []).map((entry) => [entry.key, entry.value]));
+}
+
 export function detectorIntent(kind: DetectorKind, serviceIds: readonly string[], words: DetectorWords, appId: string): Record<string, unknown> | null {
   const value = buildDetector(kind, serviceIds, words, 'intent');
   if (value === null) return null;
@@ -153,7 +240,9 @@ export function detectorIntent(kind: DetectorKind, serviceIds: readonly string[]
   return {
     'dt.query': detectorQuery(kind, serviceIds),
     'davis.analyzer': { 'davis.analyzer.name': analyzer.name, 'davis.analyzer.input': input, 'davis.analyzer.labels': [DETECTOR_INTENT_LABEL] },
-    'davis.anomalydetector': { title: value['title'], description: value['description'], eventTemplate: value['eventTemplate'] },
+    // 3.8.0 (the owner: the app's step 3 came without its "Event name"): the intent's eventTemplate is an object of
+    // property → value (its manifest declares an object), not the settings value's list of { key, value }.
+    'davis.anomalydetector': { title: value['title'], description: value['description'], eventTemplate: eventTemplateMap(value) },
     sourceApplication: appId,
   };
 }
@@ -211,9 +300,10 @@ export function buildLogLevelPipeline(displayName: string, description: string):
  */
 export const OPENPIPELINE_LINK = platformUrl('dynatrace.settings/settings/openpipeline-logs/pipelines?page=1&pageSize=50') ?? '';
 /** The OpenPipeline routing of logs, where a source is sent to the pipeline. */
-export const OPENPIPELINE_ROUTING_LINK = platformUrl('dynatrace.settings/settings/openpipeline-logs/routing') ?? '';
-/** The Anomaly Detection app, where the detectors open (app id read from the tenant's app list). */
-export const ANOMALY_APP_LINK = platformUrl('dynatrace.davis.anomalydetection/') ?? '';
+// 3.8.0 (the owner: ".../openpipeline-logs/routing" — "We can't find this page"; the right one is `dynamic-routes`).
+export const OPENPIPELINE_ROUTING_LINK = platformUrl('dynatrace.settings/settings/openpipeline-logs/dynamic-routes') ?? '';
+/** 3.8.0 (the owner: "o link correto dos detectores remete a página de settings"): Settings → all the alerts, where they show. */
+export const ANOMALY_SETTINGS_LINK = platformUrl('dynatrace.settings/settings/all-alerts') ?? '';
 
 // ------------------------------------------------------------------ 3.7.6: the route that sends sources to the pipeline
 

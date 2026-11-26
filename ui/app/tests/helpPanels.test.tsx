@@ -31,7 +31,7 @@ const PANELS: [HelpPanelId, RegExp][] = [
   ['guide', /How to use this app/],
   ['methodology', /Methodology/],
   ['sources', /Data sources/],
-  ['whatsNew', /What’s new in 3\.7/],
+  ['whatsNew', /What’s new in 3\.8/],
   ['about', /About PoC Automation 3\.0/],
 ];
 

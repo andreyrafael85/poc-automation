@@ -103,6 +103,6 @@ describe('What’s new', () => {
     expect(WHATS_NEW.some((entry) => entry.key === 'help.whatsNew.i102')).toBe(false);
     expect(WHATS_NEW.length).toBe(10);
     expect(entryFor('help.whatsNew.i102').en.startsWith('3.6.0 — ')).toBe(true);
-    expect(entryFor('help.whatsNew.title')['pt-BR']).toBe('Novidades da 3.7');
+    expect(entryFor('help.whatsNew.title')['pt-BR']).toBe('Novidades da 3.8') // 3.8.0: the minor bump;
   });
 });

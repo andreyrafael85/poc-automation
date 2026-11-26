@@ -113,6 +113,7 @@ import { v376Strings } from './v376';
 import { v377Strings } from './v377';
 import { v378Strings } from './v378';
 import { v379Strings } from './v379';
+import { v380Strings } from './v380';
 
 export { LOCALES, LOCALE_LABELS, LOCALE_TAG, type Locale, type Entry } from './locales';
 
@@ -920,6 +921,7 @@ const dictionary = {
   ...v377Strings,
   ...v378Strings,
   ...v379Strings,
+  ...v380Strings,
 } as const satisfies Record<string, Entry>;
 
 export type StringKey = keyof typeof dictionary;

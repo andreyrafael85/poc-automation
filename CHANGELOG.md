@@ -1,5 +1,22 @@
 # Changelog
 
+## 3.8.0 — anomaly detectors run by a service user
+
+**The PoC Builder creates the anomaly detectors again**
+
+- A detector runs its query on behalf of an actor, and the platform takes a **service user** as that actor — a
+  person's own account is not accepted. The Anomaly detection tab now asks for that service user: those already
+  running detectors on the environment are offered once the platform accepts them, or an id is pasted and checked
+  with the platform's validate-only call before anything is written. The choice is kept with the PoC.
+- One detector per golden signal over the services ticked, or one per signal and per service, named after it;
+  created only on the SE's click after a confirmation, kept in the Register and removed by the clean-up.
+- Opening a detector in the Anomaly Detection app instead arrives with its event already filled in.
+
+**Links and AI Observability**
+
+- The OpenPipeline link opens the logs' dynamic routes; the detectors' link opens Settings → all the alerts.
+- On AI Observability, the models in use sit beside the table of tokens by service and model.
+
 ## 3.7.9 — the Autonomous Value Cycle
 
 **Coverage tells the value the PoC delivered**

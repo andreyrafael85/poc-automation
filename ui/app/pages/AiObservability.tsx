@@ -35,15 +35,16 @@ import { platformUrl } from '../utils/deepLinks';
 
 export const GENAI_APP_LINK = platformUrl('dynatrace.genai.observability/') ?? '';
 
+// 3.8.0: beside the model cards the names keep their room; the two token counts stay narrow.
 const tokenColumns = (t: Translation['t'], formatNumber: (value: number) => string): DataTableColumnDef<AiTokenRow>[] => [
-  { id: 'service', header: t('p.ai.h.service'), accessor: 'service', width: '1.3fr' },
-  { id: 'model', header: t('p.ai.h.model'), accessor: (row) => row.model ?? t('p.ai.modelNone'), width: '1.3fr' },
+  { id: 'service', header: t('p.ai.h.service'), accessor: 'service', width: '1.3fr', minWidth: 150 },
+  { id: 'model', header: t('p.ai.h.model'), accessor: (row) => row.model ?? t('p.ai.modelNone'), width: '1.2fr', minWidth: 140 },
   {
     id: 'input',
     header: t('p.ai.h.input'),
     accessor: 'input',
     alignment: 'right',
-    width: 160,
+    width: 104,
     cell: ({ rowData }) => <DataTable.DefaultCell>{formatNumber(rowData.input)}</DataTable.DefaultCell>,
   },
   {
@@ -51,7 +52,7 @@ const tokenColumns = (t: Translation['t'], formatNumber: (value: number) => stri
     header: t('p.ai.h.output'),
     accessor: 'output',
     alignment: 'right',
-    width: 160,
+    width: 104,
     cell: ({ rowData }) => <DataTable.DefaultCell>{formatNumber(rowData.output)}</DataTable.DefaultCell>,
   },
 ];
@@ -190,48 +191,48 @@ export const AiObservability = () => {
         </CockpitRow>
       )}
 
-      {cards.length > 0 && (
-        <Stack as="section" gap="group" data-testid="ai-models">
-          <Heading level={3} as="h2">
-            {t('p.ai.models.title')}
-          </Heading>
-          <Paragraph className="pvs-caption">{t('p.ai.models.caption')}</Paragraph>
-          <div className="pvs-aimodels">
-            {cards.map((card) => (
-              <Panel key={card.model ?? 'none'} as="article" pad="roomy" className="pvs-aimodel">
-                <Stack gap="tight">
-                  <span className="pvs-aimodel__head">
-                    <AIModelIcon />
-                    <Text className="pvs-aimodel__name">{card.model ?? t('p.ai.modelNone')}</Text>
-                  </span>
-                  <Text className="pvs-aimodel__figure">{compact(card.input + card.output)}</Text>
-                  <Text className="pvs-caption">{t('p.ai.models.tokens', { input: compact(card.input), output: compact(card.output) })}</Text>
-                  <StratoTicks
-                    value={card.share}
-                    max={100}
-                    ticks={20}
-                    name={t('p.ai.models.shareName')}
-                    reading={t('p.ai.models.share', { pct: formatNumber(card.share, { maximumFractionDigits: 1 }) })}
-                  />
-                  <Text className="pvs-caption">{t('p.ai.models.share', { pct: formatNumber(card.share, { maximumFractionDigits: 1 }) })}</Text>
-                  <dl className="pvs-aimodel__facts">
-                    <dt>{t('p.ai.h.calls')}</dt>
-                    <dd>{card.calls === null ? '—' : formatNumber(card.calls)}</dd>
-                    <dt>{t('p.ai.h.avg')}</dt>
-                    <dd>{card.meanSeconds === null ? '—' : t('p.ai.seconds', { n: formatNumber(card.meanSeconds, { maximumFractionDigits: 2 }) })}</dd>
-                    <dt>{t('p.ai.models.errors')}</dt>
-                    <dd>{card.calls === null ? '—' : formatNumber(card.failed)}</dd>
-                  </dl>
-                  <Text className="pvs-caption">{t('p.ai.models.services', { list: card.services.join(', ') })}</Text>
-                </Stack>
-              </Panel>
-            ))}
-          </div>
-        </Stack>
-      )}
-
-      {(rows.length > 0 || callRows.length > 0) && (
-        <Stack gap="section" data-testid="ai-tables">
+      {/* 3.8.0 (the owner: "podem ficar lado a lado"): the models in use beside the tokens by service and model. */}
+      {(cards.length > 0 || rows.length > 0) && (
+        <div className="pvs-aimodels-row" data-testid="ai-models-row" data-cols={cards.length > 0 && rows.length > 0 ? '2' : '1'}>
+          {cards.length > 0 && (
+            <Stack as="section" gap="group" data-testid="ai-models">
+              <Heading level={3} as="h2">
+                {t('p.ai.models.title')}
+              </Heading>
+              <Paragraph className="pvs-caption">{t('p.ai.models.caption')}</Paragraph>
+              <div className="pvs-aimodels">
+                {cards.map((card) => (
+                  <Panel key={card.model ?? 'none'} as="article" pad="roomy" className="pvs-aimodel">
+                    <Stack gap="tight">
+                      <span className="pvs-aimodel__head">
+                        <AIModelIcon />
+                        <Text className="pvs-aimodel__name">{card.model ?? t('p.ai.modelNone')}</Text>
+                      </span>
+                      <Text className="pvs-aimodel__figure">{compact(card.input + card.output)}</Text>
+                      <Text className="pvs-caption">{t('p.ai.models.tokens', { input: compact(card.input), output: compact(card.output) })}</Text>
+                      <StratoTicks
+                        value={card.share}
+                        max={100}
+                        ticks={20}
+                        name={t('p.ai.models.shareName')}
+                        reading={t('p.ai.models.share', { pct: formatNumber(card.share, { maximumFractionDigits: 1 }) })}
+                      />
+                      <Text className="pvs-caption">{t('p.ai.models.share', { pct: formatNumber(card.share, { maximumFractionDigits: 1 }) })}</Text>
+                      <dl className="pvs-aimodel__facts">
+                        <dt>{t('p.ai.h.calls')}</dt>
+                        <dd>{card.calls === null ? '—' : formatNumber(card.calls)}</dd>
+                        <dt>{t('p.ai.h.avg')}</dt>
+                        <dd>{card.meanSeconds === null ? '—' : t('p.ai.seconds', { n: formatNumber(card.meanSeconds, { maximumFractionDigits: 2 }) })}</dd>
+                        <dt>{t('p.ai.models.errors')}</dt>
+                        <dd>{card.calls === null ? '—' : formatNumber(card.failed)}</dd>
+                      </dl>
+                      <Text className="pvs-caption">{t('p.ai.models.services', { list: card.services.join(', ') })}</Text>
+                    </Stack>
+                  </Panel>
+                ))}
+              </div>
+            </Stack>
+          )}
           {rows.length > 0 && (
             <Panel as="section" pad="roomy">
               <Stack gap="group">
@@ -243,18 +244,19 @@ export const AiObservability = () => {
               </Stack>
             </Panel>
           )}
-          {callRows.length > 0 && (
-            <Panel as="section" pad="roomy">
-              <Stack gap="group">
-                <Heading level={3} as="h2">
-                  {t('p.ai.calls.title')}
-                </Heading>
-                <Paragraph className="pvs-caption">{t('p.ai.calls.caption')}</Paragraph>
-                <DataTable data={callRows} columns={callColumns(t, formatNumber)} sortable fullWidth />
-              </Stack>
-            </Panel>
-          )}
-        </Stack>
+        </div>
+      )}
+
+      {callRows.length > 0 && (
+        <Panel as="section" pad="roomy" data-testid="ai-tables">
+          <Stack gap="group">
+            <Heading level={3} as="h2">
+              {t('p.ai.calls.title')}
+            </Heading>
+            <Paragraph className="pvs-caption">{t('p.ai.calls.caption')}</Paragraph>
+            <DataTable data={callRows} columns={callColumns(t, formatNumber)} sortable fullWidth />
+          </Stack>
+        </Panel>
       )}
 
       <Panel as="section" pad="roomy" className="pvs-aideeper">

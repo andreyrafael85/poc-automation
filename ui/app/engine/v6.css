@@ -1773,3 +1773,8 @@
 .pvs-whenmap-wrap .pvs-whenmap__cell[data-peak='true'] {
   box-shadow: inset 0 0 0 2px var(--pvs-v6-edge);
 }
+
+/* 3.8.0 — the PoC Builder's service-user id field: wide enough for a UUID and its hint. */
+.pvs-ad-actor-input {
+  width: min(100%, 420px);
+}

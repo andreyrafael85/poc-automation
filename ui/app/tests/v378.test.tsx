@@ -37,7 +37,7 @@ describe('anomaly detectors through the Anomaly Detection app', () => {
     expect(detectorIntent('traffic', ['nope'], WORDS, 'a')).toBeNull();
     const kit = read('features/builder/PocSettingsKits.tsx');
     expect(kit).toContain('openDetectorInApp(payload)');
-    expect(kit).not.toContain(['createSettingsObject', '(DETECTOR_SCHEMA'].join(''));
+    // 3.8.0: the kit creates the detectors itself again, run by a service user (tests/v380.test.tsx); the intent stays.
   });
 });
 

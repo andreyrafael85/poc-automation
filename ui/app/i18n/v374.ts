@@ -128,10 +128,10 @@ export const v374Strings = {
   'builder.ad.create': { en: 'Create {n} detector(s)', 'pt-BR': 'Criar {n} detector(es)' },
   'builder.ad.confirm.title': { en: 'Create {n} anomaly detector(s) on this environment?', 'pt-BR': 'Criar {n} detector(es) de anomalia neste ambiente?' },
   'builder.ad.confirm.body': {
-    en: 'Each detector runs its query every minute as you, and opens a Dynatrace Intelligence problem (and its notifications) when the signal leaves its normal. The clean-up at the end of the PoC removes them.',
-    'pt-BR': 'Cada detector roda a sua consulta a cada minuto em seu nome e abre um problema da Dynatrace Intelligence (e as suas notificações) quando o sinal sai do normal. A limpeza do fim da PoC os remove.',
+    en: 'Each detector runs its query every minute as the service user chosen above, and opens a Dynatrace Intelligence problem (and its notifications) when the signal leaves its normal. The clean-up at the end of the PoC removes them.',
+    'pt-BR': 'Cada detector roda a sua consulta a cada minuto como o usuário de serviço escolhido acima e abre um problema da Dynatrace Intelligence (e as suas notificações) quando o sinal sai do normal. A limpeza do fim da PoC os remove.',
   },
-  'builder.ad.openApp': { en: 'Open Anomaly Detection', 'pt-BR': 'Abrir Anomaly Detection' },
+  'builder.ad.openApp': { en: 'Open the alerts in Settings', 'pt-BR': 'Abrir os alertas em Configurações' },
 
   // ------------------------------------------------------------------ the OpenPipeline kit
   'builder.op.title': { en: 'A level for logs written without one (OpenPipeline)', 'pt-BR': 'Um nível para logs escritos sem nível (OpenPipeline)' },
