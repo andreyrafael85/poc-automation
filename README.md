@@ -4,7 +4,7 @@
 
 ### All in One — run a Dynatrace proof of concept end to end, from one app
 
-![Version](https://img.shields.io/badge/version-3.8.1-1496ff)
+![Version](https://img.shields.io/badge/version-3.8.2-1496ff)
 ![Dynatrace AppEngine](https://img.shields.io/badge/Dynatrace-AppEngine-6f2da8)
 ![Strato](https://img.shields.io/badge/Strato%20Design%20System-3.18-00a1b2)
 ![React](https://img.shields.io/badge/React-18-61dafb)
@@ -27,15 +27,12 @@ evidence class, the exact query and the time it was read — nothing estimated, 
 </p>
 <p align="center"><em>The Overview — stage 1 of 7 (fictitious company, synthetic data).</em></p>
 
-> **What's new in 3.8.1** — the **service user** that runs the PoC Builder's anomaly detectors is now set in
-> **Settings → PoC plan**, as a step of the preparation: the account's UUID opens its service users in Account
-> Management; the SE picks one already running detectors on the environment or pastes the id of one made for the PoC,
-> and the platform checks it before it is saved (the check no longer sends an empty event description). The PoC
-> Builder only reads it and can check it again; creating a service user stays in Account Management. The dashboards'
-> **section banners take the customer's brand colour** chosen in Settings, which gains **navy** and **green**.
-> **AI Observability** is in proportion: tokens over time across the page, then tokens by model, tokens by service
-> and the models in use side by side, with the tables below. The menu has **seven stages**: the Executive summary
-> opens Demonstrated value, and Consumption and events and Licensing close Recommendations.
+> **What's new in 3.8.2** — the PoC Builder's Workflows tab gains **Predictive capacity**: four workflows that ask
+> **Dynatrace Intelligence** every day for a forecast of the fullest host disks, host memory, host CPU and each
+> Kubernetes container's memory against its limit, and act only when the forecast reaches its line — an e-mail with
+> Dynatrace Assist's reading and an event that opens a problem —, handed to the Workflows app like the triage. The app
+> now declares the permission to use the **service user** set in Settings as the anomaly detectors' actor, and the
+> anomaly kit checks it with the platform when it opens: a **"Ready"** badge enables the creation.
 >
 > Earlier releases: see the git history of this repository.
 
@@ -93,10 +90,10 @@ Portuguese).
 | **Smart Dashboards · 8** | Environment health and SLOs · Operations and reliability · Infrastructure and cloud · Digital experience and business · Runtime security · Logs and data quality · Kubernetes and containers · Databases and dependencies — each with section banners in the customer's brand colour and the customer's logo in the corner |
 | **Notebook and launchpad** | An investigation notebook on the golden signals (it opens with its charts already drawn) and a PoC launchpad |
 | **SLOs** | Availability and performance SLOs of the busiest services, and fleet SLOs (host CPU, host memory, Kubernetes workloads without restarts) |
-| **Workflows** | A problem-triage workflow and a weekly PoC summary, handed to the Workflows app ready to save. Both run the app's own workflow actions, add a Dynatrace Assist reading and send a formal Markdown e-mail; the weekly run also writes a notebook with the week's charts |
+| **Workflows** | A problem-triage workflow and a weekly PoC summary, handed to the Workflows app ready to save. Both run the app's own workflow actions, add a Dynatrace Assist reading and send a formal Markdown e-mail; the weekly run also writes a notebook with the week's charts. **Predictive capacity**: four daily Dynatrace Intelligence forecasts (host disk, host memory, host CPU, Kubernetes memory against its limit) that e-mail and can open a problem only when the forecast reaches its line |
 | **Synthetic** | **Browser monitors** (a real browser: load times, Core Web Vitals, a screenshot on failure) and **HTTP monitors** of the customer's addresses |
 | **OpenPipeline** | A logs pipeline that gives a level to records written without one, the route that sends the sources the SE ticks to it, and a check of what went through |
-| **Anomaly detection** | Detectors on the golden signals (failure rate, response time p90, traffic drop) — one per signal over the services ticked, or one per signal and per service — created by the app and run by the **service user** set in Settings → PoC plan (the platform checks it; the Builder only reads it and can check it again); or opened in the **Anomaly Detection app** with the event already filled in |
+| **Anomaly detection** | Detectors on the golden signals (failure rate, response time p90, traffic drop) — one per signal over the services ticked, or one per signal and per service — created by the app and run by the **service user** set in Settings → PoC plan (the platform checks it; the Builder reads it, checks it again when it opens and shows "Ready"); or opened in the **Anomaly Detection app** with the event already filled in |
 | **Register** | What the PoC created, with links, and the clean-up |
 
 ### Workflow actions
@@ -210,7 +207,7 @@ Step by step in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 ## Permissions
 
-The manifest (`app.config.json`) declares **25 scopes**, each with a comment. Details in
+The manifest (`app.config.json`) declares **26 scopes**, each with a comment. Details in
 [docs/PERMISSIONS.md](docs/PERMISSIONS.md).
 
 | Scope | Why |
@@ -240,6 +237,7 @@ The manifest (`app.config.json`) declares **25 scopes**, each with a comment. De
 | `environment-api:synthetic-monitors:write` | Create and remove the PoC's Browser and HTTP monitors |
 | `settings:objects:write` | Create and remove the anomaly detectors and the OpenPipeline pipeline, and write the PoC's route in the logs routing |
 | `settings:objects:read` | Read the logs routing, so that only the PoC's route is added or removed, and the service users already running detectors |
+| `iam:service-users:use` | Write the anomaly detectors with the service user set in Settings as their actor |
 
 The app declares no `automation:*` scope: workflows are handed to the Workflows app and saved there with the
 user's own permissions.
@@ -248,11 +246,11 @@ user's own permissions.
 
 ## Quality
 
-| Gate | Command | Result for 3.8.1 |
+| Gate | Command | Result for 3.8.2 |
 | --- | --- | --- |
 | Types (UI and workflow actions) | `npm run typecheck` | clean |
 | Lint | `npm run lint` | clean |
-| Unit and component tests | `npm test` | **2,096 passed**, 0 skipped, 148 test files |
+| Unit and component tests | `npm test` | **2,104 passed**, 0 skipped, 149 test files |
 | Query catalog | `npm run docs:catalog` | 128 queries, regenerated |
 | AppEngine analysis | `npm run analyze` | part of `scripts/release-gates.sh` |
 | Delivery build | `npm run build -- --optimize --enable-code-splitting` | part of `scripts/release-gates.sh` |
@@ -270,7 +268,7 @@ the console and the layout fit; renders every export (`--exports`) and runs inte
 
 ```text
 .
-├── app.config.json          # AppEngine manifest: id, name, version, 25 scopes, the two workflow actions
+├── app.config.json          # AppEngine manifest: id, name, version, 26 scopes, the two workflow actions
 ├── actions/                 # Workflow actions "Triage" and "Weekly" and their forms
 ├── ui/
 │   ├── main.tsx
@@ -296,7 +294,7 @@ the console and the layout fit; renders every export (`--exports`) and runs inte
 | Document | Content |
 | --- | --- |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | How the app is built: stages and routes, access, the query catalog and provenance, persistence, the PoC Builder, the workflow actions, exports, languages |
-| [docs/PERMISSIONS.md](docs/PERMISSIONS.md) | The 25 scopes and why each one is needed |
+| [docs/PERMISSIONS.md](docs/PERMISSIONS.md) | The 26 scopes and why each one is needed |
 | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Build, deploy, versioning and rollback with `dt-app` |
 | [docs/QUERY-CATALOG.md](docs/QUERY-CATALOG.md) | Every catalogued query with its DQL, guards and validation record (generated) |
 | [CHANGELOG.md](CHANGELOG.md) | Release notes |
@@ -311,7 +309,7 @@ história da PoC em **sete etapas** (Contexto, Objetivos da PoC, Cobertura alcan
 Autônomo** —, Evidências — com a Observabilidade de IA —, Valor demonstrado — com o Resumo executivo —,
 Recomendações — com o **Plano de ação 30-60-90**, Consumo e eventos e o Licenciamento — e Configurações & Construção). O **PoC Builder** cria no tenant, com um clique e uma confirmação cada: oito Smart Dashboards (os banners de seção na cor da marca do cliente), o
 notebook de investigação e o launchpad, SLOs, os workflows de triagem e de resumo semanal (com as ações próprias do
-app e a leitura do Dynatrace Assist), monitores Browser e HTTP, o pipeline e a rota do OpenPipeline e os detectores
+app e a leitura do Dynatrace Assist), os quatro workflows de capacidade preditiva (previsões diárias da Dynatrace Intelligence de disco, memória, CPU e memória do Kubernetes), monitores Browser e HTTP, o pipeline e a rota do OpenPipeline e os detectores
 de anomalia (rodados pelo usuário de serviço definido em Configurações → Plano da PoC, um passo da preparação); tudo fica no Registro e sai na limpeza do fim da PoC. O app exporta o
 Relatório do SE, o PDF de Cobertura, o guia de pré-requisitos, o deck Tech Wrapup e as Provas reais. Cada número
 vem de uma consulta DQL catalogada, com a classe de evidência, a consulta e o momento da leitura; o Licenciamento

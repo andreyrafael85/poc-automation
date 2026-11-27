@@ -1,5 +1,23 @@
 # Changelog
 
+## 3.8.2 — predictive capacity, and the service user ready on the anomaly kit
+
+**Predictive capacity on the PoC Builder**
+
+- The Workflows tab gains "Predictive capacity": four workflows that ask Dynatrace Intelligence every day for a
+  forecast — the fullest host disks, host memory, host CPU, and each Kubernetes container's memory against its limit.
+- Each acts only when the forecast reaches its line (adjustable on the kit, seven or fourteen days ahead): an e-mail
+  with Dynatrace Assist's reading and, optionally, a resource-contention event that opens a problem.
+- Like the triage and the weekly summary, they are built by the app and handed to the Workflows app (or downloaded as
+  .json), where the SE saves them with their own permissions; the forecast runs as the workflow's actor.
+
+**The service user, ready on the anomaly kit**
+
+- The manifest declares `iam:service-users:use`, so the PoC Builder can write the anomaly detectors with the service
+  user set in Settings as their actor.
+- The anomaly kit checks that service user with the platform when it opens and shows a "Ready" badge; "Ready" enables
+  the creation of the detectors.
+
 ## 3.8.1 — the service user in Settings, the brand colour on the dashboards, seven stages
 
 **The service user that runs the anomaly detectors moves to Settings**

@@ -15,6 +15,7 @@ import { Panel, Stack } from '../engine';
 import { SPECIALTY_BLUEPRINTS, SPECIALTY_IDS, type SpecialtyId } from '../features/dashboard/blueprints';
 import { DashboardLogoContext, shrinkLogo } from '../features/dashboard/dashboardLogo';
 import { SpecialtyCard, useDashboardEvidence } from '../features/dashboard/SpecialtyDashboards';
+import { CapacityKit } from '../features/builder/CapacityKit';
 import { CleanupPanel, createdItems, MonitorKit, SloKit, WeeklyKit, WorkflowKit } from '../features/builder/PocAutomationKits';
 import { AnomalyKit, OpenPipelineKit } from '../features/builder/PocSettingsKits';
 import { listSlos, wholeSloIds } from '../features/builder/pocAutomation';
@@ -238,10 +239,14 @@ export const PocBuilder = () => {
           <Tab title={t('builder.tab.workflows')} keepMounted>
             <Stack gap="section" className="pvs-tabpane">
               {canCreate ? (
-                <div className="pvs-doc-kits">
-                  <WorkflowKit />
-                  <WeeklyKit />
-                </div>
+                <>
+                  <div className="pvs-doc-kits">
+                    <WorkflowKit />
+                    <WeeklyKit />
+                  </div>
+                  {/* 3.8.2: four predictive-capacity workflows (Dynatrace Intelligence forecasts). */}
+                  <CapacityKit />
+                </>
               ) : (
                 <Text className="pvs-caption">{t('builder.seOnly')}</Text>
               )}

@@ -1778,3 +1778,24 @@
 .pvs-ad-actor-input {
   width: min(100%, 420px);
 }
+
+/* 3.8.2 — the PoC Builder's predictive-capacity kit: the four forecasts as cards, four to a row on a wide screen. */
+.pvs-capkit {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--dt-spacings-size-12);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pvs-capkit__item {
+  padding: var(--dt-spacings-size-12);
+  border: 1px solid var(--dt-colors-border-neutral-default);
+  border-radius: var(--dt-borders-radius-container-default);
+  min-width: 0;
+}
+
+.pvs-capkit__name {
+  font-weight: 600;
+}

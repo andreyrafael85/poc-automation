@@ -3,7 +3,7 @@
   "environmentUrl": "https://YOUR-ENVIRONMENT-ID.apps.dynatrace.com/",
   "app": {
     "name": "PoC Automation 3.0",
-    "version": "3.8.1",
+    "version": "3.8.2",
     "description": "All in One, automated Dynatrace PoC: coverage, evidence, value and Tech Wrapup",
     "id": "my.poc.automation",
     "scopes": [
@@ -106,6 +106,10 @@
       {
         "name": "settings:objects:read",
         "comment": "Since 3.7.6: reads the OpenPipeline logs routing (builtin:openpipeline.logs.routing) — one settings object whose list of routes other pipelines share — so the PoC Builder adds the PoC pipeline's route at the top, and the clean-up removes it, without touching the other routes."
+      },
+      {
+        "name": "iam:service-users:use",
+        "comment": "Since 3.8.2: lets the PoC Builder write the anomaly detectors with the service user the SE set in Settings as their actor (executionSettings.actor) — without it the settings service answers 'User has no permission to use service users'."
       }
     ],
     "csp": {

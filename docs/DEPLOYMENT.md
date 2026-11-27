@@ -44,7 +44,7 @@ the version (`npm run release:check`) and can sign in without a browser when an 
 exists (`$PVS_DEPLOY_ENV`, mode 600, outside the repository; the script never prints its values).
 
 At install the platform validates the manifest (for instance, the description must stay within 80 characters) and
-asks to accept the **25 scopes** ([PERMISSIONS.md](PERMISSIONS.md)). The two workflow actions in `actions/` are
+asks to accept the **26 scopes** ([PERMISSIONS.md](PERMISSIONS.md)). The two workflow actions in `actions/` are
 installed with the app and appear in Workflows as `my.poc.automation:poc-triage` and `my.poc.automation:poc-weekly`.
 
 ## Versions

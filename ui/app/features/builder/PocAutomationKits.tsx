@@ -424,7 +424,7 @@ export const MonitorKit = ({ type = 'HTTP' }: { type?: 'HTTP' | 'BROWSER' }) => 
 };
 
 /** The SE's time zone (the weekly schedule's), or UTC when the browser does not say. */
-function browserTimeZone(): string {
+export function browserTimeZone(): string {
   try {
     return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
   } catch {

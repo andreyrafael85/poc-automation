@@ -21,6 +21,17 @@ import { ACCOUNT_UUID, SERVICE_USER_ID, checkActor, listDetectorActors, serviceU
  * in Account Management: its API takes an account-level OAuth client (`account-idm-write`), which the app does not hold.
  */
 
+/**
+ * 3.8.2: the platform's refusal in the SE's words. "User has no permission to use service users" is about the app, not the
+ * service user: until 3.8.1 the app's token lacked `iam:service-users:use` (declared since 3.8.2); with it declared, the
+ * message means the SE's own user lacks that permission.
+ */
+export function refusalWords(reason: string, t: (key: 'builder.ad.actor.notId' | 'su.refused.noUse') => string): string {
+  if (reason === 'not-an-id') return t('builder.ad.actor.notId');
+  if (/no permission to use service users/i.test(reason)) return t('su.refused.noUse');
+  return reason;
+}
+
 /** How many of the tenant's detector actors are checked (each check writes nothing). */
 const ACTORS_CHECKED = 8;
 
@@ -70,7 +81,7 @@ export const ServiceUserPicker = ({ onSaved }: { onSaved?: (patch: Partial<PocPl
     if (refusal === null) {
       setCheck({ state: 'ok' });
       save({ detectorActor: actor });
-    } else setCheck({ state: 'refused', reason: refusal === 'not-an-id' ? t('builder.ad.actor.notId') : refusal });
+    } else setCheck({ state: 'refused', reason: refusalWords(refusal, t) });
   };
 
   const accountValid = ACCOUNT_UUID.test(account.trim());

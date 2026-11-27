@@ -65,7 +65,7 @@ describe('the manifest and the action files', () => {
       expect.arrayContaining([expect.objectContaining({ name: 'poc-triage', title: 'PoC Automation · Triage' })]),
     );
     // 3.7.3 added the two synthetic scopes, 3.7.4 settings:objects:write and 3.7.6 settings:objects:read; the action still needs none of its own.
-    expect(manifest.app.scopes).toHaveLength(25);
+    expect(manifest.app.scopes).toHaveLength(26); // 3.8.2: iam:service-users:use
     expect(read('actions/poc-triage.action.ts')).toContain("from '../ui/app/features/triage/triage'");
     expect(read('actions/poc-triage.widget.tsx')).toContain('{{ event()["event.id"] }}');
   });

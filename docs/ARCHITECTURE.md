@@ -1,6 +1,6 @@
 # Architecture
 
-> **App:** PoC Automation 3.0 · **id:** `my.poc.automation` · **platform:** Dynatrace AppEngine · **release:** 3.8.1
+> **App:** PoC Automation 3.0 · **id:** `my.poc.automation` · **platform:** Dynatrace AppEngine · **release:** 3.8.2
 >
 > The code is the source of truth. This document describes how the app is built and the rules it keeps.
 
@@ -363,10 +363,10 @@ each dashboard, notebook and launchpad.
 | **Smart Dashboards · 8** | Compact cards; the full card opens one at a time | 8 dashboards; "Update" replaces the same document | Document service |
 | **Notebook and launchpad** | `PocDocumentKit` | "PoC investigation" notebook and "PoC launchpad" | Document service |
 | **SLOs** | `SloKit` | Availability and performance per service; fleet SLOs | SLO API |
-| **Workflows** | `WorkflowKit`, `WeeklyKit` | Triage and weekly workflows, handed to Workflows (or downloaded as `.json`) | Workflows intent |
+| **Workflows** | `WorkflowKit`, `WeeklyKit`, `CapacityKit` | Triage and weekly workflows, and four predictive-capacity workflows, handed to Workflows (or downloaded as `.json`) | Workflows intent |
 | **Synthetic** | `MonitorKit` | Browser and HTTP monitors of the customer's addresses | Synthetic API |
 | **OpenPipeline** | `OpenPipelineKit` | A logs pipeline, its route, and a check | Settings 2.0 |
-| **Anomaly detection** | `AnomalyKit` | Detectors on the golden signals, run by a service user (or opened in the Anomaly Detection app) | Settings 2.0 (and the Anomaly Detection intent) |
+| **Anomaly detection** | `AnomalyKit` | Detectors on the golden signals, run by the service user set in Settings — checked with the platform when the kit opens, a "Ready" badge enabling the creation (or opened in the Anomaly Detection app) | Settings 2.0 (and the Anomaly Detection intent) |
 | **Register** | list + `CleanupPanel` | — | per type |
 
 **The dashboards** (`features/dashboard/blueprints.ts`): Environment health and SLOs (the platform's SLO tiles for
@@ -392,6 +392,14 @@ there.
 | --- | --- | --- |
 | Triage | A Dynatrace Intelligence problem with analysis ready, every category; the trigger is on, so saving turns it on | `poc_triage` → `dynatrace_assist` → `notify_team` |
 | Weekly summary | Cron `0 9 * * 1` in the SE's time zone | `poc_weekly` → `weekly_assist` → `notify_team` |
+| Predictive capacity (four: host disk, host memory, host CPU, Kubernetes memory against its limit) | Cron `0 7 * * *` (daily) | `forecast_capacity` → `capacity_assist` → `notify_team`, and optionally `raise_event` |
+
+**Predictive capacity** (`features/builder/pocCapacity.ts`, `CapacityKit.tsx`, since 3.8.2). Each workflow runs a
+JavaScript task that asks Dynatrace Intelligence's forecast analyzer (`dt.statistics.GenericForecastAnalyzer`, through
+`@dynatrace-sdk/client-davis-analyzers`) for the fullest series seven or fourteen days ahead, reading metrics only, and
+acts only when the forecast reaches the line the SE set on the kit: an e-mail with Dynatrace Assist's reading and,
+optionally, a resource-contention event that opens a problem. The forecast runs as the workflow's actor — no scope of
+this app is involved.
 
 Not written by the app, workflows are in neither the Register nor the clean-up.
 

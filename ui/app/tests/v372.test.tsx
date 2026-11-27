@@ -205,7 +205,8 @@ describe('the triage e-mail', () => {
 describe('What’s new', () => {
   it('keeps 3.7.2 among the ten releases', () => {
     // 3.7.3: newer releases come first.
-    expect(WHATS_NEW).toContainEqual({ key: 'help.whatsNew.i114', published: '2026-11-23' });
+    // 3.8.2: i114 left the ten What's new shows (the entry stays in its fragment).
+    expect(WHATS_NEW).not.toContainEqual({ key: 'help.whatsNew.i114', published: '2026-11-23' });
     expect(WHATS_NEW.length).toBe(10);
     expect(entryFor('help.whatsNew.i114').en.startsWith('3.7.2 — ')).toBe(true);
   });

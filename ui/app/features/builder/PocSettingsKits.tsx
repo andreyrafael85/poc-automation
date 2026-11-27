@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { Button } from '@dynatrace/strato-components/buttons';
+import { Chip } from '@dynatrace/strato-components/content';
 import { Checkbox } from '@dynatrace/strato-components/forms';
 import { Heading, Link, Paragraph, Text } from '@dynatrace/strato-components/typography';
 import { ExternalLinkIcon } from '@dynatrace/strato-icons';
@@ -13,6 +14,7 @@ import type { StringKey } from '../../i18n/strings';
 import { useTranslation } from '../../i18n/useTranslation';
 import { num, str } from '../../utils/records';
 import { appIdOrManifest } from './PocDocumentKit';
+import { refusalWords } from './ServiceUserPicker';
 import { Confirm, Result, SLO_SERVICES_PRESELECTED, SLO_SERVICES_SHOWN, failureKey, type Busy } from './PocAutomationKits';
 import {
   ANOMALY_SETTINGS_LINK,
@@ -98,8 +100,16 @@ export const AnomalyKit = () => {
   const recheck = async () => {
     setCheck({ state: 'checking' });
     const refusal = await checkActor(saved);
-    setCheck(refusal === null ? { state: 'ok' } : { state: 'refused', reason: refusal === 'not-an-id' ? t('builder.ad.actor.notId') : refusal });
+    setCheck(refusal === null ? { state: 'ok' } : { state: 'refused', reason: refusalWords(refusal, t) });
   };
+  // 3.8.2 (the owner: "precisa ter alguma identificação se o usuário foi criado corretamente no configurações para habilitar
+  // criar o detector"): the kit asks the platform on opening (nothing written) and creates only once the answer is yes.
+  useEffect(() => {
+    if (saved === '' || !canCreate) return;
+    void recheck();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per saved service user
+  }, [saved, canCreate]);
+  const ready = check?.state === 'ok';
 
   const run = async () => {
     setBusy({ kind: 'busy' });
@@ -192,9 +202,18 @@ export const AnomalyKit = () => {
         </Text>
 
         <Stack gap="tight" data-testid="builder-ad-actor">
-          <Text className="pvs-label">{t('builder.ad.actor.title')}</Text>
+          <Cluster>
+            <Text className="pvs-label">{t('builder.ad.actor.title')}</Text>
+            {saved !== '' && check !== null && (
+              <span data-testid="builder-ad-actor-badge" data-state={check.state}>
+                <Chip size="condensed" variant="accent" color={check.state === 'ok' ? 'success' : check.state === 'refused' ? 'critical' : 'neutral'}>
+                  {t(check.state === 'ok' ? 'builder.ad.actor.badgeOk' : check.state === 'refused' ? 'builder.ad.actor.badgeRefused' : 'builder.ad.actor.badgeChecking')}
+                </Chip>
+              </span>
+            )}
+          </Cluster>
           {saved !== '' ? (
-            <Text data-testid="builder-ad-actor-saved">✓ {t('builder.ad.actor.saved', { id: saved })}</Text>
+            <Text data-testid="builder-ad-actor-saved">{t('builder.ad.actor.saved', { id: saved })}</Text>
           ) : (
             <Text className="pvs-caption" data-testid="builder-ad-actor-none">
               {t('builder.ad.actor.fromSettings')}
@@ -239,7 +258,7 @@ export const AnomalyKit = () => {
                 variant="accent"
                 color="primary"
                 onClick={() => setBusy({ kind: 'confirm' })}
-                disabled={plan.length === 0 || saved === '' || busy.kind === 'busy'}
+                disabled={plan.length === 0 || saved === '' || !ready || busy.kind === 'busy'}
                 data-testid="builder-ad-create"
               >
                 {t('builder.ad.createFor', {

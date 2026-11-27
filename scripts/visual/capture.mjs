@@ -164,6 +164,12 @@ const brandFontsAvailable = fs.existsSync(BRAND_FONTS);
 const APP_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><rect width="20" height="20" rx="4" fill="#3d3d47"/><text x="10" y="14" font-size="9" font-family="sans-serif" fill="#fff" text-anchor="middle">Po</text></svg>';
 async function serveAppIcon(context) {
   await context.route(/\/platform\/app-engine\/registry\/v1\/app-icons\//, (route) => route.fulfill({ status: 200, contentType: 'image/svg+xml', body: APP_ICON_SVG }));
+  // 3.8.2: the anomaly kit asks the settings service, on opening, whether the saved service user would be accepted
+  // (`validateOnly`, nothing written). Offline that request answered 404 (a console error); the harness answers as the
+  // platform does when it accepts the actor.
+  await context.route(/\/platform\/classic\/environment-api\/v2\/settings\/objects\?validateOnly=true/, (route) =>
+    route.request().method() === 'POST' ? route.fulfill({ status: 200, contentType: 'application/json', body: '[{"code":200}]' }) : route.fallback(),
+  );
 }
 
 async function serveBrandFonts(context) {
@@ -1082,13 +1088,33 @@ async function runStates({ browser, base }) {
         const wfDownload = await page.getByTestId('builder-wf-download').count();
         const weekly = await page.getByTestId('builder-weekly-kit').count();
         const weeklyOpen = await page.getByTestId('builder-weekly-open').count();
+        // 3.8.2: the predictive-capacity kit — four forecasts, each opened in Workflows or downloaded.
+        const capacity = await page.locator('[data-testid^="builder-capacity-open-"]').count();
         await page.getByRole('tab', { name: 'Synthetic', exact: true }).click({ timeout: 8000 });
         // The harness answers no synthetic location, so the kit says so.
         const monitors = await page.getByTestId('builder-monitor-kit').waitFor({ timeout: 8000 }).then(() => 1).catch(() => 0);
         // 3.7.8: the browser monitors kit sits first in the tab, beside the HTTP one.
         const browsers = await page.getByTestId('builder-browser-kit').waitFor({ timeout: 8000 }).then(() => 1).catch(() => 0);
-        const ok = services > 0 && sloConfirm && fleet === 3 && wfOpen === 1 && wfDownload === 1 && weekly === 1 && weeklyOpen === 1 && monitors === 1 && browsers === 1;
-        return { ok, note: `services offered: ${services}; fleet SLOs: ${fleet}; SLO confirmation: ${sloConfirm}; triage workflow (open/download): ${wfOpen}/${wfDownload}; weekly summary: ${weekly}; HTTP / browser monitor kits: ${monitors}/${browsers}; nothing created` };
+        const ok = services > 0 && sloConfirm && fleet === 3 && wfOpen === 1 && wfDownload === 1 && weekly === 1 && weeklyOpen === 1 && capacity === 4 && monitors === 1 && browsers === 1;
+        return { ok, note: `services offered: ${services}; fleet SLOs: ${fleet}; SLO confirmation: ${sloConfirm}; triage workflow (open/download): ${wfOpen}/${wfDownload}; weekly summary: ${weekly}; capacity workflows: ${capacity}; HTTP / browser monitor kits: ${monitors}/${browsers}; nothing created` };
+      },
+    },
+    // ---- 3.8.2: the PoC Builder's predictive-capacity kit (the Workflows tab) — four forecasts, nothing created ----
+    {
+      name: 'builder-capacity',
+      route: '/builder',
+      url: { state: 'seeded' },
+      run: async (page) => {
+        await page.getByRole('tab', { name: 'Workflows', exact: true }).click({ timeout: 8000 });
+        const kit = page.getByTestId('builder-capacity-kit');
+        await kit.waitFor({ timeout: 8000 });
+        await kit.scrollIntoViewIfNeeded();
+        const kinds = await page.locator('[data-testid^="builder-capacity-open-"]').count();
+        const downloads = await page.locator('[data-testid^="builder-capacity-download-"]').count();
+        const enabled = await page.getByTestId('builder-capacity-open-disk').isEnabled();
+        const events = await page.getByTestId('builder-capacity-events').count();
+        const ok = kinds === 4 && downloads === 4 && enabled && events === 1;
+        return { ok, note: `forecasts: ${kinds} (download: ${downloads}); open enabled with the SE's e-mail: ${enabled}; event option: ${events}; nothing created` };
       },
     },
     // ---- 3.7.4: the PoC Builder's OpenPipeline and anomaly detection kits — their tabs and the confirmations ----
@@ -1113,13 +1139,20 @@ async function runStates({ browser, base }) {
         await page.getByTestId('builder-ad-per-service').click({ timeout: 8000 });
         const scope = (await page.getByTestId('builder-ad-scope').textContent({ timeout: 8000 })) ?? '';
         const create = (await page.getByTestId('builder-ad-create').textContent({ timeout: 8000 })) ?? '';
-        const ready = !(await page.getByTestId('builder-ad-create').isDisabled());
         // 3.8.1: the service user comes from Settings (the seeded PoC has one); the kit shows it and can re-check it.
+        // 3.8.2: it asks the platform on opening and shows a badge; the harness answers the check as the platform does when it
+        // accepts the service user, so the badge reads "Ready" and the create button is enabled (nothing is clicked).
         const saved = await page.getByTestId('builder-ad-actor-saved').count();
         const toSettings = await page.getByTestId('builder-ad-actor-settings').count();
+        await page.getByTestId('builder-ad-actor-badge').waitFor({ timeout: 8000 });
+        const badge = (await page.getByTestId('builder-ad-actor-badge').getAttribute('data-state')) ?? '';
+        await page.locator('[data-testid="builder-ad-actor-badge"][data-state="ok"]').waitFor({ timeout: 8000 }).catch(() => undefined);
+        const badgeNow = (await page.getByTestId('builder-ad-actor-badge').getAttribute('data-state')) ?? badge;
+        const waits = await page.getByTestId('builder-ad-create').isDisabled();
+        const ready = !waits && badgeNow === 'ok';
         await page.getByTestId('builder-ad-how').scrollIntoViewIfNeeded();
         const ok = /86\.7%/.test(preview) && opConfirm && services > 0 && signals === 3 && adButtons === 3 && actor === 1 && /\b9\b/.test(create) && ready && saved === 1 && toSettings === 1;
-        return { ok, note: `preview: "${preview.slice(0, 60)}…"; pipeline confirmation: ${opConfirm}; services: ${services}; signals: ${signals}; detector buttons: ${adButtons}; per service: "${scope.slice(0, 70)}"; create: "${create}" (ready with the service user from Settings: ${ready && saved === 1}); nothing created` };
+        return { ok, note: `preview: "${preview.slice(0, 60)}…"; pipeline confirmation: ${opConfirm}; services: ${services}; signals: ${signals}; detector buttons: ${adButtons}; per service: "${scope.slice(0, 70)}"; create: "${create}" (service user from Settings: ${saved === 1}; badge: ${badgeNow}; create enabled once "Ready": ${!waits}); nothing created` };
       },
     },
     // ---- 3.8.1: Settings → PoC plan — the service user that runs the detectors, the account and its link ----

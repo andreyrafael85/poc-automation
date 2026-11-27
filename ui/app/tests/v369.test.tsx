@@ -30,7 +30,7 @@ describe('the manifest', () => {
     // Workflows app saves the triage workflow through its intent, with the SE's own permissions.
     expect([...scopes.keys()].some((name) => name.startsWith('automation:'))).toBe(false);
     // 3.7.3: the two synthetic scopes of the HTTP monitors; 3.7.4: settings:objects:write; 3.7.6: settings:objects:read (owner's orders of 2026-11-23).
-    expect(manifest.app.scopes).toHaveLength(25);
+    expect(manifest.app.scopes).toHaveLength(26); // 3.8.2: iam:service-users:use
   });
 });
 

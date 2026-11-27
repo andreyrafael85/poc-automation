@@ -135,7 +135,8 @@ export interface WorkflowBody<T extends EventTrigger | ScheduleTrigger = EventTr
       input: Record<string, unknown>;
       position: { x: number; y: number };
       predecessors: string[];
-      conditions?: { states: Record<string, 'OK' | 'ANY'> };
+      // 3.8.2: a custom condition (Jinja) and what happens when it is false — the capacity workflows act only on a risk.
+      conditions?: { states: Record<string, 'OK' | 'ANY'>; custom?: string; else?: 'SKIP' };
     }
   >;
 }
