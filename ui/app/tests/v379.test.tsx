@@ -101,7 +101,7 @@ describe('the Autonomous Value Cycle (3.7.9)', () => {
 
 describe('the menu in nine stages, and the Roadmap as the 30-60-90 action plan', () => {
   it('keeps Coverage and Platform adoption in stage 3, joins Discoveries and Evidence, and has no Roadmap page', () => {
-    expect(STORY_STAGES.map((stage) => stage.id)).toEqual(['context', 'objectives', 'coverage', 'evidence', 'impact', 'value', 'recommendations', 'next', 'manage']);
+    expect(STORY_STAGES.map((stage) => stage.id)).toEqual(['context', 'objectives', 'coverage', 'evidence', 'value', 'recommendations', 'manage'] /* 3.8.1: seven */);
     expect(STORY_STAGES.find((stage) => stage.id === 'coverage')?.routes).toEqual(['/coverage', '/adoption']);
     expect(STORY_STAGES.find((stage) => stage.id === 'evidence')?.routes).toEqual(expect.arrayContaining(['/problems', '/rca', '/topology', '/services', '/ai-observability', '/competitor']));
     expect(NAVIGATION.some((section) => section.route === '/roadmap')).toBe(false);
@@ -118,7 +118,7 @@ describe('the menu in nine stages, and the Roadmap as the 30-60-90 action plan',
 
 describe('What’s new', () => {
   it('keeps 3.7.9 among the ten, after 3.8.0', () => {
-    expect(WHATS_NEW[1]?.key).toBe('help.whatsNew.i121');
+    expect(WHATS_NEW[2]?.key).toBe('help.whatsNew.i121'); // 3.8.1: after 3.8.1 and 3.8.0
     expect(WHATS_NEW).toHaveLength(10);
     expect(entryFor('help.whatsNew.i121').en).toMatch(/^3\.7\.9 — /);
   });

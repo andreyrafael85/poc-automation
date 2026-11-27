@@ -76,6 +76,8 @@ export interface PocPlan {
   autonomyTarget?: 'observe' | 'explain' | 'prioritise' | 'propose' | 'act';
   /** 3.8.0: the service user that runs the detectors the PoC Builder creates (a person's own id is refused as their actor). */
   detectorActor?: string;
+  /** 3.8.1: the Dynatrace account's UUID, for the link to its service users (Account Management). */
+  accountUuid?: string;
 }
 
 /** 3.6.9: the SLOs one service gets — requests without a failure, minutes within the response-time line. */
@@ -246,6 +248,8 @@ export function parsePocPlan(raw: unknown): PocPlan {
   const target = raw['autonomyTarget'];
   const actor = raw['detectorActor'];
   const detectorActor = typeof actor === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(actor) ? actor.toLowerCase() : undefined;
+  const account = raw['accountUuid'];
+  const accountUuid = typeof account === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(account) ? account.toLowerCase() : undefined;
   const autonomyTarget = typeof target === 'string' && ['observe', 'explain', 'prioritise', 'propose', 'act'].includes(target) ? (target as PocPlan['autonomyTarget']) : undefined;
   return {
     startDate,
@@ -261,6 +265,7 @@ export function parsePocPlan(raw: unknown): PocPlan {
     ...(pipeline !== null ? { pipeline } : {}),
     ...(autonomyTarget === undefined ? {} : { autonomyTarget }),
     ...(detectorActor === undefined ? {} : { detectorActor }),
+    ...(accountUuid === undefined ? {} : { accountUuid }),
   };
 }
 

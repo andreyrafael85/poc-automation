@@ -951,7 +951,7 @@ async function runStates({ browser, base }) {
         await page.getByTestId('setup-next').click({ timeout: 8000 });
         const banner = await page.getByTestId('setup-banner').waitFor({ timeout: 15000 }).then(() => true).catch(() => false);
         const onSettings = /\/settings/.test(page.url());
-        return { ok: steps === 7 && /0/.test(progress) && banner && onSettings, note: `steps: ${steps}; progress: "${progress.slice(0, 40)}"; next opens Settings with the banner: ${banner && onSettings}` };
+        return { ok: steps === 8 && /0/.test(progress) && banner && onSettings, note: `steps: ${steps}; progress: "${progress.slice(0, 40)}"; next opens Settings with the banner: ${banner && onSettings}` };
       },
     },
     // ---- 3.7.6: the OpenPipeline kit with its pipeline created — the check line, the sources and the route's confirmation ----
@@ -1113,10 +1113,33 @@ async function runStates({ browser, base }) {
         await page.getByTestId('builder-ad-per-service').click({ timeout: 8000 });
         const scope = (await page.getByTestId('builder-ad-scope').textContent({ timeout: 8000 })) ?? '';
         const create = (await page.getByTestId('builder-ad-create').textContent({ timeout: 8000 })) ?? '';
-        const waits = await page.getByTestId('builder-ad-create').isDisabled();
+        const ready = !(await page.getByTestId('builder-ad-create').isDisabled());
+        // 3.8.1: the service user comes from Settings (the seeded PoC has one); the kit shows it and can re-check it.
+        const saved = await page.getByTestId('builder-ad-actor-saved').count();
+        const toSettings = await page.getByTestId('builder-ad-actor-settings').count();
         await page.getByTestId('builder-ad-how').scrollIntoViewIfNeeded();
-        const ok = /86\.7%/.test(preview) && opConfirm && services > 0 && signals === 3 && adButtons === 3 && actor === 1 && /\b9\b/.test(create) && waits;
-        return { ok, note: `preview: "${preview.slice(0, 60)}…"; pipeline confirmation: ${opConfirm}; services: ${services}; signals: ${signals}; detector buttons: ${adButtons}; per service: "${scope.slice(0, 70)}"; create: "${create}" (waits for a service user: ${waits}); nothing created` };
+        const ok = /86\.7%/.test(preview) && opConfirm && services > 0 && signals === 3 && adButtons === 3 && actor === 1 && /\b9\b/.test(create) && ready && saved === 1 && toSettings === 1;
+        return { ok, note: `preview: "${preview.slice(0, 60)}…"; pipeline confirmation: ${opConfirm}; services: ${services}; signals: ${signals}; detector buttons: ${adButtons}; per service: "${scope.slice(0, 70)}"; create: "${create}" (ready with the service user from Settings: ${ready && saved === 1}); nothing created` };
+      },
+    },
+    // ---- 3.8.1: Settings → PoC plan — the service user that runs the detectors, the account and its link ----
+    {
+      name: 'settings-service-user',
+      route: '/settings?tab=plan',
+      url: { state: 'seeded' },
+      run: async (page) => {
+        await page.getByTestId('settings-service-user').waitFor({ timeout: 8000 });
+        await page.getByTestId('settings-service-user').scrollIntoViewIfNeeded();
+        const saved = (await page.getByTestId('su-saved').textContent({ timeout: 8000 })) ?? '';
+        const before = (await page.getByTestId('su-link').getAttribute('href')) ?? '';
+        const field = page.getByTestId('su-account');
+        const tag = await field.evaluate((element) => element.tagName);
+        await (tag === 'INPUT' ? field : field.locator('input')).fill('00000000-0000-4000-8000-0000000000aa');
+        await page.getByTestId('su-account-save').click({ timeout: 8000 });
+        const after = (await page.getByTestId('su-link').getAttribute('href')) ?? '';
+        const input = await page.getByTestId('builder-ad-actor-input').count();
+        const ok = /00000000-1111/.test(saved) && before === 'https://myaccount.dynatrace.com/' && /service-user-management\?account-uuid=00000000-0000-4000-8000-0000000000aa/.test(after) && input === 1;
+        return { ok, note: `saved: "${saved.slice(0, 60)}"; link before: ${before}; after the account: ${after.slice(0, 90)}; nothing written to the tenant` };
       },
     },
     // ---- 3.6.7: the PoC Builder's notebook and launchpad kits — their tab, and the confirmation before a create ----

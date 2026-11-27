@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import { Button } from '@dynatrace/strato-components/buttons';
-import { Checkbox, TextInput } from '@dynatrace/strato-components/forms';
+import { Checkbox } from '@dynatrace/strato-components/forms';
 import { Heading, Link, Paragraph, Text } from '@dynatrace/strato-components/typography';
 import { ExternalLinkIcon } from '@dynatrace/strato-icons';
 
@@ -23,11 +23,9 @@ import {
   OPENPIPELINE_ROUTING_LINK,
   PIPELINE_SCHEMA,
   DETECTOR_SCHEMA,
-  SERVICE_USER_ID,
   buildDetector,
-  checkDetector,
+  checkActor,
   detectorIntent,
-  listDetectorActors,
   openDetectorInApp,
   refusalOf,
   responseBodyOf,
@@ -36,7 +34,6 @@ import {
   routeMatcher,
   routeToPipeline,
   type RouteSource,
-  type DetectorActor,
   type DetectorKind,
   type DetectorWords,
 } from './pocSettings';
@@ -69,30 +66,10 @@ export const AnomalyKit = () => {
   const existing = pocPlan.detectors ?? [];
   const customer = parameters.customerName.trim() === '' ? 'PoC' : parameters.customerName.trim();
 
-  // The service user: the one saved with the PoC, one offered from the tenant's detectors, or one pasted.
-  const [actors, setActors] = useState<DetectorActor[] | null>(null);
-  const [typed, setTyped] = useState('');
-  const [check, setCheck] = useState<{ id: string; state: 'checking' | 'ok' | 'refused'; reason?: string } | null>(null);
+  // 3.8.1: the service user is set in Settings → PoC plan; here the kit only reads it and can ask the platform again.
+  const [check, setCheck] = useState<{ state: 'checking' | 'ok' | 'refused'; reason?: string } | null>(null);
   const saved = pocPlan.detectorActor ?? '';
   const canCreate = access.canManageAccess;
-  useEffect(() => {
-    if (!canCreate) return;
-    let live = true;
-    listDetectorActors()
-      .then(async (found) => {
-        // Only the actors the platform accepts for this user are offered (a person's id is refused as an actor).
-        const accepted: DetectorActor[] = [];
-        for (const actor of found.slice(0, ACTORS_CHECKED)) {
-          const probe = buildDetector('traffic', [], probeWords, actor.id);
-          if (probe !== null && (await checkDetector(probe)) === null) accepted.push(actor);
-        }
-        if (live) setActors(accepted);
-      })
-      .catch(() => live && setActors([]));
-    return () => {
-      live = false;
-    };
-  }, [canCreate]);
 
   const toggle = <T,>(set: Set<T>, value: T) => {
     const next = new Set(set);
@@ -118,19 +95,10 @@ export const AnomalyKit = () => {
     eventDescription: t('builder.ad.eventDescription'),
   });
 
-  const verify = async (id: string) => {
-    const actor = id.trim().toLowerCase();
-    if (!SERVICE_USER_ID.test(actor)) {
-      setCheck({ id: actor, state: 'refused', reason: t('builder.ad.actor.notId') });
-      return;
-    }
-    setCheck({ id: actor, state: 'checking' });
-    const probe = buildDetector('traffic', [], probeWords, actor);
-    const refusal = probe === null ? t('builder.ad.actor.notId') : await checkDetector(probe);
-    if (refusal === null) {
-      setCheck({ id: actor, state: 'ok' });
-      setPocPlan({ ...pocPlan, detectorActor: actor });
-    } else setCheck({ id: actor, state: 'refused', reason: refusal });
+  const recheck = async () => {
+    setCheck({ state: 'checking' });
+    const refusal = await checkActor(saved);
+    setCheck(refusal === null ? { state: 'ok' } : { state: 'refused', reason: refusal === 'not-an-id' ? t('builder.ad.actor.notId') : refusal });
   };
 
   const run = async () => {
@@ -225,51 +193,32 @@ export const AnomalyKit = () => {
 
         <Stack gap="tight" data-testid="builder-ad-actor">
           <Text className="pvs-label">{t('builder.ad.actor.title')}</Text>
-          <Text className="pvs-caption">{t('builder.ad.actor.why')}</Text>
-          {saved !== '' && (
+          {saved !== '' ? (
             <Text data-testid="builder-ad-actor-saved">✓ {t('builder.ad.actor.saved', { id: saved })}</Text>
+          ) : (
+            <Text className="pvs-caption" data-testid="builder-ad-actor-none">
+              {t('builder.ad.actor.fromSettings')}
+            </Text>
           )}
-          {canCreate && actors === null && <Text className="pvs-muted">{t('builder.ad.actor.looking')}</Text>}
-          {canCreate && actors !== null && actors.length > 0 && (
-            <Cluster>
-              {actors.map((actor) => (
-                <Button
-                  key={actor.id}
-                  variant={saved === actor.id ? 'accent' : 'default'}
-                  onClick={() => void verify(actor.id)}
-                  data-testid={`builder-ad-actor-${actor.id}`}
-                >
-                  {t('builder.ad.actor.offer', { id: actor.id.slice(0, 8), n: formatNumber(actor.detectors), example: actor.example.slice(0, 40) })}
-                </Button>
-              ))}
-            </Cluster>
-          )}
-          {canCreate && (
-            <Cluster>
-              <div className="pvs-ad-actor-input">
-                <TextInput
-                  value={typed}
-                  onChange={(value) => setTyped(value.slice(0, 60))}
-                  placeholder={t('builder.ad.actor.placeholder')}
-                  aria-label={t('builder.ad.actor.title')}
-                  data-testid="builder-ad-actor-input"
-                />
-              </div>
-              <Button variant="emphasized" onClick={() => void verify(typed)} disabled={typed.trim() === '' || check?.state === 'checking'} data-testid="builder-ad-actor-check">
-                {t('builder.ad.actor.check')}
+          <Cluster>
+            {saved !== '' && canCreate && (
+              <Button variant="default" onClick={() => void recheck()} disabled={check?.state === 'checking'} data-testid="builder-ad-actor-recheck">
+                {t('builder.ad.actor.recheck')}
               </Button>
-            </Cluster>
-          )}
+            )}
+            <Link href="/settings?tab=plan" data-testid="builder-ad-actor-settings">
+              {t('builder.ad.actor.openSettings')}
+            </Link>
+          </Cluster>
           {check !== null && (
             <Text className="pvs-caption" data-testid="builder-ad-actor-result" data-state={check.state}>
               {check.state === 'checking'
                 ? t('builder.ad.actor.checking')
                 : check.state === 'ok'
-                  ? t('builder.ad.actor.ok')
+                  ? t('builder.ad.actor.okBuilder')
                   : t('builder.ad.actor.refused', { reason: check.reason ?? '' })}
             </Text>
           )}
-          <Text className="pvs-caption">{t('builder.ad.actor.how')}</Text>
         </Stack>
 
         {existing.length > 0 && <Text className="pvs-caption">{t('builder.ad.existing', { n: formatNumber(existing.length) })}</Text>}
@@ -332,12 +281,6 @@ export const AnomalyKit = () => {
     </Panel>
   );
 };
-
-/** How many of the tenant's detector actors are checked (each check writes nothing). */
-const ACTORS_CHECKED = 8;
-/** The words of the detector used only to ask the platform whether an actor is accepted (never written). */
-const PROBE_NAME = ['PoC Automation', 'actor check'].join(' · ');
-const probeWords: DetectorWords = { title: PROBE_NAME, description: '', eventName: PROBE_NAME, eventDescription: '' };
 
 /**
  * 3.7.6 (the owner: "como validamos se está totalmente funcional?"): once the pipeline exists, how many records went through

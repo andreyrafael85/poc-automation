@@ -87,26 +87,36 @@
   font-weight: 600;
 }
 
-/* 3.8.0 — the models in use beside the tokens by service and model (one column on a narrow screen). */
-.pvs-aimodels-row {
+/*
+ * 3.8.1 (the owner: "os tiles/portlets estão desproporcionais"): tokens by model, tokens by service and the models in use —
+ * three panels of one height side by side from 1,100 px (stacked below); the model cards one under the other in theirs.
+ */
+.pvs-ai-trio {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--dt-spacings-size-24);
-  align-items: start;
 }
 
-/* Each side keeps its own height (the table panel no longer stretches to the cards). */
-.pvs-aimodels-row > * {
-  align-self: start;
-  height: auto;
-  min-width: 0;
+.pvs-ai-trio .pvs-aimodels {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 @media (min-width: 1100px) {
-  .pvs-aimodels-row[data-cols='2'] {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
-  }
-  .pvs-aimodels-row[data-cols='2'] .pvs-aimodels {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  .pvs-ai-trio {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* With several models, their cards take a band of their own under the two charts, four to a row. */
+@media (min-width: 1100px) {
+  .pvs-ai-trio[data-models='many'] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .pvs-ai-trio[data-models='many'] > [data-testid='ai-models'] {
+    grid-column: 1 / -1;
+  }
+  .pvs-ai-trio[data-models='many'] .pvs-aimodels {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+}
+

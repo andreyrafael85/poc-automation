@@ -73,6 +73,9 @@ const SEEDED_SHARED = {
       { id: 'c5', metric: 'manual', operator: '>=', target: null, text: 'Root cause found without a war room', origin: 'Kick-off', manualStatus: 'met', pillar: 'agility' },
     ],
     dashboard: null,
+    // 3.8.1: the service user that runs the detectors is a preparation step; the seeded PoC has one (a made-up id), so it
+    // keeps six of its eight steps and opens in full.
+    detectorActor: '00000000-1111-4222-8333-444455556666',
   },
 };
 const SEEDED_PRIVATE = {

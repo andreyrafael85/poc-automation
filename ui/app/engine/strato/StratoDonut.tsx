@@ -51,6 +51,17 @@ export interface StratoDonutProps {
   ariaLabel: string;
 }
 
+/**
+ * 3.8.1 (the owner: the AI page's "Tokens by service" donut showed "298,1 mi" cut at both ends): the total in the centre is
+ * sized to the hole of the ring — about 55 % of the chart's height — so a longer reading shrinks instead of spilling under the
+ * ring (from 14 to 28 px).
+ */
+export function centerFontSize(text: string, height: number): number {
+  const room = height * 0.55;
+  const fit = room / (Math.max(1, text.length) * 0.6);
+  return Math.floor(Math.max(14, Math.min(28, fit)));
+}
+
 export const StratoDonut = ({
   slices,
   centerValue,
@@ -80,7 +91,9 @@ export const StratoDonut = ({
           <DonutChart.Grouping threshold={{ type: 'relative', value: 0 }} />
           <DonutChart.Inner>
             <div className="pvs-sdonut__inner">
-              <span className="pvs-sdonut__total">{centerValue}</span>
+              <span className="pvs-sdonut__total" style={{ ['--pvs-sdonut-total' as string]: `${centerFontSize(centerValue, height)}px` }}>
+                {centerValue}
+              </span>
               <span className="pvs-sdonut__label">{centerLabel}</span>
             </div>
           </DonutChart.Inner>

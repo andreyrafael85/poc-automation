@@ -8,7 +8,7 @@ import { Heading, Link, Paragraph, Text } from '@dynatrace/strato-components/typ
 import { AnalyticsIcon, ExternalLinkIcon } from '@dynatrace/strato-icons';
 
 import { useAccess } from '../../config/AccessContext';
-import { useDashboardLogo } from './dashboardLogo';
+import { useDashboardBanner, useDashboardLogo } from './dashboardLogo';
 import { useQueryScope, useStudio } from '../../config/StudioContext';
 import { Cluster, Panel, Stack } from '../../engine';
 import { useCatalogQuery } from '../../hooks/useCatalogQuery';
@@ -73,6 +73,7 @@ export const PocDashboardSection = () => {
   const scope = useQueryScope();
   const access = useAccess();
   const logo = useDashboardLogo();
+  const banner = useDashboardBanner();
   const criteria = useCriteriaResults(pocPlan.criteria);
   const words = useCriterionWords();
   const shortWords = useCriterionWords({ short: true });
@@ -121,6 +122,7 @@ export const PocDashboardSection = () => {
     buildPocDashboard({
       title: name.trim() === '' ? t('dash.defaultName') : name.trim(),
       logo,
+      banner,
       intro: t('dash.intro', {
         engagement: parameters.engagementName.trim() === '' ? t('dash.noEngagement') : parameters.engagementName.trim(),
         at: formatDateTime(resolvedTimeframe.endIso),

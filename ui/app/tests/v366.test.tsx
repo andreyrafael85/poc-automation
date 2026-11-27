@@ -40,13 +40,13 @@ const words = (logo?: { src: string; alt: string }): DashboardWords => ({
 });
 
 describe('the menu', () => {
-  it('closes with a tenth stage, Settings & Build, holding the PoC Builder and Settings', () => {
+  it('closes with a last stage, Settings & Build, holding the PoC Builder and Settings', () => {
     const last = STORY_STAGES[STORY_STAGES.length - 1];
     expect(last?.id).toBe('manage');
     expect(last?.routes).toEqual(['/builder', '/settings']);
     expect(STORY_STAGES[0]?.routes).toEqual(['/']);
-    // 3.7.9: nine stages; Settings & Build is the ninth.
-    expect(stageOf('/settings')?.position).toBe(9);
+    // 3.8.1: seven stages; Settings & Build is the seventh (the ninth in 3.7.9–3.8.0).
+    expect(stageOf('/settings')?.position).toBe(7);
     expect(entryFor('stage.manage')['pt-BR']).toBe('Configurações & Construção');
     expect(entryFor('stage.manage').en).toBe('Settings & Build');
     expect(entryFor('nav.builder')).toEqual({ en: 'PoC Builder', 'pt-BR': 'PoC Builder' });

@@ -1,6 +1,6 @@
 # Architecture
 
-> **App:** PoC Automation 3.0 · **id:** `my.poc.automation` · **platform:** Dynatrace AppEngine · **release:** 3.8.0
+> **App:** PoC Automation 3.0 · **id:** `my.poc.automation` · **platform:** Dynatrace AppEngine · **release:** 3.8.1
 >
 > The code is the source of truth. This document describes how the app is built and the rules it keeps.
 
@@ -8,7 +8,7 @@
 
 1. [Purpose and audience](#1-purpose-and-audience)
 2. [Platform pieces and folders](#2-platform-pieces-and-folders)
-3. [The nine stages: pages and routes](#3-the-nine-stages-pages-and-routes)
+3. [The seven stages: pages and routes](#3-the-seven-stages-pages-and-routes)
 4. [Access and roles](#4-access-and-roles)
 5. [Data: the query catalog and provenance](#5-data-the-query-catalog-and-provenance)
 6. [Persistence](#6-persistence)
@@ -130,9 +130,9 @@ Execution principles:
 
 ---
 
-## 3. The nine stages: pages and routes
+## 3. The seven stages: pages and routes
 
-The menu groups the pages into **nine stages** that follow the arc of a PoC (`STORY_STAGES` in
+The menu groups the pages into **seven stages** that follow the arc of a PoC (`STORY_STAGES` in
 `ui/app/config/navigation.ts`). The pager at the foot of each page leads to the next page of the story.
 
 | # | Stage | Page | Route | Purpose |
@@ -156,14 +156,14 @@ The menu groups the pages into **nine stages** that follow the arc of a PoC (`ST
 | 4 | | AI Observability | `/ai-observability` | GenAI tokens in and out, models, services and calls (tokens only), with a link to the platform's AI Observability app |
 | 4 | | Security | `/security` | Vulnerabilities reachable at runtime and where they run |
 | 4 | | Competitor overlap | `/competitor` | Other monitoring tools running in the environment |
-| 5 | Impact | Executive summary | `/executive` | The verdict for sponsors: Day 0 against today, MTTR |
-| 5 | | Consumption and events | `/consumption` | How use is spread across capabilities (SE and partner only) |
-| 6 | Demonstrated value | Value & ROI | `/value` | Measured and projected value from visible assumptions |
-| 6 | | SE Report | `/report` | The report, the first-day message, the Tech Wrapup deck and the real proofs |
-| 7 | Recommendations | Opportunities | `/opportunities` | Next capabilities to enable, from the findings, and the **30-60-90 action plan** (a tab) |
-| 8 | Next steps | Licensing | `/licensing` | Licensing, for the SE and partners |
-| 9 | Settings & Build | PoC Builder | `/builder` | What the PoC created on the environment and what else to create |
-| 9 | | Settings | `/settings` | Customer and engagement, PoC plan, the team's working figures, partner, prerequisites, assumptions, partner access |
+| 5 | Demonstrated value | Executive summary | `/executive` | The verdict for sponsors: Day 0 against today, MTTR |
+| 5 | | Value & ROI | `/value` | Measured and projected value from visible assumptions |
+| 5 | | SE Report | `/report` | The report, the first-day message, the Tech Wrapup deck and the real proofs |
+| 6 | Recommendations | Opportunities | `/opportunities` | Next capabilities to enable, from the findings, and the **30-60-90 action plan** (a tab) |
+| 6 | | Consumption and events | `/consumption` | How use is spread across capabilities (SE and partner only) |
+| 6 | | Licensing | `/licensing` | Licensing, for the SE and partners |
+| 7 | Settings & Build | PoC Builder | `/builder` | What the PoC created on the environment and what else to create |
+| 7 | | Settings | `/settings` | Customer and engagement, PoC plan (with the service user that runs the anomaly detectors), the team's working figures, partner, prerequisites, assumptions, partner access |
 
 ### The Autonomous Value Cycle
 
@@ -187,7 +187,7 @@ Who sees what:
 
 | Set | Routes | Effect |
 | --- | --- | --- |
-| `EXECUTIVE_HIDDEN_ROUTES` | `/builder`, `/settings` and the technical pages | Leave the menu in executive mode (the whole stage 9 disappears) |
+| `EXECUTIVE_HIDDEN_ROUTES` | `/builder`, `/settings` and the technical pages | Leave the menu in executive mode (the whole stage 7 disappears) |
 | `SE_ONLY_ROUTES` | `/licensing`, `/consumption` | Commercial material: SE and partner only, outside executive mode; blocked even by URL |
 | `RESTRICTED_ROUTES` | `/`, `/executive`, `/timeline` | What a customer without access can open; everything else asks for the partner password |
 
@@ -211,7 +211,7 @@ Files: `ui/app/config/access.ts` (pure rules), `ui/app/config/AccessContext.tsx`
 - **The master password.** For partners who install the app on their own tenant. Only a verifier is in the code
   (`MASTER_VERIFIER`, 600,000 rounds); this repository ships a placeholder (`deadbeef…`) that no password matches —
   put your own before deploying, or leave it.
-- **The setup guide** (`ui/app/features/setup/`). Seven readiness steps; until five are saved, the SE and the
+- **The setup guide** (`ui/app/features/setup/`). Eight readiness steps for the SE (the service user that runs the anomaly detectors among them, since 3.8.1); until five sevenths of them are saved (six of eight), the SE and the
   partner see the guide instead of the pages and the menu stays hidden — Settings and the PoC Builder stay open.
   Customers and executive mode never see it.
 - **Commercial data and executive mode.** Commercial data is native to the SE and the partner; `CommercialScope`
@@ -349,7 +349,7 @@ environment never travel.
 
 ## 8. The PoC Builder
 
-Route `/builder`, stage 9. Page `ui/app/pages/PocBuilder.tsx`; logic in `ui/app/features/builder/` and
+Route `/builder`, stage 7. Page `ui/app/pages/PocBuilder.tsx`; logic in `ui/app/features/builder/` and
 `ui/app/features/dashboard/`.
 
 **Principles.** Nothing is created automatically: each kit writes only after the SE's click and a confirmation,
@@ -373,7 +373,8 @@ each dashboard, notebook and launchpad.
 the SLOs the Builder created), Operations and reliability, Infrastructure and cloud, Digital experience and business,
 Runtime security, Logs and data quality (record reads sampled 1:100 and labelled), Kubernetes and containers,
 Databases and dependencies. Each tile reads a catalog entry or a query of `VALIDATED_DQL`, each with its validation
-record; banners use Strato colour tokens.
+record; the section banners use Strato colour tokens, or, since 3.8.1, the customer's brand colour chosen in Settings
+(which offers navy and green too).
 
 **The notebook** follows the order an engineer investigates (status, traffic, latency, errors, saturation,
 problems, logs, Kubernetes, security); the app runs each section once on create or update, with the user's own
@@ -421,8 +422,11 @@ overwritten. The clean-up removes the route first, then the pipeline.
 response time p90 (auto-adaptive, above) and a traffic drop (auto-adaptive, below). With no service ticked, a
 detector watches every service; the SE may also create one detector per signal and per service ticked. A detector
 runs its query on behalf of an actor, and the platform takes a **service user** as that actor (a person's own account
-is refused). The kit offers the service users already running detectors on the environment, once the platform accepts
-them, or takes a pasted id; before anything is written it asks the settings service with a `validateOnly` call. The
+is refused). Since 3.8.1 that service user is set in **Settings → PoC plan** (`ServiceUserPicker`), a step of the
+preparation: the account's UUID opens its service users in Account Management; the SE picks one already running
+detectors on the environment (offered once the platform accepts them) or pastes the id of one made for the PoC, and
+the settings service checks it with a `validateOnly` call (nothing written) before it is saved with the PoC. The kit
+only reads it and can check it again; creating a service user stays in Account Management. The
 detectors are created only on the SE's click after a confirmation, kept in the Register and removed by the clean-up.
 A detector can also be opened in the **Anomaly Detection app** through its documented intent, with its event already
 filled in, and saved there by the SE (then it is not in the Register). The kit links to Settings → all the alerts.

@@ -196,6 +196,39 @@ export function refusalOf(body: unknown, fallback: string): string {
 }
 
 /**
+ * 3.8.1 (the owner: "A plataforma não aceitou este: Must contain at least 1 non-whitespace character" for a service user that
+ * runs detectors on the lab): the check sent a detector whose event description was empty — the platform refused the
+ * description, not the actor (reproduced on the lab on 2026-11-27 with `dtctl create settings --validate-only`). The words of
+ * the detector used only for that check now fill every field. Never written.
+ */
+const PROBE_NAME = ['PoC Automation', 'actor check'].join(' · ');
+const PROBE_TEXT = [PROBE_NAME, SLO_TAG].join(' — ');
+export const PROBE_WORDS: DetectorWords = { title: PROBE_NAME, description: PROBE_TEXT, eventName: PROBE_NAME, eventDescription: PROBE_TEXT };
+
+/** Asks the platform whether this service user may run the PoC's detectors (nothing written): null when accepted. */
+export async function checkActor(actor: string): Promise<string | null> {
+  const id = actor.trim().toLowerCase();
+  if (!SERVICE_USER_ID.test(id)) return 'not-an-id';
+  const probe = buildDetector('traffic', [], PROBE_WORDS, id);
+  return probe === null ? 'not-an-id' : checkDetector(probe);
+}
+
+/** An account's UUID, as Account Management writes it in its addresses. */
+export const ACCOUNT_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * 3.8.1 (the owner: the link to the service users' page, "deve ser validado o ID da tenant/account-uuid"): Account Management →
+ * Identity & access management → Service users of this PoC's account; without a valid account UUID, Account Management's
+ * own start page (where the account is chosen).
+ */
+export function serviceUsersLink(accountUuid: string | undefined): string {
+  const id = (accountUuid ?? '').trim().toLowerCase();
+  return ACCOUNT_UUID.test(id)
+    ? `https://myaccount.dynatrace.com/account/iam/service-user-management?account-uuid=${encodeURIComponent(id)}`
+    : 'https://myaccount.dynatrace.com/';
+}
+
+/**
  * Asks the settings service whether a detector would be accepted, without writing it (`validateOnly`): the way to know, before
  * anything is created, that the platform takes this actor. Returns null when accepted, or the platform's own words.
  */

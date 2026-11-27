@@ -33,17 +33,16 @@ export const v31Strings = {
   },
   'stage.evidence': { en: 'Evidence', 'pt-BR': 'Evidências' },
   'stage.evidence.blurb': { en: 'What Dynatrace found on its own, and the measurements behind each finding, traceable down to the query.', 'pt-BR': 'O que a Dynatrace encontrou por conta própria e as medições por trás de cada descoberta, rastreáveis até a consulta.' },
-  'stage.impact': { en: 'Impact', 'pt-BR': 'Impacto' },
-  'stage.impact.blurb': { en: 'The headline for the sponsors, and how the platform is used and consumed.', 'pt-BR': 'O resumo para os patrocinadores e como a plataforma é usada e consumida.' },
   'stage.value': { en: 'Demonstrated value', 'pt-BR': 'Valor demonstrado' },
   'stage.value.blurb': {
-    en: 'What the PoC proved, and the deliverables that carry it away.',
-    'pt-BR': 'O que a PoC comprovou e os entregáveis que levam isso adiante.',
+    en: 'The headline for the sponsors, what the PoC proved, and the deliverables that carry it away.',
+    'pt-BR': 'O resumo para os patrocinadores, o que a PoC comprovou e os entregáveis que levam isso adiante.',
   },
   'stage.recommendations': { en: 'Recommendations', 'pt-BR': 'Recomendações' },
-  'stage.recommendations.blurb': { en: 'Improvements, each with the measurement that justifies it, and the 30-60-90 action plan.', 'pt-BR': 'Melhorias, cada uma com a medição que a justifica, e o plano de ação 30-60-90.' },
-  'stage.next': { en: 'Next steps', 'pt-BR': 'Próximos passos' },
-  'stage.next.blurb': { en: 'How to size what comes after the PoC.', 'pt-BR': 'Como dimensionar o que vem depois da PoC.' },
+  'stage.recommendations.blurb': {
+    en: 'Improvements, each with the measurement that justifies it, the 30-60-90 action plan, how the platform is used and how to size what comes after the PoC.',
+    'pt-BR': 'Melhorias, cada uma com a medição que a justifica, o plano de ação 30-60-90, como a plataforma é usada e como dimensionar o que vem depois da PoC.',
+  },
 
   // ------------------------------------------------------------------ shell
   'shell.nav.label': { en: 'The story of this PoC', 'pt-BR': 'A história desta PoC' },
@@ -220,8 +219,8 @@ export const v31Strings = {
   // ------------------------------------------------------------- overview
   'story.map.title': { en: 'The story of this PoC', 'pt-BR': 'A história desta PoC' },
   'story.map.subtitle': {
-    en: 'Nine stages, from context to next steps. Open any stage, in any order.',
-    'pt-BR': 'Nove etapas, do contexto aos próximos passos. Abra qualquer etapa, em qualquer ordem.',
+    en: 'Seven stages, from context to recommendations, then Settings & Build. Open any stage, in any order.',
+    'pt-BR': 'Sete etapas, do contexto às recomendações, e por fim Configurações & Construção. Abra qualquer etapa, em qualquer ordem.',
   },
   'story.map.pages': { en: '{count} pages', 'pt-BR': '{count} páginas' },
   'story.map.page': { en: '1 page', 'pt-BR': '1 página' },

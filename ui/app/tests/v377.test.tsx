@@ -47,7 +47,7 @@ describe('the first-run wizard', () => {
     expect(requiredSteps(5)).toBe(4);
     const saved = { customerName: 'Acme', customerLogoDataUrl: null, pocDescription: '', scopeDescription: 'x', startDate: '2026-11-01', endDate: '2026-12-01', criteria: 0, dashboards: 0, ratePerHour: null };
     const se = readinessSteps(saved, { canManageAccess: true, commercialVisible: true });
-    expect(se.map((step) => step.key)).toEqual(['customer', 'logo', 'description', 'dates', 'criteria', 'dashboard', 'rate']);
+    expect(se.map((step) => step.key)).toEqual(['customer', 'logo', 'description', 'dates', 'criteria', 'dashboard', 'serviceUser', 'rate']);
     expect(se.filter((step) => step.done)).toHaveLength(3);
     expect(readinessSteps(saved, { canManageAccess: false, commercialVisible: false })).toHaveLength(5);
   });

@@ -251,7 +251,8 @@
 
 .pvs-sdonut__total {
   font-family: var(--dt-typography-heading-level-2-family);
-  font-size: var(--dt-typography-heading-level-2-size);
+  /* 3.8.1: sized to the ring's hole by the component (StratoDonut's centerFontSize). */
+  font-size: var(--pvs-sdonut-total, var(--dt-typography-heading-level-2-size));
   font-weight: var(--dt-typography-heading-level-2-weight);
   color: var(--dt-colors-text-neutral-default);
   font-feature-settings: 'ss01';

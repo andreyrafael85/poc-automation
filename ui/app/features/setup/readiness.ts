@@ -8,7 +8,7 @@ import { useTranslation } from '../../i18n/useTranslation';
  * etapas preenchidas … para seguir com o App full"): what the PoC needs before the story is told — the same items Settings
  * has listed since 3.3.21 (from what is saved, never the draft) — and how many the app asks for before it opens in full.
  */
-export type ReadinessKey = 'customer' | 'logo' | 'description' | 'dates' | 'criteria' | 'dashboard' | 'rate';
+export type ReadinessKey = 'customer' | 'logo' | 'description' | 'dates' | 'criteria' | 'dashboard' | 'serviceUser' | 'rate';
 
 export interface ReadinessStep {
   key: ReadinessKey;
@@ -34,6 +34,8 @@ export function readinessSteps(
     criteria: number;
     dashboards: number;
     ratePerHour: number | null;
+    /** 3.8.1: the service user that runs the PoC's anomaly detectors (Settings → PoC plan). */
+    serviceUser?: string;
   },
   who: { canManageAccess: boolean; commercialVisible: boolean },
 ): ReadinessStep[] {
@@ -47,6 +49,8 @@ export function readinessSteps(
   ];
   // The dashboard is the SE's (only they create it); the hourly cost is commercial — listed only where it is visible.
   if (who.canManageAccess) steps.push({ key: 'dashboard', done: saved.dashboards > 0, path: '/builder' });
+  // 3.8.1 (the owner: "incluir a criação do usuário de serviço nos passos de configurações … ser um dos pontos de 8/8").
+  if (who.canManageAccess) steps.push({ key: 'serviceUser', done: filled(saved.serviceUser), path: '/settings?tab=plan' });
   if (who.commercialVisible) steps.push({ key: 'rate', done: saved.ratePerHour !== null, path: '/settings?tab=cost' });
   return steps;
 }
@@ -74,6 +78,7 @@ export function useReadiness(): Readiness {
       criteria: pocPlan.criteria.length,
       dashboards: Object.values(pocPlan.specialtyDashboards ?? {}).filter((ref) => ref !== undefined).length,
       ratePerHour: costModel.ratePerHour,
+      serviceUser: pocPlan.detectorActor,
     },
     { canManageAccess: access.canManageAccess, commercialVisible: access.commercialVisible },
   );
@@ -90,6 +95,7 @@ export const STEP_LABEL: Record<ReadinessKey, StringKey> = {
   dates: 'settings.ready.dates',
   criteria: 'settings.ready.criteria',
   dashboard: 'settings.ready.builderDashboards',
+  serviceUser: 'settings.ready.serviceUser',
   rate: 'settings.ready.rate',
 };
 
@@ -101,6 +107,7 @@ export const STEP_WHY: Record<ReadinessKey, StringKey> = {
   dates: 'setup.why.dates',
   criteria: 'setup.why.criteria',
   dashboard: 'setup.why.dashboard',
+  serviceUser: 'setup.why.serviceUser',
   rate: 'setup.why.rate',
 };
 

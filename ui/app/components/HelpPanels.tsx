@@ -52,6 +52,7 @@ const GUIDE_STEPS: readonly StringKey[] = [
 export const WHATS_NEW_SHOWN = 10;
 
 export const WHATS_NEW: readonly { key: StringKey; published: string }[] = [
+  { key: 'help.whatsNew.i123', published: '2026-11-27' },
   { key: 'help.whatsNew.i122', published: '2026-11-26' },
   { key: 'help.whatsNew.i121', published: '2026-11-23' },
   { key: 'help.whatsNew.i120', published: '2026-11-23' },
@@ -61,7 +62,6 @@ export const WHATS_NEW: readonly { key: StringKey; published: string }[] = [
   { key: 'help.whatsNew.i116', published: '2026-11-23' },
   { key: 'help.whatsNew.i115', published: '2026-11-23' },
   { key: 'help.whatsNew.i114', published: '2026-11-23' },
-  { key: 'help.whatsNew.i113', published: '2026-11-22' },
 ];
 
 const Steps = ({ keys }: { keys: readonly StringKey[] }) => {

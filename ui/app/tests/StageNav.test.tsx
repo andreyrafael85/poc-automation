@@ -71,7 +71,7 @@ describe('StageNav', () => {
     }
   });
 
-  it('groups the pages into the nine stages, numbered in order', () => {
+  it('groups the pages into the seven stages, numbered in order', () => {
     renderNav();
     const nav = screen.getByRole('navigation', { name: 'The story of this PoC' });
     const groups = within(nav).getAllByRole('group');

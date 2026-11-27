@@ -18,6 +18,7 @@ import { useAccess } from '../config/AccessContext';
 import { safeWebUrl } from '../config/persistence';
 import { useStudio } from '../config/StudioContext';
 import { BRAND_COLOR, BRAND_TONES, type BrandTone } from '../design/palette';
+import { ServiceUserPicker } from '../features/builder/ServiceUserPicker';
 import { Callout, Cluster, Figure, Grid, Panel, Stack } from '../engine';
 import '../engine/page-d.css';
 import type { StringKey } from '../i18n/strings';
@@ -180,7 +181,9 @@ const SettingsForm = ({ imported, onImported }: { imported: string | null; onImp
     pillarDraft.length !== selectedPillars.length || pillarDraft.some((id) => !selectedPillars.includes(id));
 
   const planDirty =
-    JSON.stringify({ ...planDraft, dashboard: null }) !== JSON.stringify({ ...pocPlan, dashboard: null });
+    // 3.8.1: the service user and the account are saved by their own panel, never by Apply.
+    JSON.stringify({ ...planDraft, dashboard: null, detectorActor: undefined, accountUuid: undefined }) !==
+      JSON.stringify({ ...pocPlan, dashboard: null, detectorActor: undefined, accountUuid: undefined });
   // A manual criterion is nothing but its words, and a PoC cannot end before it starts.
   const planValid =
     (planDraft.startDate === null || planDraft.endDate === null || planDraft.endDate >= planDraft.startDate) &&
@@ -251,7 +254,7 @@ const SettingsForm = ({ imported, onImported }: { imported: string | null; onImp
       ...selectedPillars.filter((id) => !pillarDraft.includes(id)),
     ]);
     changed.forEach((id) => togglePillar(id));
-    setPocPlan({ ...planDraft, dashboard: pocPlan.dashboard });
+    setPocPlan({ ...planDraft, dashboard: pocPlan.dashboard, detectorActor: pocPlan.detectorActor, accountUuid: pocPlan.accountUuid });
   };
 
   /**
@@ -304,6 +307,7 @@ const SettingsForm = ({ imported, onImported }: { imported: string | null; onImp
     dates: 'settings.tab.plan',
     criteria: 'settings.tab.plan',
     dashboard: 'nav.builder',
+    serviceUser: 'settings.tab.plan',
     rate: 'settings.tab.cost',
   };
   const readiness: ReadinessItem[] = prepared.steps.map((step) => ({ key: step.key, label: t(STEP_LABEL[step.key]), where: t(STEP_WHERE[step.key]), done: step.done }));
@@ -529,6 +533,8 @@ const SettingsForm = ({ imported, onImported }: { imported: string | null; onImp
         <Tab title={t('settings.tab.plan')} keepMounted>
           <Stack gap="section">
             <PocPlanEditor draft={planDraft} onChange={setPlanDraft} pillars={pillarDraft} onPillarsChange={setPillarDraft} />
+            {/* 3.8.1: the service user that runs the PoC's anomaly detectors (a readiness step for the SE). */}
+            {access.canWork && <ServiceUserPicker onSaved={(patch) => setPlanDraft((draft) => ({ ...draft, ...patch }))} />}
           </Stack>
         </Tab>
 

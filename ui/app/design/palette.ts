@@ -284,7 +284,10 @@ export type BrandTone =
   | 'moss'
   | 'yellow'
   | 'brown'
-  | 'grey';
+  | 'grey'
+  // 3.8.1 (the owner: "duas novas cores … mais próximas das cores da brand futura do cliente").
+  | 'navy'
+  | 'green';
 
 const mid = (family: Record<string, { Default: string }>): string =>
   family['Color05']?.Default ?? family['Color04']?.Default ?? '';
@@ -304,15 +307,20 @@ export const BRAND_COLOR: Record<BrandTone, string> = {
   yellow: mid(seq.Yellow),
   brown: mid(seq.Brown),
   grey: mid(seq.Grey),
+  // 3.8.1: a deep navy (the sequential blue's second step) and a true green (the sequential pear's middle step).
+  navy: seq.Blue.Color02.Default,
+  green: mid(seq.Pear),
 };
 
 /** Order shown in the picker. `default` first, then warm to cool. */
 export const BRAND_TONES: readonly BrandTone[] = [
   'default',
+  'navy',
   'blue',
   'petrol',
   'turquoise',
   'moss',
+  'green',
   'yellow',
   'orange',
   'brown',

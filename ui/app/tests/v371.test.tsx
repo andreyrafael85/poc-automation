@@ -175,7 +175,8 @@ describe('the words', () => {
 
   it('keeps 3.7.1 among the ten releases', () => {
     // 3.7.2: newer releases come first.
-    expect(WHATS_NEW).toContainEqual({ key: 'help.whatsNew.i113', published: '2026-11-22' });
+    // 3.8.1: i113 left the ten What's new shows (the entry stays in its fragment).
+    expect(WHATS_NEW).not.toContainEqual({ key: 'help.whatsNew.i113', published: '2026-11-22' });
     expect(WHATS_NEW.length).toBe(10);
     expect(entryFor('help.whatsNew.i113').en.startsWith('3.7.1 — ')).toBe(true);
     expect(entryFor('help.whatsNew.title').en).toBe('What’s new in 3.8');

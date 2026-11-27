@@ -1,5 +1,23 @@
 # Changelog
 
+## 3.8.1 — the service user in Settings, the brand colour on the dashboards, seven stages
+
+**The service user that runs the anomaly detectors moves to Settings**
+
+- Settings → PoC plan holds the service user that runs the PoC Builder's anomaly detectors, as a step of the
+  preparation. The account's UUID opens its service users in Account Management; the SE picks one already running
+  detectors on the environment or pastes the id of one made for the PoC, and the platform checks it before it is
+  saved — the check no longer sends an empty event description.
+- The PoC Builder only reads it and can check it again. Creating a service user stays in Account Management.
+
+**Dashboards, AI Observability and the menu**
+
+- The dashboards' section banners take the customer's brand colour chosen in Settings, which gains navy and green.
+- AI Observability in proportion: tokens over time across the page, then tokens by model, tokens by service and the
+  models in use side by side, with the tables below.
+- The menu has seven stages: the Executive summary opens Demonstrated value, and Consumption and events and Licensing
+  close Recommendations.
+
 ## 3.8.0 — anomaly detectors run by a service user
 
 **The PoC Builder creates the anomaly detectors again**

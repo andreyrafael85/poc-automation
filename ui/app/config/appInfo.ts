@@ -14,7 +14,7 @@ import { getAppVersion } from '@dynatrace-sdk/app-environment';
  * public issue tracker or support portal, so none is offered.
  */
 
-export const APP_VERSION = '3.8.0';
+export const APP_VERSION = '3.8.1';
 
 /**
  * The app's name as people see it (3.4.14, owner's order of 2026-11-19): "PoC Automation 3.0" in the app, the

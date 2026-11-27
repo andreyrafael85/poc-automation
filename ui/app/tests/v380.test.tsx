@@ -78,10 +78,12 @@ describe('the detectors the PoC Builder creates (3.8.0)', () => {
   it('creates them after a check with the platform, and the intent arrives with its event filled in', () => {
     const kit = read('features/builder/PocSettingsKits.tsx');
     expect(kit).toContain(['createSettingsObject', '(DETECTOR_SCHEMA, value)'].join(''));
-    expect(kit).toContain('checkDetector(probe)');
+    // 3.8.1: the actor is set in Settings (ServiceUserPicker); the kit re-checks it.
+    expect(kit).toContain('checkActor(saved)');
     expect(kit).toContain('data-testid="builder-ad-per-service"');
     expect(kit).toContain('data-testid="builder-ad-create"');
     expect(kit).toContain('data-testid="builder-ad-actor"');
+    expect(read('features/builder/ServiceUserPicker.tsx')).toContain('checkActor(actor.id)');
     expect(read('features/builder/pocSettings.ts')).toContain('validateOnly=true');
     const payload = detectorIntent('failureRate', [], WORDS, 'my.poc.automation');
     const detector = payload?.['davis.anomalydetector'] as { eventTemplate: Record<string, string> };
@@ -98,17 +100,16 @@ describe('the links (3.8.0)', () => {
 });
 
 describe('AI Observability (3.8.0)', () => {
-  it('sets the models in use beside the tokens by service and model', () => {
+  it('keeps the models in use beside the other token panels (3.8.1: three side by side, tests/v381)', () => {
     const page = read('pages/AiObservability.tsx');
-    expect(page).toContain('className="pvs-aimodels-row"');
+    expect(page).toContain('className="pvs-ai-trio"');
     expect(page.indexOf('data-testid="ai-models"')).toBeLessThan(page.indexOf("t('p.ai.table.title')"));
-    expect(read('pages/aiObservability.css')).toMatch(/\.pvs-aimodels-row\[data-cols='2'\][^{]*\{\s*grid-template-columns: minmax\(0, 1fr\) minmax\(0, 1\.15fr\)/);
   });
 });
 
 describe('What’s new (3.8.0)', () => {
   it('opens on 3.8.0 and keeps ten', () => {
-    expect(WHATS_NEW[0]).toEqual({ key: 'help.whatsNew.i122', published: '2026-11-26' });
+    expect(WHATS_NEW[1]).toEqual({ key: 'help.whatsNew.i122', published: '2026-11-26' }); // 3.8.1 opens it now
     expect(WHATS_NEW).toHaveLength(10);
     expect(entryFor('help.whatsNew.i122').en.startsWith('3.8.0 — ')).toBe(true);
     expect(entryFor('help.whatsNew.i122')['pt-BR'].startsWith('3.8.0 — ')).toBe(true);

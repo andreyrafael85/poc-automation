@@ -8,7 +8,7 @@ import { Heading, Link, Paragraph, Text } from '@dynatrace/strato-components/typ
 import { AnalyticsIcon, ExternalLinkIcon } from '@dynatrace/strato-icons';
 
 import { useAccess } from '../../config/AccessContext';
-import { useDashboardLogo } from './dashboardLogo';
+import { useDashboardBanner, useDashboardLogo } from './dashboardLogo';
 import { useQueryScope, useStudio } from '../../config/StudioContext';
 import { Cluster, Panel, Stack } from '../../engine';
 import { useCatalogQuery } from '../../hooks/useCatalogQuery';
@@ -86,6 +86,7 @@ export const SpecialtyCard = ({ id, evidence }: { id: SpecialtyId; evidence: Rea
   const access = useAccess();
   const blueprint = SPECIALTY_BLUEPRINTS[id];
   const logo = useDashboardLogo();
+  const banner = useDashboardBanner();
   const existing = pocPlan.specialtyDashboards?.[id] ?? null;
   const customer = parameters.customerName.trim();
   const dashboardName = t(`dash3.${id}.name` as StringKey);
@@ -114,6 +115,7 @@ export const SpecialtyCard = ({ id, evidence }: { id: SpecialtyId; evidence: Rea
     buildDashboard(blueprint, {
       title: name.trim() === '' ? dashboardName : name.trim(),
       logo,
+      banner,
       intro: t(`dash3.${id}.audience` as StringKey),
       question: t(`dash3.${id}.question` as StringKey),
       objectivesTitle: '',

@@ -4,7 +4,7 @@
 
 ### All in One — run a Dynatrace proof of concept end to end, from one app
 
-![Version](https://img.shields.io/badge/version-3.8.0-1496ff)
+![Version](https://img.shields.io/badge/version-3.8.1-1496ff)
 ![Dynatrace AppEngine](https://img.shields.io/badge/Dynatrace-AppEngine-6f2da8)
 ![Strato](https://img.shields.io/badge/Strato%20Design%20System-3.18-00a1b2)
 ![React](https://img.shields.io/badge/React-18-61dafb)
@@ -16,8 +16,8 @@
 
 **PoC Automation 3.0** is a Dynatrace AppEngine app that Sales Engineers and partners use to run a proof of
 concept from the first day to the closing deck. It reads the customer's own Dynatrace environment, tells the
-story of the PoC in **nine stages** — from what exists, to what the platform discovered, to the value it
-demonstrated and the next steps — builds the PoC's dashboards, notebooks, SLOs, workflows, monitors and
+story of the PoC in **seven stages** — from what exists, to what the platform discovered, to the value it
+demonstrated and the recommendations — builds the PoC's dashboards, notebooks, SLOs, workflows, monitors and
 OpenPipeline configuration on the tenant with one click each, and exports the **SE Report**, the **Coverage PDF**
 and the **Tech Wrapup deck**. Every number on screen and on paper comes from a catalogued DQL query, with its
 evidence class, the exact query and the time it was read — nothing estimated, nothing invented.
@@ -25,16 +25,17 @@ evidence class, the exact query and the time it was read — nothing estimated, 
 <p align="center">
   <img src="docs/images/overview.png" alt="PoC Automation 3.0 — the Overview page for the fictitious company ACME Corp: three gauges, five number cards with their evidence class, problem arrivals over time and the estate by layer" width="900">
 </p>
-<p align="center"><em>The Overview — stage 1 of 9 (fictitious company, synthetic data).</em></p>
+<p align="center"><em>The Overview — stage 1 of 7 (fictitious company, synthetic data).</em></p>
 
-> **What's new in 3.8.0** — the PoC Builder's **anomaly detectors are created by the app again**, run by a
-> **service user** the SE picks: those already running detectors on the environment are offered once the platform
-> accepts them, or an id is pasted and checked with the platform's validate-only call before anything is written.
-> The SE creates one detector per golden signal over the services ticked, or one per signal and per service; they are
-> kept in the Register and removed by the clean-up. Opening a detector in the **Anomaly Detection app** instead arrives
-> with its event already filled in. The OpenPipeline link now goes to the **dynamic routes**, the detectors' link to
-> **Settings → all the alerts**, and on **AI Observability** the models in use sit beside the tokens by service and
-> model.
+> **What's new in 3.8.1** — the **service user** that runs the PoC Builder's anomaly detectors is now set in
+> **Settings → PoC plan**, as a step of the preparation: the account's UUID opens its service users in Account
+> Management; the SE picks one already running detectors on the environment or pastes the id of one made for the PoC,
+> and the platform checks it before it is saved (the check no longer sends an empty event description). The PoC
+> Builder only reads it and can check it again; creating a service user stays in Account Management. The dashboards'
+> **section banners take the customer's brand colour** chosen in Settings, which gains **navy** and **green**.
+> **AI Observability** is in proportion: tokens over time across the page, then tokens by model, tokens by service
+> and the models in use side by side, with the tables below. The menu has **seven stages**: the Executive summary
+> opens Demonstrated value, and Consumption and events and Licensing close Recommendations.
 >
 > Earlier releases: see the git history of this repository.
 
@@ -57,7 +58,7 @@ evidence class, the exact query and the time it was read — nothing estimated, 
 
 ## What's inside
 
-### The story in nine stages
+### The story in seven stages
 
 The side menu follows the arc of a PoC. A pager at the foot of each page leads to the next page of the story and
 respects what the current audience may see.
@@ -68,20 +69,18 @@ respects what the current audience may see.
 | 2 | **PoC objectives** | PoC timeline — the days of the PoC, daily signals and the success criteria |
 | 3 | **Coverage achieved** | Coverage (index, the **Autonomous Value Cycle**, findings and an agreed action plan) · Platform adoption |
 | 4 | **Evidence** | Dynatrace Intelligence · AIOps & RCA (propagation, investigation, affected entities) · Services & tracing · Infrastructure · Kubernetes · Cloud · Topology · Technologies · Logs & data quality · Digital experience · Business events · Automation · **AI Observability** (GenAI tokens, models, services and calls) · Security · Competitor overlap |
-| 5 | **Impact** | Executive summary (Day 0 against today, MTTR) · Consumption and events |
-| 6 | **Demonstrated value** | Value & ROI · SE Report (report, first-day message, Tech Wrapup deck, real proofs) |
-| 7 | **Recommendations** | Opportunities, with the **30-60-90 action plan** |
-| 8 | **Next steps** | Licensing (for the SE and partners) |
-| 9 | **Settings & Build** | **PoC Builder** · Settings |
+| 5 | **Demonstrated value** | Executive summary (Day 0 against today, MTTR) · Value & ROI · SE Report (report, first-day message, Tech Wrapup deck, real proofs) |
+| 6 | **Recommendations** | Opportunities, with the **30-60-90 action plan** · Consumption and events · Licensing (for the SE and partners) |
+| 7 | **Settings & Build** | **PoC Builder** · Settings |
 
 The **Autonomous Value Cycle** tells what the PoC already delivered: around a Foundation, five links that feed each
 other — Context, Cause, Impact, Action and Prevention — each count the value events the PoC demonstrated, from what
 the app reads on the environment, with the next wave of each link; an autonomy ladder (observe, explain, prioritise,
 propose, act) shows the rungs demonstrated and the target agreed with the customer.
 
-A setup guide walks the SE through seven readiness steps (customer, logo, scope, dates, success criteria, a
-dashboard, the team's working figures). While the PoC is being prepared the menu stays hidden; the whole app opens at
-five of the seven steps.
+A setup guide walks the SE through eight readiness steps (customer, logo, scope, dates, success criteria, a
+dashboard, the service user that runs the anomaly detectors, the team's working figures). While the PoC is being
+prepared the menu stays hidden; the whole app opens at six of the eight steps.
 
 ### The PoC Builder — build on the tenant, one click at a time
 
@@ -91,13 +90,13 @@ Portuguese).
 
 | Tab | What it builds |
 | --- | --- |
-| **Smart Dashboards · 8** | Environment health and SLOs · Operations and reliability · Infrastructure and cloud · Digital experience and business · Runtime security · Logs and data quality · Kubernetes and containers · Databases and dependencies — each with section banners and the customer's logo in the corner |
+| **Smart Dashboards · 8** | Environment health and SLOs · Operations and reliability · Infrastructure and cloud · Digital experience and business · Runtime security · Logs and data quality · Kubernetes and containers · Databases and dependencies — each with section banners in the customer's brand colour and the customer's logo in the corner |
 | **Notebook and launchpad** | An investigation notebook on the golden signals (it opens with its charts already drawn) and a PoC launchpad |
 | **SLOs** | Availability and performance SLOs of the busiest services, and fleet SLOs (host CPU, host memory, Kubernetes workloads without restarts) |
 | **Workflows** | A problem-triage workflow and a weekly PoC summary, handed to the Workflows app ready to save. Both run the app's own workflow actions, add a Dynatrace Assist reading and send a formal Markdown e-mail; the weekly run also writes a notebook with the week's charts |
 | **Synthetic** | **Browser monitors** (a real browser: load times, Core Web Vitals, a screenshot on failure) and **HTTP monitors** of the customer's addresses |
 | **OpenPipeline** | A logs pipeline that gives a level to records written without one, the route that sends the sources the SE ticks to it, and a check of what went through |
-| **Anomaly detection** | Detectors on the golden signals (failure rate, response time p90, traffic drop) — one per signal over the services ticked, or one per signal and per service — created by the app and run by a **service user** the SE picks and the platform accepts; or opened in the **Anomaly Detection app** with the event already filled in |
+| **Anomaly detection** | Detectors on the golden signals (failure rate, response time p90, traffic drop) — one per signal over the services ticked, or one per signal and per service — created by the app and run by the **service user** set in Settings → PoC plan (the platform checks it; the Builder only reads it and can check it again); or opened in the **Anomaly Detection app** with the event already filled in |
 | **Register** | What the PoC created, with links, and the clean-up |
 
 ### Workflow actions
@@ -249,11 +248,11 @@ user's own permissions.
 
 ## Quality
 
-| Gate | Command | Result for 3.8.0 |
+| Gate | Command | Result for 3.8.1 |
 | --- | --- | --- |
 | Types (UI and workflow actions) | `npm run typecheck` | clean |
 | Lint | `npm run lint` | clean |
-| Unit and component tests | `npm test` | **2,087 passed**, 0 skipped, 147 test files |
+| Unit and component tests | `npm test` | **2,096 passed**, 0 skipped, 148 test files |
 | Query catalog | `npm run docs:catalog` | 128 queries, regenerated |
 | AppEngine analysis | `npm run analyze` | part of `scripts/release-gates.sh` |
 | Delivery build | `npm run build -- --optimize --enable-code-splitting` | part of `scripts/release-gates.sh` |
@@ -308,12 +307,12 @@ the console and the layout fit; renders every export (`--exports`) and runs inte
 
 O **PoC Automation 3.0** é um app do Dynatrace AppEngine para SEs e parceiros conduzirem uma prova de conceito do
 primeiro dia ao deck de encerramento — "All in One". Ele lê o próprio ambiente Dynatrace do cliente e conta a
-história da PoC em **nove etapas** (Contexto, Objetivos da PoC, Cobertura alcançada — com o **Ciclo de Valor
-Autônomo** —, Evidências — com a Observabilidade de IA —, Impacto, Valor demonstrado, Recomendações — com o
-**Plano de ação 30-60-90** —, Próximos passos e Configurações & Construção). O **PoC Builder** cria no tenant, com um clique e uma confirmação cada: oito Smart Dashboards, o
+história da PoC em **sete etapas** (Contexto, Objetivos da PoC, Cobertura alcançada — com o **Ciclo de Valor
+Autônomo** —, Evidências — com a Observabilidade de IA —, Valor demonstrado — com o Resumo executivo —,
+Recomendações — com o **Plano de ação 30-60-90**, Consumo e eventos e o Licenciamento — e Configurações & Construção). O **PoC Builder** cria no tenant, com um clique e uma confirmação cada: oito Smart Dashboards (os banners de seção na cor da marca do cliente), o
 notebook de investigação e o launchpad, SLOs, os workflows de triagem e de resumo semanal (com as ações próprias do
 app e a leitura do Dynatrace Assist), monitores Browser e HTTP, o pipeline e a rota do OpenPipeline e os detectores
-de anomalia (rodados por um usuário de serviço que o SE escolhe); tudo fica no Registro e sai na limpeza do fim da PoC. O app exporta o
+de anomalia (rodados pelo usuário de serviço definido em Configurações → Plano da PoC, um passo da preparação); tudo fica no Registro e sai na limpeza do fim da PoC. O app exporta o
 Relatório do SE, o PDF de Cobertura, o guia de pré-requisitos, o deck Tech Wrapup e as Provas reais. Cada número
 vem de uma consulta DQL catalogada, com a classe de evidência, a consulta e o momento da leitura; o Licenciamento
 fica só com o SE e o parceiro. A interface está em inglês e em português do Brasil.

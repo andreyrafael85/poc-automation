@@ -42,22 +42,22 @@ const renderMap = () =>
     </AppRoot>,
   );
 
-const VISIBLE = STORY_STAGES.filter((stage) => stage.id !== 'next');
+// 3.8.1: seven stages, every one with a page for this viewer (Licensing and Consumption now sit in Recommendations).
+const VISIBLE = STORY_STAGES;
 
 const getMap = () => screen.getByRole('region', { name: 'The story of this PoC' });
 
 describe('StoryMap', () => {
-  it('is a named section with an ordered list of the nine stages', () => {
+  it('is a named section with an ordered list of the seven stages', () => {
     renderMap();
     const map = getMap();
     expect(within(map).getByRole('heading', { level: 2, name: 'The story of this PoC' })).toBeInTheDocument();
-    expect(within(map).getByText(/Nine stages, from context to next steps/)).toBeInTheDocument();
+    expect(within(map).getByText(/Seven stages, from context to recommendations/)).toBeInTheDocument();
     expect(within(map).getByRole('list').tagName).toBe('OL');
-    // 3.7.9: "Next steps" holds only Licensing (SE and partner), so a viewer without commercial data does not see it.
     expect(within(map).getAllByRole('listitem')).toHaveLength(VISIBLE.length);
   });
 
-  it('links each of the nine stages to a page of that stage', () => {
+  it('links each of the seven stages to a page of that stage', () => {
     renderMap();
     const links = within(getMap()).getAllByRole('link');
     expect(links).toHaveLength(VISIBLE.length);
@@ -72,7 +72,7 @@ describe('StoryMap', () => {
   it('names each link by its stage, including the stage number, and counts its pages', () => {
     renderMap();
     const links = within(getMap()).getAllByRole('link');
-    expect(links[2]).toHaveAccessibleName('Open Stage 3 of 9 · Coverage achieved');
+    expect(links[2]).toHaveAccessibleName('Open Stage 3 of 7 · Coverage achieved');
     // Name and blurb are visible text; the number is the badge, hidden from the tree.
     expect(links[2]).toHaveTextContent('Coverage achieved');
     // 3.7.9: the Coverage stage holds Coverage and Platform adoption.
@@ -101,7 +101,7 @@ describe('StoryMap', () => {
     const coverage = links.find((link) => link.textContent?.includes('Coverage achieved'));
     expect(coverage).toHaveTextContent('2 pages');
     // Numbers are positions in the whole story, so they do not shift when a stage is left out.
-    expect(within(map).getByRole('link', { name: /Stage 5 of 9 · Impact/ })).toBeInTheDocument();
+    expect(within(map).getByRole('link', { name: /Stage 5 of 7 · Demonstrated value/ })).toBeInTheDocument();
   });
 
   it('translates stage names, blurbs and counts to pt-BR', async () => {
@@ -114,7 +114,7 @@ describe('StoryMap', () => {
     expect(screen.getByText('Objetivos da PoC')).toBeInTheDocument();
     expect(screen.queryByText('Coverage achieved')).not.toBeInTheDocument();
     expect(screen.queryByText('PoC objectives')).not.toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Abrir Etapa 3 de 9 · Cobertura alcançada' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Abrir Etapa 3 de 7 · Cobertura alcançada' })).toBeInTheDocument();
     expect(screen.getAllByText('2 páginas').length).toBeGreaterThan(0);
     expect(screen.getAllByText('1 página').length).toBeGreaterThan(0);
   });

@@ -2,7 +2,7 @@
  * Navigation map.
  *
  * The flat list of pages, each with its label. How they are *grouped and ordered*
- * for a viewer is `STORY_STAGES`, below: nine stages along the arc of a PoC.
+ * for a viewer is `STORY_STAGES`, below: seven stages along the arc of a PoC (nine until 3.8.0).
  * Sections whose data is unavailable stay in the navigation and declare the gap on
  * the page itself, because hiding them would let a permission problem read as a
  * clean result.
@@ -59,7 +59,7 @@ export const NAVIGATION: readonly NavigationSection[] = [
 ];
 
 /**
- * The story of a PoC, in nine stages.
+ * The story of a PoC, in seven stages (3.8.1; nine in 3.7.9–3.8.0).
  *
  * v3.1 reorders and regroups the same 25 pages along the arc a PoC actually
  * follows — context, objectives, coverage, discoveries, evidence, impact, value,
@@ -78,12 +78,10 @@ export type StoryStageId =
   | 'objectives'
   | 'coverage'
   | 'evidence'
-  | 'impact'
   | 'value'
   // 3.6.6: the SE's and the partner's own work — Settings and the PoC builder — closes the menu.
   | 'manage'
-  | 'recommendations'
-  | 'next';
+  | 'recommendations';
 
 export interface StoryStage {
   id: StoryStageId;
@@ -123,15 +121,15 @@ export const STORY_STAGES: readonly StoryStage[] = [
       '/competitor',
     ],
   },
-  { id: 'impact', labelKey: 'stage.impact', blurbKey: 'stage.impact.blurb', routes: ['/executive', '/consumption'] },
-  { id: 'value', labelKey: 'stage.value', blurbKey: 'stage.value.blurb', routes: ['/value', '/report'] },
+  // 3.8.1 (the owner): seven stages — "Impact" and "Next steps" leave; the Executive summary opens Demonstrated value, and
+  // Consumption and events and Licensing close Recommendations, after Opportunities.
+  { id: 'value', labelKey: 'stage.value', blurbKey: 'stage.value.blurb', routes: ['/executive', '/value', '/report'] },
   {
     id: 'recommendations',
     labelKey: 'stage.recommendations',
     blurbKey: 'stage.recommendations.blurb',
-    routes: ['/opportunities'],
+    routes: ['/opportunities', '/consumption', '/licensing'],
   },
-  { id: 'next', labelKey: 'stage.next', blurbKey: 'stage.next.blurb', routes: ['/licensing'] },
   { id: 'manage', labelKey: 'stage.manage', blurbKey: 'stage.manage.blurb', routes: ['/builder', '/settings'] },
 ];
 

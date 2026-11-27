@@ -360,6 +360,12 @@ export interface DashboardWords {
    * the app already validated and reduced (`dashboardLogo.ts`), drawn in a markdown tile of its own beside the header.
    */
   logo?: { src: string; alt: string };
+  /**
+   * 3.8.1 (the owner: "ao selecionar a cor nas configurações o dashboard além da logo … ter o padrão de cores do cliente"): the
+   * customer's brand colour (Settings → Customer's brand colour) on every section banner; absent (the "Default" tone), each
+   * dashboard keeps its own banner colour.
+   */
+  banner?: string;
   /** The opening paragraph: engagement, window, provenance. */
   intro: string;
   /** "Customer: … · Start: … · Day 12" — label/value pairs, already translated. */
@@ -572,7 +578,7 @@ export function buildDashboard(blueprint: DashboardBlueprint, words: DashboardWo
     if (plans.length === 0 && !isSlo) continue;
     sectionIndex += 1;
     const heading = words.sectionTitle === undefined ? section : words.sectionTitle(section, sectionIndex);
-    place(sectionBanner(heading, blueprint.icons?.[section] ?? 'BarChartGroupedIcon', blueprint.banner ?? BANNER_DEFAULT), 24, 1);
+    place(sectionBanner(heading, blueprint.icons?.[section] ?? 'BarChartGroupedIcon', words.banner ?? blueprint.banner ?? BANNER_DEFAULT), 24, 1);
     y += 1;
 
     // 3.7.1: the SLOs the PoC created, each on the platform's own SLO tile, three to a row; none yet → a note.

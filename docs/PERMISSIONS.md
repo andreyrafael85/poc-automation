@@ -50,7 +50,7 @@ scope is declared but never used.
 | `slo:slos:write` | Create the availability, performance and fleet SLOs the SE picks, and remove them in the clean-up. |
 | `environment-api:synthetic:read` | List the environment's public synthetic locations, so the SE picks where the monitors run. |
 | `environment-api:synthetic-monitors:write` | Create the Browser and HTTP monitors the SE confirms, and remove them in the clean-up. |
-| `settings:objects:write` | Create and remove the PoC's anomaly detectors (`builtin:davis.anomaly-detectors`, run by a service user; before writing, a `validateOnly` call asks the platform whether it accepts that actor) and the OpenPipeline logs pipeline (`builtin:openpipeline.logs.pipelines`), and write the logs routing back with the PoC's route. |
+| `settings:objects:write` | Create and remove the PoC's anomaly detectors (`builtin:davis.anomaly-detectors`, run by the service user set in Settings → PoC plan; a `validateOnly` call asks the platform whether it accepts that actor before it is saved, and the PoC Builder can ask again) and the OpenPipeline logs pipeline (`builtin:openpipeline.logs.pipelines`), and write the logs routing back with the PoC's route. |
 | `settings:objects:read` | Read the OpenPipeline logs routing (`builtin:openpipeline.logs.routing`) — one settings object whose routes every pipeline shares — so only the PoC's route is added or removed; and the existing anomaly detectors, to offer the service users already running them. |
 
 ## What the app does not request

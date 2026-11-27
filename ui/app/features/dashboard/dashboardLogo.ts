@@ -1,6 +1,8 @@
 import { createContext, useContext } from 'react';
 
 import { isSafeImageDataUrl } from '../../utils/logo';
+import { useStudio } from '../../config/StudioContext';
+import { BRAND_COLOR, type BrandTone } from '../../design/palette';
 
 /**
  * 3.6.6 — the customer's logo in the dashboards the PoC creates (the owner: "ao fazer o upload … se automaticamente esta
@@ -57,3 +59,13 @@ export async function shrinkLogo(src: string | null): Promise<string | null> {
 export const DashboardLogoContext = createContext<{ src: string; alt: string } | undefined>(undefined);
 
 export const useDashboardLogo = (): { src: string; alt: string } | undefined => useContext(DashboardLogoContext);
+
+/**
+ * 3.8.1: the customer's brand colour for the dashboards' section banners (Settings → Customer's brand colour), or
+ * `undefined` for the "Default" tone — then each dashboard keeps its own banner colour.
+ */
+export function bannerFor(tone: BrandTone): string | undefined {
+  return tone === 'default' ? undefined : BRAND_COLOR[tone];
+}
+
+export const useDashboardBanner = (): string | undefined => bannerFor(useStudio().parameters.brandTone);
