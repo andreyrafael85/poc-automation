@@ -60,7 +60,8 @@ describe('the e-mails’ order', () => {
 describe('the anomaly detectors', () => {
   it('watch every service when none is ticked, and refuse ids that are not service ids', () => {
     const w = { title: 'T', description: 'D', eventName: 'E', eventDescription: 'ED' };
-    expect(detectorQuery('traffic', [])).toBe('timeseries requests = sum(dt.service.request.count), by: {dt.entity.service}');
+    // 3.8.3: no filter on the services (every service), only the floor of requests a minute.
+    expect(detectorQuery('traffic', [])).toBe('timeseries requests = sum(dt.service.request.count), by: {dt.entity.service}\n| filter arrayAvg(requests) >= 10');
     expect(buildDetector('traffic', [], w, 'user-1')).not.toBeNull();
     expect(buildDetector('traffic', ['nope'], w, 'user-1')).toBeNull();
     expect(read('features/builder/PocSettingsKits.tsx')).not.toContain('chosen.size === 0 || access');

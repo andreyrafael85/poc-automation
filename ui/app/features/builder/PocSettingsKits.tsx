@@ -14,7 +14,7 @@ import type { StringKey } from '../../i18n/strings';
 import { useTranslation } from '../../i18n/useTranslation';
 import { num, str } from '../../utils/records';
 import { appIdOrManifest } from './PocDocumentKit';
-import { refusalWords } from './ServiceUserPicker';
+import { actorLabel, refusalWords } from './ServiceUserPicker';
 import { Confirm, Result, SLO_SERVICES_PRESELECTED, SLO_SERVICES_SHOWN, failureKey, type Busy } from './PocAutomationKits';
 import {
   ANOMALY_SETTINGS_LINK,
@@ -94,7 +94,8 @@ export const AnomalyKit = () => {
         : t('builder.ad.name', { signal: t(`builder.ad.kind.${kind}` as StringKey), customer }),
     description: serviceIds.length === 0 ? t('builder.ad.descriptionAll') : t('builder.ad.description', { n: formatNumber(serviceIds.length) }),
     eventName: t(`builder.ad.event.${kind}` as StringKey),
-    eventDescription: t('builder.ad.eventDescription'),
+    // 3.8.3: what the event means for the service, per signal (it no longer names the PoC).
+    eventDescription: t(`builder.ad.eventText.${kind}` as StringKey, { line: formatNumber(FAILURE_RATE_LINE) }),
   });
 
   const recheck = async () => {
@@ -213,7 +214,7 @@ export const AnomalyKit = () => {
             )}
           </Cluster>
           {saved !== '' ? (
-            <Text data-testid="builder-ad-actor-saved">{t('builder.ad.actor.saved', { id: saved })}</Text>
+            <Text data-testid="builder-ad-actor-saved">{t('builder.ad.actor.saved', { id: actorLabel(saved, pocPlan.detectorActorName) })}</Text>
           ) : (
             <Text className="pvs-caption" data-testid="builder-ad-actor-none">
               {t('builder.ad.actor.fromSettings')}

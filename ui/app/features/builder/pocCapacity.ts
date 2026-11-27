@@ -171,7 +171,11 @@ export interface CapacityWords {
   aiHeading: string;
   mailDescription: string;
   eventDescription: string;
-  eventTitle: string;
+  /** 3.8.3: the predictive event's title and description — over the line now, or crossing it later ({name}, {line}, {days}, {at}, {end}, {top}, {horizon}). */
+  eventTitleNow: string;
+  eventTitleLikely: string;
+  eventTextNow: string;
+  eventTextLikely: string;
   /** For the e-mail's Markdown. */
   heading: string;
   gist: string;
@@ -195,7 +199,7 @@ export interface CapacityChoice {
   threshold: number;
   horizon: CapacityHorizon;
   recipients: readonly string[];
-  /** D4: raise a resource-contention event (it opens a problem) for each series at risk. */
+  /** D4: raise a resource-contention event (it opens a problem) for each series at risk — always on since 3.8.3 (the owner). */
   raiseEvents: boolean;
   shared: boolean;
   timezone: string;
@@ -261,22 +265,50 @@ export function forecastScript(choice: CapacityChoice, words: CapacityWords): st
 }
 
 /** The event task's script: one resource-contention event per series at risk (the soonest first), which opens a problem. Pure. */
-export function eventScript(words: CapacityWords): string {
+/**
+ * 3.8.3 (the owner's validation of 3.8.2: "se for detectado pela forecast que está com problemas poderá ser gerado um nome de
+ * alerta ideal … já poderia gerar o alerta 'preditivo' também bem descrito e informativo ao cliente"): every run that finds a
+ * series over the line now, or whose central forecast crosses it, raises one event per series (up to 10) — a title that says
+ * what is happening ("Disk above 90% — host · /" or "Predicted: disk reaches 90% in 3.4 days — host · /") and a description with
+ * the forecast's figures, the method and the first step. A series only the upper bound crosses ("possible") stays in the e-mail.
+ * The event lasts 300 minutes (the platform's longest timeout for an ingested event); the next day's run raises it again while
+ * the risk remains. Pure: the event task's script.
+ */
+export function eventScript(choice: Pick<CapacityChoice, 'threshold' | 'horizon'>, words: CapacityWords): string {
+  const texts = { titleNow: words.eventTitleNow, titleLikely: words.eventTitleLikely, textNow: words.eventTextNow, textLikely: words.eventTextLikely };
   return [
     'import { result } from "@dynatrace-sdk/automation-utils";',
     'import { eventsClient, EventIngestEventType } from "@dynatrace-sdk/client-classic-environment-v2";',
     '',
+    `const TEXTS = ${JSON.stringify(texts)};`,
+    `const LINE = ${JSON.stringify(choice.threshold)};`,
+    `const DAYS = ${JSON.stringify(choice.horizon)};`,
+    'const fill = (text, values) => text.replace(/\\{(\\w+)\\}/g, (all, key) => (values[key] === undefined ? all : String(values[key])));',
+    'const pct = (v) => (v === null || v === undefined ? "—" : v > 200 ? "> 200%" : v + "%");',
+    '',
     'export default async function () {',
     `  const forecast = await result(${JSON.stringify(FORECAST_TASK)});`,
-    `  const rows = (forecast && forecast.rows ? forecast.rows : []).slice(0, ${CAPACITY_EVENTS_MAX});`,
+    `  const rows = (forecast && forecast.rows ? forecast.rows : []).filter((row) => row.status === "now" || row.status === "likely").slice(0, ${CAPACITY_EVENTS_MAX});`,
     '  let raised = 0;',
     '  for (const row of rows) {',
+    '    const values = { name: row.name, line: LINE, days: row.days, horizon: DAYS, at: String(row.at).slice(0, 16).replace("T", " ") + " UTC", end: pct(row.end), top: pct(row.top) };',
+    '    const now = row.status === "now";',
     '    await eventsClient.createEvent({',
     '      body: {',
     '        eventType: EventIngestEventType.ResourceContentionEvent,',
-    `        title: ${JSON.stringify(words.eventTitle)}.replace("{name}", row.name),`,
+    '        title: fill(now ? TEXTS.titleNow : TEXTS.titleLikely, values).slice(0, 250),',
+    '        timeout: 300,',
     '        ...(row.entityId ? { entitySelector: `entityId("${row.entityId}")` } : {}),',
-    '        properties: { "poc.forecast.crosses_at": row.at, "poc.forecast.days": String(row.days), "poc.forecast.upper_max": String(row.top), "poc.automation": "capacity-forecast" },',
+    '        properties: {',
+    '          "dt.event.description": fill(now ? TEXTS.textNow : TEXTS.textLikely, values),',
+    '          "capacity.forecast.status": row.status,',
+    '          "capacity.forecast.line_pct": String(LINE),',
+    '          "capacity.forecast.reaches_at": String(row.at),',
+    '          "capacity.forecast.days": String(row.days),',
+    '          "capacity.forecast.end_pct": String(row.end),',
+    '          "capacity.forecast.upper_pct": String(row.top),',
+    '          "capacity.forecast.source": "Dynatrace Intelligence generic forecast, 90% interval",',
+    '        },',
     '      },',
     '    });',
     '    raised++;',
@@ -331,7 +363,7 @@ export function buildCapacityWorkflow(choice: CapacityChoice, words: CapacityWor
       name: 'raise_event',
       action: JS_ACTION,
       description: words.eventDescription,
-      input: { script: eventScript(words) },
+      input: { script: eventScript(choice, words) },
       position: { x: 1, y: 2 },
       predecessors: [FORECAST_TASK],
       conditions: { states: { [FORECAST_TASK]: 'OK' }, ...onRisk },

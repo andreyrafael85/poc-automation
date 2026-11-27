@@ -113,6 +113,7 @@ import { v379Strings } from '../i18n/v379';
 import { v380Strings } from '../i18n/v380';
 import { v381Strings } from '../i18n/v381';
 import { v382Strings } from '../i18n/v382';
+import { v383Strings } from '../i18n/v383';
 
 /**
  * A half-translated screen in front of a customer is worse than an English one,
@@ -136,7 +137,7 @@ describe('dictionary completeness', () => {
     // identical is almost certainly an untranslated placeholder.
     // 3.4.13: a product name (Real User Monitoring) and the title of a Dynatrace screen, which the product shows in English.
     // 3.7.0: two formats of the triage action's e-mail, placeholders and punctuation only.
-    const allowedIdentical = new Set<string>(['twt.coverTitle', 'prt.src.davis', 'prq.rum.title', 'prq.ips.mock.title', 'triage.head', 'triage.subject', 'triage.k8s', 'triage.sec.links', 'weekly.sec.links', 'builder.tab.dashboards']);
+    const allowedIdentical = new Set<string>(['twt.coverTitle', 'prt.src.davis', 'prq.rum.title', 'prq.ips.mock.title', 'triage.head', 'triage.subject', 'triage.k8s', 'triage.sec.links', 'weekly.sec.links', 'builder.tab.dashboards', 'builder.ledger.guardian', 'grd.name', 'grd.obj.lcp']);
     const suspicious = ALL_KEYS.filter((key) => {
       if (allowedIdentical.has(key)) return false;
       const entry = entryFor(key);
@@ -383,6 +384,7 @@ describe('dictionary fragments', () => {
       v380Strings,
       v381Strings,
       v382Strings,
+      v383Strings,
     };
     const owner = new Map<string, string>();
     const collisions: string[] = [];

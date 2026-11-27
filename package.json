@@ -1,6 +1,6 @@
 {
   "name": "poc-automation",
-  "version": "3.8.2",
+  "version": "3.8.3",
   "description": "PoC Automation 3.0 — the all-in-one Dynatrace app to run a proof of concept end to end, every number traceable to its query",
   "scripts": {
     "build": "dt-app build",

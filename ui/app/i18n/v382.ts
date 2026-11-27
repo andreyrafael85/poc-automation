@@ -19,8 +19,8 @@ export const v382Strings = {
   // ------------------------------------------------------------------ predictive capacity
   'cap.title': { en: 'Predictive capacity', 'pt-BR': 'Capacidade preditiva' },
   'cap.what': {
-    en: 'Four workflows that ask Dynatrace Intelligence every day for a forecast of the environment’s capacity — the fullest disks, host memory and CPU, and each Kubernetes container’s memory against its own limit — and act only when the forecast reaches the line: an e-mail with Dynatrace Assist’s reading and, if chosen, an event that opens a problem before the capacity runs out.',
-    'pt-BR': 'Quatro workflows que pedem todo dia à Dynatrace Intelligence a previsão da capacidade do ambiente — os discos mais cheios, a memória e a CPU dos hosts, e a memória de cada contêiner do Kubernetes contra o próprio limite — e só agem quando a previsão alcança a linha: um e-mail com a leitura do Dynatrace Assist e, se escolhido, um evento que abre um problema antes de a capacidade acabar.',
+    en: 'Four workflows that ask Dynatrace Intelligence every day for a forecast of the environment’s capacity — the fullest disks, host memory and CPU, and each Kubernetes container’s memory against its own limit — and act only when the forecast reaches the line: an e-mail with Dynatrace Assist’s reading and a predictive event that opens a problem before the capacity runs out.',
+    'pt-BR': 'Quatro workflows que pedem todo dia à Dynatrace Intelligence a previsão da capacidade do ambiente — os discos mais cheios, a memória e a CPU dos hosts, e a memória de cada contêiner do Kubernetes contra o próprio limite — e só agem quando a previsão alcança a linha: um e-mail com a leitura do Dynatrace Assist e um evento preditivo que abre um problema antes de a capacidade acabar.',
   },
   'cap.step1': {
     en: 'Every day at 07:00 ({timezone}), each workflow reads the last weeks of its metric and forecasts the next days with Dynatrace Intelligence (the generic forecast, a 90 % interval).',
@@ -31,18 +31,14 @@ export const v382Strings = {
     'pt-BR': 'Uma série fica “acima da linha agora”, “provável” (a previsão central cruza a linha) ou “possível” (só o limite superior cruza); uma série sem previsão válida fica de fora.',
   },
   'cap.step3': {
-    en: 'Only then: Dynatrace Assist reads the risk, the e-mail goes out and, if chosen, a resource-contention event opens a problem on the host or the disk.',
-    'pt-BR': 'Só então: o Dynatrace Assist lê o risco, o e-mail sai e, se escolhido, um evento de contenção de recurso abre um problema no host ou no disco.',
+    en: 'Only then: Dynatrace Assist reads the risk, the e-mail goes out and a predictive event opens a problem on the host or the disk — for each series over the line now or whose forecast crosses it.',
+    'pt-BR': 'Só então: o Dynatrace Assist lê o risco, o e-mail sai e um evento preditivo abre um problema no host ou no disco — para cada série acima da linha agora ou cuja previsão a cruza.',
   },
   'cap.horizon': { en: 'How far ahead', 'pt-BR': 'Até quando prever' },
   'cap.horizon.days': { en: '{n} days', 'pt-BR': '{n} dias' },
   'cap.line': { en: 'Line', 'pt-BR': 'Linha' },
   'cap.open': { en: 'Open in Workflows', 'pt-BR': 'Abrir no Workflows' },
   'cap.download': { en: 'Download (.json)', 'pt-BR': 'Baixar (.json)' },
-  'cap.events': {
-    en: 'Raise an event (it opens a problem) for each series at risk — up to 10 per run',
-    'pt-BR': 'Gerar um evento (que abre um problema) para cada série em risco — até 10 por execução',
-  },
   'cap.opened': {
     en: 'The “{signal}” workflow is open in Workflows with its daily schedule on: save it there and it runs as you.',
     'pt-BR': 'O workflow “{signal}” está aberto no Workflows com a agenda diária ligada: salve lá e ele roda como você.',
@@ -79,7 +75,6 @@ export const v382Strings = {
     en: 'Raises a resource-contention event (a problem) for each series at risk.',
     'pt-BR': 'Gera um evento de contenção de recurso (um problema) para cada série em risco.',
   },
-  'cap.wf.eventTitle': { en: 'Capacity forecast — {signal}: {name}', 'pt-BR': 'Previsão de capacidade — {signal}: {name}' },
   'cap.wf.aiPrompt': {
     en: 'You are an SRE. Below is a Dynatrace Intelligence capacity forecast. In up to six short bullets starting with "- ", say which resources run out first, how soon, the likely cause and the first action to take. No emoji, no heading, no note about language support. Answer in English.',
     'pt-BR': 'Você é um SRE. Abaixo está uma previsão de capacidade da Dynatrace Intelligence. Em até seis tópicos curtos começando com "- ", diga quais recursos acabam primeiro, em quanto tempo, a causa provável e a primeira ação. Sem emoji, sem título, sem nota sobre o suporte a idiomas. Responda em português do Brasil.',

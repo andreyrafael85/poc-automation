@@ -170,6 +170,24 @@ async function serveAppIcon(context) {
   await context.route(/\/platform\/classic\/environment-api\/v2\/settings\/objects\?validateOnly=true/, (route) =>
     route.request().method() === 'POST' ? route.fulfill({ status: 200, contentType: 'application/json', body: '[{"code":200}]' }) : route.fallback(),
   );
+  // 3.8.3: the service users the person may use (the IAM service), by name — two made-up ones; and the tenant's anomaly
+  // detectors (none), which Settings reads to say which service user already runs detectors.
+  await context.route(/\/platform\/iam\/v1\/organizational-levels\/environment\/[^/]+\/service-users/, (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        totalCount: 2,
+        results: [
+          { uid: '00000000-1111-4222-8333-444455556666', email: '00000000-1111-4222-8333-444455556666@service.sso.dynatrace.com', name: 'poc-automation-detectors' },
+          { uid: '00000000-2222-4333-8444-555566667777', email: '00000000-2222-4333-8444-555566667777@service.sso.dynatrace.com', name: 'observability-bot' },
+        ],
+      }),
+    }),
+  );
+  await context.route(/\/platform\/classic\/environment-api\/v2\/settings\/objects\?schemaIds=builtin%3Adavis\.anomaly-detectors/, (route) =>
+    route.request().method() === 'GET' ? route.fulfill({ status: 200, contentType: 'application/json', body: '{"items":[],"totalCount":0}' }) : route.fallback(),
+  );
 }
 
 async function serveBrandFonts(context) {
@@ -1090,13 +1108,52 @@ async function runStates({ browser, base }) {
         const weeklyOpen = await page.getByTestId('builder-weekly-open').count();
         // 3.8.2: the predictive-capacity kit — four forecasts, each opened in Workflows or downloaded.
         const capacity = await page.locator('[data-testid^="builder-capacity-open-"]').count();
+        // 3.8.3: the token security agent, opened in Workflows or downloaded.
+        const tokens = await page.getByTestId('builder-token-open').count();
         await page.getByRole('tab', { name: 'Synthetic', exact: true }).click({ timeout: 8000 });
         // The harness answers no synthetic location, so the kit says so.
         const monitors = await page.getByTestId('builder-monitor-kit').waitFor({ timeout: 8000 }).then(() => 1).catch(() => 0);
         // 3.7.8: the browser monitors kit sits first in the tab, beside the HTTP one.
         const browsers = await page.getByTestId('builder-browser-kit').waitFor({ timeout: 8000 }).then(() => 1).catch(() => 0);
-        const ok = services > 0 && sloConfirm && fleet === 3 && wfOpen === 1 && wfDownload === 1 && weekly === 1 && weeklyOpen === 1 && capacity === 4 && monitors === 1 && browsers === 1;
-        return { ok, note: `services offered: ${services}; fleet SLOs: ${fleet}; SLO confirmation: ${sloConfirm}; triage workflow (open/download): ${wfOpen}/${wfDownload}; weekly summary: ${weekly}; capacity workflows: ${capacity}; HTTP / browser monitor kits: ${monitors}/${browsers}; nothing created` };
+        const ok = services > 0 && sloConfirm && fleet === 3 && wfOpen === 1 && wfDownload === 1 && weekly === 1 && weeklyOpen === 1 && capacity === 4 && tokens === 1 && monitors === 1 && browsers === 1;
+        return { ok, note: `services offered: ${services}; fleet SLOs: ${fleet}; SLO confirmation: ${sloConfirm}; triage workflow (open/download): ${wfOpen}/${wfDownload}; weekly summary: ${weekly}; capacity workflows: ${capacity}; token agent: ${tokens}; HTTP / browser monitor kits: ${monitors}/${browsers}; nothing created` };
+      },
+    },
+    // ---- 3.8.3: the PoC Builder's Guardian tab — five Site Reliability Guardians and the validation workflow, nothing created ----
+    {
+      name: 'builder-guardian',
+      route: '/builder',
+      url: { state: 'seeded' },
+      run: async (page) => {
+        await page.getByRole('tab', { name: 'Guardian', exact: true }).click({ timeout: 8000 });
+        const kit = page.getByTestId('builder-guardian-kit');
+        await kit.waitFor({ timeout: 8000 });
+        const cards = await page.locator('[data-testid^="builder-guardian-pick-"]').count();
+        const create = (await page.getByTestId('builder-guardian-create').textContent({ timeout: 8000 })) ?? '';
+        await page.getByTestId('builder-guardian-create').click({ timeout: 8000 });
+        const confirm = await page.getByTestId('builder-guardian-confirm').waitFor({ timeout: 8000 }).then(() => true).catch(() => false);
+        // Nothing was created in the harness, so the validation workflow waits for the guardians.
+        const wfWaits = await page.getByTestId('builder-guardian-wf-open').isDisabled();
+        await page.getByTestId('builder-guardian-confirm').getByRole('button', { name: 'Cancel' }).click({ timeout: 8000 }).catch(() => undefined);
+        await kit.evaluate((element) => element.scrollIntoView({ block: 'start' }));
+        const ok = cards === 5 && /\d/.test(create) && confirm && wfWaits;
+        return { ok, note: `guardians offered: ${cards}; create: "${create}"; confirmation: ${confirm}; validation workflow waits for the guardians: ${wfWaits}; nothing created` };
+      },
+    },
+    // ---- 3.8.3: the PoC Builder's token security agent (the Workflows tab) — handed to Workflows, nothing created ----
+    {
+      name: 'builder-token',
+      route: '/builder',
+      url: { state: 'seeded' },
+      run: async (page) => {
+        await page.getByRole('tab', { name: 'Workflows', exact: true }).click({ timeout: 8000 });
+        const kit = page.getByTestId('builder-token-kit');
+        await kit.waitFor({ timeout: 8000 });
+        await kit.evaluate((element) => element.scrollIntoView({ block: 'start' }));
+        const open = await page.getByTestId('builder-token-open').isEnabled();
+        const download = await page.getByTestId('builder-token-download').count();
+        const ok = open && download === 1;
+        return { ok, note: `open enabled with the SE's e-mail: ${open}; download: ${download}; nothing created` };
       },
     },
     // ---- 3.8.2: the PoC Builder's predictive-capacity kit (the Workflows tab) — four forecasts, nothing created ----
@@ -1171,8 +1228,11 @@ async function runStates({ browser, base }) {
         await page.getByTestId('su-account-save').click({ timeout: 8000 });
         const after = (await page.getByTestId('su-link').getAttribute('href')) ?? '';
         const input = await page.getByTestId('builder-ad-actor-input').count();
-        const ok = /00000000-1111/.test(saved) && before === 'https://myaccount.dynatrace.com/' && /service-user-management\?account-uuid=00000000-0000-4000-8000-0000000000aa/.test(after) && input === 1;
-        return { ok, note: `saved: "${saved.slice(0, 60)}"; link before: ${before}; after the account: ${after.slice(0, 90)}; nothing written to the tenant` };
+        // 3.8.3: the service users offered by name, and the least policy to paste.
+        const named = await page.getByRole('button', { name: /observability-bot/ }).count();
+        const policy = ((await page.getByTestId('su-policy').textContent({ timeout: 8000 }).catch(() => '')) ?? '').includes('davis:analyzers:execute');
+        const ok = /poc-automation-detectors \(00000000-1111/.test(saved) && before === 'https://myaccount.dynatrace.com/' && /service-user-management\?account-uuid=00000000-0000-4000-8000-0000000000aa/.test(after) && input === 1 && named === 1 && policy;
+        return { ok, note: `saved: "${saved.slice(0, 80)}"; offered by name: ${named}; policy: ${policy}; link before: ${before}; after the account: ${after.slice(0, 90)}; nothing written to the tenant` };
       },
     },
     // ---- 3.6.7: the PoC Builder's notebook and launchpad kits — their tab, and the confirmation before a create ----

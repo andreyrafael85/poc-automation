@@ -4,7 +4,7 @@
 
 ### All in One — run a Dynatrace proof of concept end to end, from one app
 
-![Version](https://img.shields.io/badge/version-3.8.2-1496ff)
+![Version](https://img.shields.io/badge/version-3.8.3-1496ff)
 ![Dynatrace AppEngine](https://img.shields.io/badge/Dynatrace-AppEngine-6f2da8)
 ![Strato](https://img.shields.io/badge/Strato%20Design%20System-3.18-00a1b2)
 ![React](https://img.shields.io/badge/React-18-61dafb)
@@ -27,12 +27,14 @@ evidence class, the exact query and the time it was read — nothing estimated, 
 </p>
 <p align="center"><em>The Overview — stage 1 of 7 (fictitious company, synthetic data).</em></p>
 
-> **What's new in 3.8.2** — the PoC Builder's Workflows tab gains **Predictive capacity**: four workflows that ask
-> **Dynatrace Intelligence** every day for a forecast of the fullest host disks, host memory, host CPU and each
-> Kubernetes container's memory against its limit, and act only when the forecast reaches its line — an e-mail with
-> Dynatrace Assist's reading and an event that opens a problem —, handed to the Workflows app like the triage. The app
-> now declares the permission to use the **service user** set in Settings as the anomaly detectors' actor, and the
-> anomaly kit checks it with the platform when it opens: a **"Ready"** badge enables the creation.
+> **What's new in 3.8.3** — the PoC Builder gains a **Guardian** tab: five **Site Reliability Guardians** — the
+> PoC's SLOs, infrastructure performance, services, applications and security (vulnerabilities) —, each created on the
+> SE's click after a confirmation, kept in the Register and removed by the clean-up, and a validation workflow that runs
+> them every day, handed to the Workflows app. A **token security agent** joins the Workflows tab: a daily workflow that
+> audits the environment's access tokens and credential vault (metadata only), says what to disable or rotate and adds
+> Dynatrace Assist's reading. The anomaly detectors get sturdier rules and events that name the service's problem;
+> Settings shows the service users **by name** with the **least policy** they need; and the capacity workflows always
+> raise a predictive event, titled and described for the customer.
 >
 > Earlier releases: see the git history of this repository.
 
@@ -90,10 +92,11 @@ Portuguese).
 | **Smart Dashboards · 8** | Environment health and SLOs · Operations and reliability · Infrastructure and cloud · Digital experience and business · Runtime security · Logs and data quality · Kubernetes and containers · Databases and dependencies — each with section banners in the customer's brand colour and the customer's logo in the corner |
 | **Notebook and launchpad** | An investigation notebook on the golden signals (it opens with its charts already drawn) and a PoC launchpad |
 | **SLOs** | Availability and performance SLOs of the busiest services, and fleet SLOs (host CPU, host memory, Kubernetes workloads without restarts) |
-| **Workflows** | A problem-triage workflow and a weekly PoC summary, handed to the Workflows app ready to save. Both run the app's own workflow actions, add a Dynatrace Assist reading and send a formal Markdown e-mail; the weekly run also writes a notebook with the week's charts. **Predictive capacity**: four daily Dynatrace Intelligence forecasts (host disk, host memory, host CPU, Kubernetes memory against its limit) that e-mail and can open a problem only when the forecast reaches its line |
+| **Workflows** | A problem-triage workflow and a weekly PoC summary, handed to the Workflows app ready to save. Both run the app's own workflow actions, add a Dynatrace Assist reading and send a formal Markdown e-mail; the weekly run also writes a notebook with the week's charts. **Predictive capacity**: four daily Dynatrace Intelligence forecasts (host disk, host memory, host CPU, Kubernetes memory against its limit) that e-mail and raise a predictive event only when the forecast reaches its line. **Token security agent**: a daily audit of the access tokens and the credential vault (metadata only) with what to disable or rotate and Dynatrace Assist's reading |
 | **Synthetic** | **Browser monitors** (a real browser: load times, Core Web Vitals, a screenshot on failure) and **HTTP monitors** of the customer's addresses |
 | **OpenPipeline** | A logs pipeline that gives a level to records written without one, the route that sends the sources the SE ticks to it, and a check of what went through |
-| **Anomaly detection** | Detectors on the golden signals (failure rate, response time p90, traffic drop) — one per signal over the services ticked, or one per signal and per service — created by the app and run by the **service user** set in Settings → PoC plan (the platform checks it; the Builder reads it, checks it again when it opens and shows "Ready"); or opened in the **Anomaly Detection app** with the event already filled in |
+| **Anomaly detection** | Detectors on the golden signals (failure rate, response time p90, traffic drop) — one per signal over the services ticked, or one per signal and per service — with a request floor so quiet services do not alert, created by the app and run by the **service user** set in Settings → PoC plan (shown by name, with the least policy it needs; the Builder checks it again when it opens and shows "Ready"); or opened in the **Anomaly Detection app** with the event already filled in |
+| **Guardian** | Five **Site Reliability Guardians** — the PoC's SLOs, infrastructure performance, services, applications, security (vulnerabilities) — and a daily validation workflow handed to the Workflows app |
 | **Register** | What the PoC created, with links, and the clean-up |
 
 ### Workflow actions
@@ -246,11 +249,11 @@ user's own permissions.
 
 ## Quality
 
-| Gate | Command | Result for 3.8.2 |
+| Gate | Command | Result for 3.8.3 |
 | --- | --- | --- |
 | Types (UI and workflow actions) | `npm run typecheck` | clean |
 | Lint | `npm run lint` | clean |
-| Unit and component tests | `npm test` | **2,104 passed**, 0 skipped, 149 test files |
+| Unit and component tests | `npm test` | **2,119 passed**, 0 skipped, 150 test files |
 | Query catalog | `npm run docs:catalog` | 128 queries, regenerated |
 | AppEngine analysis | `npm run analyze` | part of `scripts/release-gates.sh` |
 | Delivery build | `npm run build -- --optimize --enable-code-splitting` | part of `scripts/release-gates.sh` |
@@ -309,7 +312,7 @@ história da PoC em **sete etapas** (Contexto, Objetivos da PoC, Cobertura alcan
 Autônomo** —, Evidências — com a Observabilidade de IA —, Valor demonstrado — com o Resumo executivo —,
 Recomendações — com o **Plano de ação 30-60-90**, Consumo e eventos e o Licenciamento — e Configurações & Construção). O **PoC Builder** cria no tenant, com um clique e uma confirmação cada: oito Smart Dashboards (os banners de seção na cor da marca do cliente), o
 notebook de investigação e o launchpad, SLOs, os workflows de triagem e de resumo semanal (com as ações próprias do
-app e a leitura do Dynatrace Assist), os quatro workflows de capacidade preditiva (previsões diárias da Dynatrace Intelligence de disco, memória, CPU e memória do Kubernetes), monitores Browser e HTTP, o pipeline e a rota do OpenPipeline e os detectores
+app e a leitura do Dynatrace Assist), os quatro workflows de capacidade preditiva (previsões diárias da Dynatrace Intelligence de disco, memória, CPU e memória do Kubernetes), o agente de segurança de tokens (uma auditoria diária dos tokens de acesso e do cofre de credenciais), cinco Site Reliability Guardians com o workflow diário de validação, monitores Browser e HTTP, o pipeline e a rota do OpenPipeline e os detectores
 de anomalia (rodados pelo usuário de serviço definido em Configurações → Plano da PoC, um passo da preparação); tudo fica no Registro e sai na limpeza do fim da PoC. O app exporta o
 Relatório do SE, o PDF de Cobertura, o guia de pré-requisitos, o deck Tech Wrapup e as Provas reais. Cada número
 vem de uma consulta DQL catalogada, com a classe de evidência, a consulta e o momento da leitura; o Licenciamento

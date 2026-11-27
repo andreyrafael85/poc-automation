@@ -1,5 +1,36 @@
 # Changelog
 
+## 3.8.3 — Site Reliability Guardians, the token security agent, sturdier anomaly detectors
+
+**The Guardian tab on the PoC Builder**
+
+- Five Site Reliability Guardians: the PoC's SLOs (each SLO's own indicator as a DQL objective), infrastructure
+  performance, services, applications and security (vulnerabilities). Each is created only on the SE's click after a
+  confirmation, kept in the Register and removed by the clean-up.
+- A validation workflow that runs the guardians every day over the last 24 hours, handed to the Workflows app (or
+  downloaded as .json) and saved there by the SE; the results stay in the Site Reliability Guardian app.
+
+**The token security agent**
+
+- The Workflows tab gains a daily workflow that audits the environment's access tokens (API tokens, personal access
+  tokens, ActiveGate tokens) and its credential vault — metadata only, never a secret — and, only when it finds
+  something, e-mails the findings (no expiry, expiring soon, unused, never used, high-privilege scopes), what to disable
+  or rotate, and Dynatrace Assist's reading. It never changes anything; disabling stays a click in the access tokens
+  page.
+
+**Anomaly detectors and the service user**
+
+- Sturdier rules: a minute counts only with at least 10 requests, the traffic detector watches only services that
+  average that many a minute, and latency and traffic drops need a sustained breach (5 of 10 and 10 of 15 minutes).
+- The detectors' events name the service's problem, no longer the PoC.
+- Settings → PoC plan shows the service users by name (with their id) and the least policy a detector's actor needs,
+  ready to paste in Account Management.
+
+**Predictive capacity**
+
+- The capacity workflows always raise a predictive event for a series over the line now or crossing it, with a title
+  and description written for the customer.
+
 ## 3.8.2 — predictive capacity, and the service user ready on the anomaly kit
 
 **Predictive capacity on the PoC Builder**

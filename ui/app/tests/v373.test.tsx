@@ -193,7 +193,8 @@ describe('the words', () => {
   });
 
   it('keeps 3.7.3 in What’s new among ten releases', () => {
-    expect(WHATS_NEW).toContainEqual({ key: 'help.whatsNew.i115', published: '2026-11-23' });
+    // 3.8.3: i115 left the ten What's new shows (the entry stays in its fragment).
+    expect(WHATS_NEW).not.toContainEqual({ key: 'help.whatsNew.i115', published: '2026-11-23' });
     expect(WHATS_NEW.length).toBe(10);
     expect(entryFor('help.whatsNew.i115').en.startsWith('3.7.3 — ')).toBe(true);
   });

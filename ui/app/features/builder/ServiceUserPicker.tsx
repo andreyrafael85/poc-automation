@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { Button } from '@dynatrace/strato-components/buttons';
+import { CodeSnippet } from '@dynatrace/strato-components/content';
 import { TextInput } from '@dynatrace/strato-components/forms';
 import { Heading, Link, Paragraph, Text } from '@dynatrace/strato-components/typography';
 import { ExternalLinkIcon } from '@dynatrace/strato-icons';
@@ -10,7 +11,16 @@ import { useStudio } from '../../config/StudioContext';
 import { Cluster, Panel, Stack } from '../../engine';
 import { useTranslation } from '../../i18n/useTranslation';
 import type { PocPlan } from '../../models/pocPlan';
-import { ACCOUNT_UUID, SERVICE_USER_ID, checkActor, listDetectorActors, serviceUsersLink, type DetectorActor } from './pocSettings';
+import {
+  ACCOUNT_UUID,
+  DETECTOR_ACTOR_POLICY,
+  SERVICE_USER_ID,
+  checkActor,
+  listDetectorActors,
+  listServiceUsers,
+  serviceUsersLink,
+  type DetectorActor,
+} from './pocSettings';
 
 /**
  * 3.8.1 (the owner: "incluir a criação do usuário de serviço nos passos de configurações … e no PoC Builder apenas validar"):
@@ -32,6 +42,14 @@ export function refusalWords(reason: string, t: (key: 'builder.ad.actor.notId' |
   return reason;
 }
 
+/** 3.8.3: the saved service user as people read it — its name and its id, or the id alone when no name is known. */
+export function actorLabel(id: string, name: string | undefined): string {
+  return name !== undefined && name.trim() !== '' ? `${name.trim()} (${id})` : id;
+}
+
+/** 3.8.3: how many of the service users the person may use are offered. */
+const USERS_SHOWN = 12;
+
 /** How many of the tenant's detector actors are checked (each check writes nothing). */
 const ACTORS_CHECKED = 8;
 
@@ -46,7 +64,9 @@ export const ServiceUserPicker = ({ onSaved }: { onSaved?: (patch: Partial<PocPl
   const saved = pocPlan.detectorActor ?? '';
   const [account, setAccount] = useState(pocPlan.accountUuid ?? '');
   const [typed, setTyped] = useState('');
-  const [actors, setActors] = useState<DetectorActor[] | null>(null);
+  // 3.8.3: the offers — the service users this person may use, by name (the IAM service), the ones already running detectors
+  // first; when the IAM service does not answer, the actors of the tenant's detectors the platform accepts (as in 3.8.1).
+  const [actors, setActors] = useState<(DetectorActor & { name: string })[] | null>(null);
   const [check, setCheck] = useState<{ state: 'checking' | 'ok' | 'refused'; reason?: string } | null>(null);
 
   const save = (patch: Partial<PocPlan>) => {
@@ -57,14 +77,22 @@ export const ServiceUserPicker = ({ onSaved }: { onSaved?: (patch: Partial<PocPl
   useEffect(() => {
     if (!canSet) return;
     let live = true;
-    listDetectorActors()
-      .then(async (found) => {
-        // Only the service users the platform accepts for this person are offered.
-        const accepted: DetectorActor[] = [];
-        for (const actor of found.slice(0, ACTORS_CHECKED)) if ((await checkActor(actor.id)) === null) accepted.push(actor);
-        if (live) setActors(accepted);
-      })
-      .catch(() => live && setActors([]));
+    void (async () => {
+      const [users, running] = await Promise.all([listServiceUsers(), listDetectorActors().catch(() => [] as DetectorActor[])]);
+      const runs = new Map(running.map((actor) => [actor.id, actor]));
+      if (users !== null && users.length > 0) {
+        const offers = users
+          .map((user) => ({ id: user.id, name: user.name, detectors: runs.get(user.id)?.detectors ?? 0, example: runs.get(user.id)?.example ?? '' }))
+          .sort((a, b) => b.detectors - a.detectors || a.name.localeCompare(b.name))
+          .slice(0, USERS_SHOWN);
+        if (live) setActors(offers);
+        return;
+      }
+      // Only the service users the platform accepts for this person are offered.
+      const accepted: (DetectorActor & { name: string })[] = [];
+      for (const actor of running.slice(0, ACTORS_CHECKED)) if ((await checkActor(actor.id)) === null) accepted.push({ ...actor, name: '' });
+      if (live) setActors(accepted);
+    })().catch(() => live && setActors([]));
     return () => {
       live = false;
     };
@@ -80,7 +108,8 @@ export const ServiceUserPicker = ({ onSaved }: { onSaved?: (patch: Partial<PocPl
     const refusal = await checkActor(actor);
     if (refusal === null) {
       setCheck({ state: 'ok' });
-      save({ detectorActor: actor });
+      const name = actors?.find((offer) => offer.id === actor)?.name ?? '';
+      save({ detectorActor: actor, detectorActorName: name === '' ? undefined : name });
     } else setCheck({ state: 'refused', reason: refusalWords(refusal, t) });
   };
 
@@ -98,7 +127,7 @@ export const ServiceUserPicker = ({ onSaved }: { onSaved?: (patch: Partial<PocPl
         </Stack>
 
         {saved !== '' ? (
-          <Text data-testid="su-saved">✓ {t('builder.ad.actor.saved', { id: saved })}</Text>
+          <Text data-testid="su-saved">✓ {t('builder.ad.actor.saved', { id: actorLabel(saved, pocPlan.detectorActorName) })}</Text>
         ) : (
           <Text className="pvs-muted" data-testid="su-none">
             {t('su.none')}
@@ -145,6 +174,17 @@ export const ServiceUserPicker = ({ onSaved }: { onSaved?: (patch: Partial<PocPl
                 <li>{t('su.steps.3')}</li>
               </ol>
               <Text className="pvs-caption">{t('su.steps.why')}</Text>
+              {/* 3.8.3: the least the service user needs to run the detectors (a new user with only "Pro User" failed at run time). */}
+              <Text className="pvs-label">{t('su.policy.title')}</Text>
+              <Text className="pvs-caption">{t('su.policy.why')}</Text>
+              <div data-testid="su-policy">
+                <CodeSnippet showLineNumbers={false} size="condensed">
+                  <CodeSnippet.ActionsMenu>
+                    <CodeSnippet.Copy />
+                  </CodeSnippet.ActionsMenu>
+                  {DETECTOR_ACTOR_POLICY}
+                </CodeSnippet>
+              </div>
             </Stack>
 
             <Stack gap="tight">
@@ -160,7 +200,11 @@ export const ServiceUserPicker = ({ onSaved }: { onSaved?: (patch: Partial<PocPl
                       onClick={() => void use(actor.id)}
                       data-testid={`builder-ad-actor-${actor.id}`}
                     >
-                      {t('builder.ad.actor.offer', { id: actor.id.slice(0, 8), n: formatNumber(actor.detectors), example: actor.example.slice(0, 40) })}
+                      {actor.name !== ''
+                        ? actor.detectors > 0
+                          ? t('su.offer.namedRuns', { name: actor.name, id: actor.id.slice(0, 8), n: formatNumber(actor.detectors) })
+                          : t('su.offer.named', { name: actor.name, id: actor.id.slice(0, 8) })
+                        : t('builder.ad.actor.offer', { id: actor.id.slice(0, 8), n: formatNumber(actor.detectors), example: actor.example.slice(0, 40) })}
                     </Button>
                   ))}
                 </Cluster>

@@ -34,8 +34,9 @@ export const v381Strings = {
     'pt-BR': 'Em Account Management → Identity & access management → Service users, escolha “Add service user” e dê um nome, por exemplo “{name}”.',
   },
   'su.steps.2': {
-    en: 'Under “Assign permissions”, choose “Directly” and give it a policy that reads the environment’s data — for example “Storage All Grail Data Read” — for this environment.',
-    'pt-BR': 'Em “Assign permissions”, escolha “Directly” e dê a ele uma política que lê os dados do ambiente — por exemplo “Storage All Grail Data Read” — para este ambiente.',
+    // 3.8.3: the policy below is the least a detector's actor needs (a new user with only "Pro User" failed at run time).
+    en: 'Under “Assign permissions”, choose “Directly” and give it, for this environment, a policy with the statements below — the least a detector’s actor needs. “Pro User” alone is not enough: the detector then fails when it runs.',
+    'pt-BR': 'Em “Assign permissions”, escolha “Directly” e dê a ele, para este ambiente, uma política com as instruções abaixo — o mínimo que o ator de um detector precisa. Só “Pro User” não basta: o detector falha ao rodar.',
   },
   'su.steps.3': {
     en: 'Copy its id (the UUID on its page) and paste it below, then “Check and use”.',

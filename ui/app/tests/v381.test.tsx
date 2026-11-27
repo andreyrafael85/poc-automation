@@ -48,7 +48,7 @@ describe('the service user (3.8.1)', () => {
     const settings = read('pages/Settings.tsx');
     expect(settings).toContain('<ServiceUserPicker');
     // Apply never overwrites what the service-user panel saved.
-    expect(settings).toContain('detectorActor: pocPlan.detectorActor, accountUuid: pocPlan.accountUuid');
+    expect(settings).toContain('detectorActor: pocPlan.detectorActor, detectorActorName: pocPlan.detectorActorName, accountUuid: pocPlan.accountUuid');
     expect(read('features/builder/PocSettingsKits.tsx')).toContain('data-testid="builder-ad-actor-settings"');
   });
 });
@@ -122,7 +122,7 @@ describe('the menu in seven stages (3.8.1)', () => {
 
 describe('What’s new (3.8.1)', () => {
   it('opens on 3.8.1 and keeps ten', () => {
-    expect(WHATS_NEW[1]).toEqual({ key: 'help.whatsNew.i123', published: '2026-11-27' }); // 3.8.2 opens it now
+    expect(WHATS_NEW[2]).toEqual({ key: 'help.whatsNew.i123', published: '2026-11-27' }); // 3.8.3 and 3.8.2 open it now
     expect(WHATS_NEW).toHaveLength(10);
     expect(entryFor('help.whatsNew.i123').en.startsWith('3.8.1 — ')).toBe(true);
     expect(entryFor('help.whatsNew.i123')['pt-BR'].startsWith('3.8.1 — ')).toBe(true);

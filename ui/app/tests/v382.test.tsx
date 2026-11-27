@@ -34,7 +34,10 @@ const WORDS: CapacityWords = {
   aiHeading: 'H',
   mailDescription: 'M',
   eventDescription: 'E',
-  eventTitle: 'Capacity — {name}',
+  eventTitleNow: 'Disk above {line}% — {name}',
+  eventTitleLikely: 'Forecast: disk reaches {line}% in {days} days — {name}',
+  eventTextNow: 'Now {name} {end}',
+  eventTextLikely: 'Likely {name} {at}',
   heading: 'Capacity',
   gist: '{n} of {valid} reach {line}% in {days} days — {now} now, {likely} likely, {possible} possible',
   subject: '{n} at risk in {days} days',
@@ -143,7 +146,7 @@ describe('the four predictive-capacity workflows (3.8.2)', () => {
     expect(kit).toContain('openInWorkflows(body(kind))');
     expect(kit).not.toContain('httpClient');
     expect(read('pages/PocBuilder.tsx')).toContain('<CapacityKit />');
-    expect(translate('cap.wf.eventTitle', 'en', { signal: 'Disk' })).toBe('Capacity forecast — Disk: {name}');
+    expect(translate('cap.ev.titleLikely', 'en', { signal: 'Disk' })).toBe('Forecast: Disk reaches {line}% in {days} days — {name}');
   });
 });
 
@@ -166,8 +169,8 @@ describe('the detectors’ service user (3.8.2)', () => {
 });
 
 describe('What’s new (3.8.2)', () => {
-  it('opens on 3.8.2 and keeps ten', () => {
-    expect(WHATS_NEW[0]).toEqual({ key: 'help.whatsNew.i124', published: '2026-11-27' });
+  it('keeps 3.8.2 among the ten', () => {
+    expect(WHATS_NEW[1]).toEqual({ key: 'help.whatsNew.i124', published: '2026-11-27' }); // 3.8.3 opens it now
     expect(WHATS_NEW).toHaveLength(10);
     expect(entryFor('help.whatsNew.i124').en.startsWith('3.8.2 — ')).toBe(true);
     expect(entryFor('help.whatsNew.i124')['pt-BR'].startsWith('3.8.2 — ')).toBe(true);

@@ -1,3 +1,4 @@
+import { getEnvironmentId } from '@dynatrace-sdk/app-environment';
 import { httpClient } from '@dynatrace-sdk/http-client';
 import { sendIntent } from '@dynatrace-sdk/navigation';
 
@@ -76,24 +77,51 @@ const SERVICE_ID = /^SERVICE-[0-9A-F]{16}$/;
  * que selecionar é o que o SE e Parceiro vão identificar"): with no service chosen the detector watches every service, one
  * series each — no filter.
  */
-function serviceFilter(serviceIds: readonly string[]): string {
+export function serviceFilter(serviceIds: readonly string[]): string {
   const ids = serviceIds.filter((id) => SERVICE_ID.test(id)).map((id) => `"${id}"`);
   return ids.length === 0 ? '' : `, filter: { in(dt.entity.service, array(${ids.join(', ')})) }`;
 }
 
+/**
+ * 3.8.3 (the owner's validation of 3.8.2: two "traffic below its baseline" problems opened at the same moment on two quiet
+ * services, and a failure-rate one at 100 % on a service with few requests — "talvez de forma geral tenha que rever a regra dos
+ * alertas automáticos"): a minute counts only with at least `DETECTOR_MIN_REQUESTS` requests, and the traffic detector watches
+ * only services that average that many a minute (on the lab on 2026-11-27, 44 of 63 services; 0 B).
+ */
+export const DETECTOR_MIN_REQUESTS = 10;
+
 /** The detector's query: one series per service. */
 export function detectorQuery(kind: DetectorKind, serviceIds: readonly string[]): string {
   const filter = serviceFilter(serviceIds);
+  const floor = DETECTOR_MIN_REQUESTS;
   if (kind === 'failureRate') {
     return [
       `timeseries {f = sum(dt.service.request.failure_count), r = sum(dt.service.request.count)}, by: {dt.entity.service}${filter}`,
-      '| fieldsAdd failureRate = 100 * f[] / r[]',
+      `| fieldsAdd failureRate = iCollectArray(if(r[] >= ${floor}, 100 * f[] / r[]))`,
       '| fields timeframe, interval, dt.entity.service, failureRate',
     ].join('\n');
   }
-  if (kind === 'responseTime') return `timeseries p90 = percentile(dt.service.request.response_time, 90), by: {dt.entity.service}${filter}`;
-  return `timeseries requests = sum(dt.service.request.count), by: {dt.entity.service}${filter}`;
+  if (kind === 'responseTime') {
+    return [
+      `timeseries {t = percentile(dt.service.request.response_time, 90), r = sum(dt.service.request.count)}, by: {dt.entity.service}${filter}`,
+      `| fieldsAdd p90 = iCollectArray(if(r[] >= ${floor}, t[]))`,
+      '| fields timeframe, interval, dt.entity.service, p90',
+    ].join('\n');
+  }
+  return [`timeseries requests = sum(dt.service.request.count), by: {dt.entity.service}${filter}`, `| filter arrayAvg(requests) >= ${floor}`].join('\n');
 }
+
+/**
+ * 3.8.3: how each signal decides — how many of the last minutes must break the rule, and how far an adaptive baseline may be
+ * crossed (in the signal's usual fluctuations). Errors keep their 3 of 5 minutes over the static line; latency needs 5 of 10
+ * minutes three fluctuations above; a traffic drop needs 10 of 15 minutes four fluctuations below — a sustained drop, not a
+ * quiet minute.
+ */
+export const DETECTOR_RULES: Record<DetectorKind, { violating: number; window: number; dealerting: number; fluctuations: number | null }> = {
+  failureRate: { violating: 3, window: 5, dealerting: 5, fluctuations: null },
+  responseTime: { violating: 5, window: 10, dealerting: 10, fluctuations: 3 },
+  traffic: { violating: 10, window: 15, dealerting: 15, fluctuations: 4 },
+};
 
 /**
  * A Davis anomaly detector of one golden signal over the chosen services (none: every service), run as `actorId`. Pure; null
@@ -105,20 +133,21 @@ export function detectorQuery(kind: DetectorKind, serviceIds: readonly string[])
 export function buildDetector(kind: DetectorKind, serviceIds: readonly string[], words: DetectorWords, actorId: string): Record<string, unknown> | null {
   // No service means every service; ids given but none valid is refused (nothing is guessed).
   if (actorId === '' || (serviceIds.length > 0 && !serviceIds.some((id) => SERVICE_ID.test(id)))) return null;
+  const rule = DETECTOR_RULES[kind];
   const common = [
     // 3.8.0: the key the Anomaly Detection app itself writes (read from the lab's detectors on 2026-11-26).
     { key: 'query.expression', value: detectorQuery(kind, serviceIds) },
     { key: 'alertOnMissingData', value: 'false' },
-    { key: 'violatingSamples', value: '3' },
-    { key: 'slidingWindow', value: '5' },
-    { key: 'dealertingSamples', value: '5' },
+    { key: 'violatingSamples', value: String(rule.violating) },
+    { key: 'slidingWindow', value: String(rule.window) },
+    { key: 'dealertingSamples', value: String(rule.dealerting) },
   ];
   const analyzer =
     kind === 'failureRate'
       ? { name: STATIC, input: [...common, { key: 'threshold', value: String(FAILURE_RATE_LINE) }, { key: 'alertCondition', value: 'ABOVE' }] }
       : {
           name: ADAPTIVE,
-          input: [...common, { key: SIGNAL_FLUCTUATIONS, value: '1' }, { key: 'alertCondition', value: kind === 'traffic' ? 'BELOW' : 'ABOVE' }],
+          input: [...common, { key: SIGNAL_FLUCTUATIONS, value: String(rule.fluctuations ?? 1) }, { key: 'alertCondition', value: kind === 'traffic' ? 'BELOW' : 'ABOVE' }],
         };
   const eventType = kind === 'failureRate' ? 'ERROR_EVENT' : kind === 'responseTime' ? 'PERFORMANCE_EVENT' : 'AVAILABILITY_EVENT';
   return {
@@ -175,6 +204,56 @@ export async function listDetectorActors(): Promise<DetectorActor[]> {
   const page = await bodyOf<{ items?: { value?: { title?: unknown; executionSettings?: { actor?: unknown } } }[] }>(response);
   return detectorActors(page.items ?? []);
 }
+
+/**
+ * 3.8.3 (the owner: "tem somente o ID … era bom trazer o nome do ator"): the service users the signed-in person may use, with
+ * their names — `GET /platform/iam/v1/organizational-levels/environment/{environment}/service-users` (the IAM service's
+ * "available service users", under `iam:service-users:use`, declared since 3.8.2; executed in the account's context). Null when
+ * the platform does not answer (the panel then falls back to the actors of the tenant's detectors).
+ */
+export interface ServiceUser {
+  id: string;
+  name: string;
+}
+
+/** The service users of an IAM answer, by id (lower case) and name. Pure. */
+export function serviceUsersOf(body: unknown): ServiceUser[] {
+  const results = (body as { results?: unknown } | null)?.results;
+  if (!Array.isArray(results)) return [];
+  return results.flatMap((entry: unknown): ServiceUser[] => {
+    const record = (entry ?? {}) as { uid?: unknown; email?: unknown; name?: unknown; surname?: unknown };
+    const fromEmail = typeof record.email === 'string' ? record.email.split('@')[0] ?? '' : '';
+    const id = (typeof record.uid === 'string' && SERVICE_USER_ID.test(record.uid.toLowerCase()) ? record.uid : fromEmail).toLowerCase();
+    if (!SERVICE_USER_ID.test(id)) return [];
+    const name = [record.name, record.surname].filter((part): part is string => typeof part === 'string' && part.trim() !== '').join(' ').trim();
+    return [{ id, name: name.slice(0, 100) }];
+  });
+}
+
+export async function listServiceUsers(): Promise<ServiceUser[] | null> {
+  try {
+    const environment = encodeURIComponent(getEnvironmentId());
+    const response = await httpClient.send({ url: `/platform/iam/v1/organizational-levels/environment/${environment}/service-users`, method: 'GET' });
+    return serviceUsersOf(await bodyOf<unknown>(response));
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * 3.8.3 (the owner's validation of 3.8.2: a new service user with only "Pro User" failed at run time — "Anomaly detector failed
+ * with an unauthorized request. Please verify that the actor has been granted the required scopes" —, while one with the Storage
+ * and Davis groups ran): the least a detector's actor needs, from Dynatrace's documentation (the anomaly detectors' and health
+ * alerts' actor: read the metrics and their buckets, run the analyzers; the entities and Smartscape for the service it watches).
+ * Given to the SE as a policy to paste in Account Management.
+ */
+export const DETECTOR_ACTOR_POLICY = [
+  'ALLOW davis:analyzers:execute;',
+  'ALLOW storage:buckets:read;',
+  'ALLOW storage:metrics:read;',
+  'ALLOW storage:entities:read;',
+  'ALLOW storage:smartscape:read;',
+].join('\n');
 
 export async function responseBodyOf(error: unknown): Promise<unknown> {
   const response = (error as { response?: { body?: (type?: 'json') => unknown } } | null)?.response;

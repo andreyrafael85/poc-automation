@@ -1799,3 +1799,22 @@
 .pvs-capkit__name {
   font-weight: 600;
 }
+
+/* 3.8.3 — the PoC Builder's Guardian kit: five guardian cards (on the capacity kit's grid, five to a row on a wide screen),
+   each listing its objectives. */
+.pvs-capkit.pvs-grdkit {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+.pvs-grdkit__objectives {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pvs-grdkit__objectives > li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}

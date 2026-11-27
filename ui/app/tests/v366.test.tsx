@@ -113,7 +113,7 @@ describe('the PoC Builder', () => {
     // 3.6.9: the SLOs are one kit more (the workflow is saved by the Workflows app).
     // 3.7.3: eight dashboards (Kubernetes and Databases joined), the notebook, the launchpad, the SLOs and the HTTP monitors.
     // 3.7.4: the anomaly detectors and the OpenPipeline pipeline join them.
-    expect(screen.getByText('0 of 14 kits on the environment')).toBeTruthy();
+    expect(screen.getByText('0 of 15 kits on the environment')).toBeTruthy();
     expect(screen.getByTestId('builder-kit-sre').textContent).toContain('7 sections');
     // Nothing is created until a card is opened and its own button pressed (rule 10).
     expect(screen.queryByTestId('dash3-create-sre')).toBeNull();

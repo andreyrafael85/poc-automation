@@ -50,9 +50,9 @@ scope is declared but never used.
 | `slo:slos:write` | Create the availability, performance and fleet SLOs the SE picks, and remove them in the clean-up. |
 | `environment-api:synthetic:read` | List the environment's public synthetic locations, so the SE picks where the monitors run. |
 | `environment-api:synthetic-monitors:write` | Create the Browser and HTTP monitors the SE confirms, and remove them in the clean-up. |
-| `settings:objects:write` | Create and remove the PoC's anomaly detectors (`builtin:davis.anomaly-detectors`, run by the service user set in Settings → PoC plan; a `validateOnly` call asks the platform whether it accepts that actor before it is saved, and the PoC Builder can ask again) and the OpenPipeline logs pipeline (`builtin:openpipeline.logs.pipelines`), and write the logs routing back with the PoC's route. |
+| `settings:objects:write` | Create and remove the PoC's anomaly detectors (`builtin:davis.anomaly-detectors`, run by the service user set in Settings → PoC plan; a `validateOnly` call asks the platform whether it accepts that actor before it is saved, and the PoC Builder can ask again) the OpenPipeline logs pipeline (`builtin:openpipeline.logs.pipelines`) and, since 3.8.3, the PoC's Site Reliability Guardians (`app:dynatrace.site.reliability.guardian:guardians`), and write the logs routing back with the PoC's route. |
 | `settings:objects:read` | Read the OpenPipeline logs routing (`builtin:openpipeline.logs.routing`) — one settings object whose routes every pipeline shares — so only the PoC's route is added or removed; and the existing anomaly detectors, to offer the service users already running them. |
-| `iam:service-users:use` | Write the anomaly detectors with the service user set in Settings → PoC plan as their actor (`executionSettings.actor`); without it the settings service answers "User has no permission to use service users". Since 3.8.2. |
+| `iam:service-users:use` | Write the anomaly detectors with the service user set in Settings → PoC plan as their actor (`executionSettings.actor`); without it the settings service answers "User has no permission to use service users". Since 3.8.2. Since 3.8.3 it also lists, by name, the service users the signed-in person may use (`GET /platform/iam/v1/organizational-levels/environment/{environment}/service-users`), for Settings → PoC plan. |
 
 ## What the app does not request
 
@@ -62,6 +62,8 @@ scope is declared but never used.
 - **No scope to create service users.** The anomaly detectors run as a service user (the platform does not take a
   person's own account as a detector's actor); the app never creates one — the SE creates it in Account Management and
   the app only uses its id, with `iam:service-users:use` (since 3.8.2).
+- **No scope for the token security agent.** Its workflow reads the access tokens and the credential vault (metadata
+  only) with the permissions of whoever saves it in Workflows; the app itself reads no token (since 3.8.3).
 - **No API token and no client secret.** Authentication is handled by AppEngine at runtime and by the `dt-app`
   session at deploy time.
 

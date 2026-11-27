@@ -16,6 +16,8 @@ import { SPECIALTY_BLUEPRINTS, SPECIALTY_IDS, type SpecialtyId } from '../featur
 import { DashboardLogoContext, shrinkLogo } from '../features/dashboard/dashboardLogo';
 import { SpecialtyCard, useDashboardEvidence } from '../features/dashboard/SpecialtyDashboards';
 import { CapacityKit } from '../features/builder/CapacityKit';
+import { GuardianKit } from '../features/builder/GuardianKit';
+import { TokenKit } from '../features/builder/TokenKit';
 import { CleanupPanel, createdItems, MonitorKit, SloKit, WeeklyKit, WorkflowKit } from '../features/builder/PocAutomationKits';
 import { AnomalyKit, OpenPipelineKit } from '../features/builder/PocSettingsKits';
 import { listSlos, wholeSloIds } from '../features/builder/pocAutomation';
@@ -120,6 +122,8 @@ export const PocBuilder = () => {
     // 3.7.4: the anomaly detectors and the OpenPipeline pipeline.
     { key: 'detectors', ref: (pocPlan.detectors ?? []).length > 0 ? 'on' : null },
     { key: 'pipeline', ref: pocPlan.pipeline ? 'on' : null },
+    // 3.8.3: the Site Reliability Guardians.
+    { key: 'guardians', ref: (pocPlan.guardians ?? []).length > 0 ? 'on' : null },
   ];
   const total = kits.length + documents.length + automation.length;
   const done = created.length + documents.filter((item) => item.ref !== null).length + automation.filter((item) => item.ref !== null).length;
@@ -246,6 +250,8 @@ export const PocBuilder = () => {
                   </div>
                   {/* 3.8.2: four predictive-capacity workflows (Dynatrace Intelligence forecasts). */}
                   <CapacityKit />
+                  {/* 3.8.3: the token security agent. */}
+                  <TokenKit />
                 </>
               ) : (
                 <Text className="pvs-caption">{t('builder.seOnly')}</Text>
@@ -273,6 +279,12 @@ export const PocBuilder = () => {
           <Tab title={t('builder.tab.anomaly')} keepMounted>
             <Stack gap="section" className="pvs-tabpane">
               {canCreate ? <AnomalyKit /> : <Text className="pvs-caption">{t('builder.seOnly')}</Text>}
+            </Stack>
+          </Tab>
+          {/* 3.8.3: five Site Reliability Guardians and their daily validation workflow. */}
+          <Tab title={t('builder.tab.guardian')} keepMounted>
+            <Stack gap="section" className="pvs-tabpane">
+              {canCreate ? <GuardianKit /> : <Text className="pvs-caption">{t('builder.seOnly')}</Text>}
             </Stack>
           </Tab>
           <Tab title={t('builder.tab.ledger')} keepMounted>

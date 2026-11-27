@@ -39,7 +39,6 @@ export const CapacityKit = () => {
   const customer = parameters.customerName.trim() === '' ? 'PoC' : parameters.customerName.trim();
   const [to, setTo] = useState(access.identity.email || '');
   const [horizon, setHorizon] = useState<CapacityHorizon>(7);
-  const [events, setEvents] = useState(true);
   const [shared, setShared] = useState(true);
   const [lines, setLines] = useState<Record<CapacityKind, number>>({ ...CAPACITY_THRESHOLD });
   const [opened, setOpened] = useState<CapacityKind | null>(null);
@@ -57,7 +56,10 @@ export const CapacityKit = () => {
       aiHeading: t('builder.wf.aiHeading'),
       mailDescription: t('builder.wf.task'),
       eventDescription: t('cap.wf.eventTask'),
-      eventTitle: t('cap.wf.eventTitle', { signal }),
+      eventTitleNow: t('cap.ev.titleNow', { signal }),
+      eventTitleLikely: t('cap.ev.titleLikely', { signal }),
+      eventTextNow: t('cap.ev.textNow', { signal }),
+      eventTextLikely: t('cap.ev.textLikely', { signal }),
       heading: t('cap.mail.heading', { signal, customer }),
       gist: t('cap.mail.gist'),
       subject: t('cap.mail.subject', { signal, customer }),
@@ -78,7 +80,7 @@ export const CapacityKit = () => {
 
   const body = (kind: CapacityKind) =>
     buildCapacityWorkflow(
-      { kind, threshold: lines[kind], horizon, recipients: recipients.valid, raiseEvents: events, shared, timezone },
+      { kind, threshold: lines[kind], horizon, recipients: recipients.valid, raiseEvents: true, shared, timezone },
       words(kind),
     );
 
@@ -175,9 +177,9 @@ export const CapacityKit = () => {
           <TextInput value={to} onChange={setTo} aria-label={t('builder.wf.to')} data-testid="builder-capacity-to" />
           {recipients.invalid.length > 0 && <Text className="pvs-caption">{t('builder.wf.invalid', { list: recipients.invalid.join(', ') })}</Text>}
         </Stack>
-        <Checkbox value={events} onChange={(value) => setEvents(value === true)} data-testid="builder-capacity-events">
-          {t('cap.events')}
-        </Checkbox>
+        <Text className="pvs-caption" data-testid="builder-capacity-events">
+          {t('cap.events.always')}
+        </Text>
         <Checkbox value={shared} onChange={(value) => setShared(value === true)}>
           {t('builder.wf.shared')}
         </Checkbox>

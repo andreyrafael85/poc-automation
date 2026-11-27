@@ -1,6 +1,6 @@
 # Architecture
 
-> **App:** PoC Automation 3.0 · **id:** `my.poc.automation` · **platform:** Dynatrace AppEngine · **release:** 3.8.2
+> **App:** PoC Automation 3.0 · **id:** `my.poc.automation` · **platform:** Dynatrace AppEngine · **release:** 3.8.3
 >
 > The code is the source of truth. This document describes how the app is built and the rules it keeps.
 
@@ -363,10 +363,11 @@ each dashboard, notebook and launchpad.
 | **Smart Dashboards · 8** | Compact cards; the full card opens one at a time | 8 dashboards; "Update" replaces the same document | Document service |
 | **Notebook and launchpad** | `PocDocumentKit` | "PoC investigation" notebook and "PoC launchpad" | Document service |
 | **SLOs** | `SloKit` | Availability and performance per service; fleet SLOs | SLO API |
-| **Workflows** | `WorkflowKit`, `WeeklyKit`, `CapacityKit` | Triage and weekly workflows, and four predictive-capacity workflows, handed to Workflows (or downloaded as `.json`) | Workflows intent |
+| **Workflows** | `WorkflowKit`, `WeeklyKit`, `CapacityKit`, `TokenKit` | Triage and weekly workflows, four predictive-capacity workflows and the token security agent, handed to Workflows (or downloaded as `.json`) | Workflows intent |
 | **Synthetic** | `MonitorKit` | Browser and HTTP monitors of the customer's addresses | Synthetic API |
 | **OpenPipeline** | `OpenPipelineKit` | A logs pipeline, its route, and a check | Settings 2.0 |
 | **Anomaly detection** | `AnomalyKit` | Detectors on the golden signals, run by the service user set in Settings — checked with the platform when the kit opens, a "Ready" badge enabling the creation (or opened in the Anomaly Detection app) | Settings 2.0 (and the Anomaly Detection intent) |
+| **Guardian** | `GuardianKit` | Five Site Reliability Guardians (the PoC's SLOs, infrastructure, services, applications, security) and a daily validation workflow handed to Workflows | Settings 2.0 (`app:dynatrace.site.reliability.guardian:guardians`) and the Workflows intent |
 | **Register** | list + `CleanupPanel` | — | per type |
 
 **The dashboards** (`features/dashboard/blueprints.ts`): Environment health and SLOs (the platform's SLO tiles for
@@ -392,14 +393,33 @@ there.
 | --- | --- | --- |
 | Triage | A Dynatrace Intelligence problem with analysis ready, every category; the trigger is on, so saving turns it on | `poc_triage` → `dynatrace_assist` → `notify_team` |
 | Weekly summary | Cron `0 9 * * 1` in the SE's time zone | `poc_weekly` → `weekly_assist` → `notify_team` |
-| Predictive capacity (four: host disk, host memory, host CPU, Kubernetes memory against its limit) | Cron `0 7 * * *` (daily) | `forecast_capacity` → `capacity_assist` → `notify_team`, and optionally `raise_event` |
+| Predictive capacity (four: host disk, host memory, host CPU, Kubernetes memory against its limit) | Cron `0 7 * * *` (daily) | `forecast_capacity` → `capacity_assist` → `notify_team` and `raise_event` |
+| Token security agent | Cron `30 7 * * *` (daily) | `token_audit` → `token_assist` → `notify_team`, only when there is a finding |
+| Guardian validation | Cron `0 8 * * *` (daily, over the last 24 hours) | one platform validation task per guardian created |
 
 **Predictive capacity** (`features/builder/pocCapacity.ts`, `CapacityKit.tsx`, since 3.8.2). Each workflow runs a
 JavaScript task that asks Dynatrace Intelligence's forecast analyzer (`dt.statistics.GenericForecastAnalyzer`, through
 `@dynatrace-sdk/client-davis-analyzers`) for the fullest series seven or fourteen days ahead, reading metrics only, and
 acts only when the forecast reaches the line the SE set on the kit: an e-mail with Dynatrace Assist's reading and,
-optionally, a resource-contention event that opens a problem. The forecast runs as the workflow's actor — no scope of
-this app is involved.
+since 3.8.3 always, a predictive resource-contention event — titled and described for the customer — for each series
+over the line now or crossing it. The forecast runs as the workflow's actor — no scope of this app is involved.
+
+**The token security agent** (`features/builder/pocTokens.ts`, `TokenKit.tsx`, since 3.8.3). A JavaScript task reads,
+with the permissions of whoever saves the workflow, the environment's access tokens (API tokens, personal access
+tokens, ActiveGate tokens) and its credential vault — the APIs return metadata only, never a secret. Each enabled
+token gets its findings (no expiry, expiring within 14 days, unused for 30 days, never used, high-privilege scopes) and
+one recommendation: disable (never used, or unused for 90 days), set an expiry and rotate, or review. Only when there
+is a finding does it send an e-mail (private by default: it names tokens and their owners) with a table, Dynatrace
+Assist's reading and, as steps, the account-level checks an environment workflow cannot reach (OAuth clients, platform
+tokens, administrator roles). It never changes anything.
+
+**Site Reliability Guardians** (`features/builder/pocGuardians.ts`, `GuardianKit.tsx`, since 3.8.3). Five guardians,
+each a settings object of the Site Reliability Guardian app: the PoC's SLOs (each SLO's own indicator as a DQL
+objective — the guardian's SLO reference takes only classic SLO metric keys), infrastructure performance, services,
+applications and security (the last 2 hours of vulnerability reports). Each objective has a comparison, a failing line
+and a warning. Created on the SE's click after a confirmation (`settings:objects:write`), kept in the Register and
+removed by the clean-up. The validation workflow runs the platform's validation action for each guardian every day;
+the results stay in the Site Reliability Guardian app.
 
 Not written by the app, workflows are in neither the Register nor the clean-up.
 
@@ -427,14 +447,18 @@ same pipeline), and writes the list back with its update token, so a change made
 overwritten. The clean-up removes the route first, then the pipeline.
 
 **Anomaly detection.** One detector per golden signal: failure rate (static threshold above 5 % for 3 of 5 minutes),
-response time p90 (auto-adaptive, above) and a traffic drop (auto-adaptive, below). With no service ticked, a
+response time p90 (auto-adaptive, above, 5 of 10 minutes) and a traffic drop (auto-adaptive, below, 10 of 15 minutes).
+Since 3.8.3 a minute counts only with at least 10 requests and the traffic detector watches only services that average
+that many a minute, so quiet services do not alert; the events name the service's problem, not the PoC. With no service ticked, a
 detector watches every service; the SE may also create one detector per signal and per service ticked. A detector
 runs its query on behalf of an actor, and the platform takes a **service user** as that actor (a person's own account
 is refused). Since 3.8.1 that service user is set in **Settings → PoC plan** (`ServiceUserPicker`), a step of the
 preparation: the account's UUID opens its service users in Account Management; the SE picks one already running
 detectors on the environment (offered once the platform accepts them) or pastes the id of one made for the PoC, and
 the settings service checks it with a `validateOnly` call (nothing written) before it is saved with the PoC. The kit
-only reads it and can check it again; creating a service user stays in Account Management. The
+only reads it and can check it again; creating a service user stays in Account Management. Since 3.8.3 Settings lists
+the service users the signed-in person may use by name (the IAM service, under `iam:service-users:use`), saves the
+name with the id, and shows the least policy a detector's actor needs, ready to paste in Account Management. The
 detectors are created only on the SE's click after a confirmation, kept in the Register and removed by the clean-up.
 A detector can also be opened in the **Anomaly Detection app** through its documented intent, with its event already
 filled in, and saved there by the SE (then it is not in the Register). The kit links to Settings → all the alerts.

@@ -76,8 +76,12 @@ export interface PocPlan {
   autonomyTarget?: 'observe' | 'explain' | 'prioritise' | 'propose' | 'act';
   /** 3.8.0: the service user that runs the detectors the PoC Builder creates (a person's own id is refused as their actor). */
   detectorActor?: string;
+  /** 3.8.3: the service user's name, as the IAM service gave it when it was chosen (shown beside its id). */
+  detectorActorName?: string;
   /** 3.8.1: the Dynatrace account's UUID, for the link to its service users (Account Management). */
   accountUuid?: string;
+  /** 3.8.3: the Site Reliability Guardians this PoC created (one per kind: SLOs, infrastructure, services, applications, security). */
+  guardians?: PocGuardianRef[];
 }
 
 /** 3.6.9: the SLOs one service gets — requests without a failure, minutes within the response-time line. */
@@ -104,6 +108,14 @@ export interface PocDetectorRef extends PocDashboardRef {
   /** 3.8.0: the one service a per-service detector watches; absent for a detector over several (or every) service. */
   serviceId?: string;
 }
+
+/** 3.8.3: a Site Reliability Guardian the PoC Builder created — its settings object id and which of the five it is. */
+export interface PocGuardianRef extends PocDashboardRef {
+  kind: string;
+}
+
+/** 3.8.3: one guardian per kind. */
+export const MAX_POC_GUARDIANS = 5;
 
 /** 3.7.4: at most this many detectors per PoC (6 until 3.7.9; 3.8.0 adds one detector per service: 8 services × 3 signals). */
 export const MAX_POC_DETECTORS = 24;
@@ -245,9 +257,17 @@ export function parsePocPlan(raw: unknown): PocPlan {
       })
     : [];
   const pipeline = dashboardRef(raw['pipeline'], MAX_SLO_ID);
+  const guardians = Array.isArray(raw['guardians'])
+    ? raw['guardians'].slice(0, MAX_POC_GUARDIANS).flatMap((value: unknown): PocGuardianRef[] => {
+        const ref = dashboardRef(value, MAX_SLO_ID);
+        const kind = text(isRecord(value) ? value['kind'] : '', 20);
+        return ref === null || kind === '' ? [] : [{ ...ref, kind }];
+      })
+    : [];
   const target = raw['autonomyTarget'];
   const actor = raw['detectorActor'];
   const detectorActor = typeof actor === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(actor) ? actor.toLowerCase() : undefined;
+  const actorName = detectorActor === undefined ? '' : text(raw['detectorActorName'], 100);
   const account = raw['accountUuid'];
   const accountUuid = typeof account === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(account) ? account.toLowerCase() : undefined;
   const autonomyTarget = typeof target === 'string' && ['observe', 'explain', 'prioritise', 'propose', 'act'].includes(target) ? (target as PocPlan['autonomyTarget']) : undefined;
@@ -265,7 +285,9 @@ export function parsePocPlan(raw: unknown): PocPlan {
     ...(pipeline !== null ? { pipeline } : {}),
     ...(autonomyTarget === undefined ? {} : { autonomyTarget }),
     ...(detectorActor === undefined ? {} : { detectorActor }),
+    ...(actorName === '' ? {} : { detectorActorName: actorName }),
     ...(accountUuid === undefined ? {} : { accountUuid }),
+    ...(guardians.length > 0 ? { guardians } : {}),
   };
 }
 

@@ -182,8 +182,8 @@ const SettingsForm = ({ imported, onImported }: { imported: string | null; onImp
 
   const planDirty =
     // 3.8.1: the service user and the account are saved by their own panel, never by Apply.
-    JSON.stringify({ ...planDraft, dashboard: null, detectorActor: undefined, accountUuid: undefined }) !==
-      JSON.stringify({ ...pocPlan, dashboard: null, detectorActor: undefined, accountUuid: undefined });
+    JSON.stringify({ ...planDraft, dashboard: null, detectorActor: undefined, detectorActorName: undefined, accountUuid: undefined }) !==
+      JSON.stringify({ ...pocPlan, dashboard: null, detectorActor: undefined, detectorActorName: undefined, accountUuid: undefined });
   // A manual criterion is nothing but its words, and a PoC cannot end before it starts.
   const planValid =
     (planDraft.startDate === null || planDraft.endDate === null || planDraft.endDate >= planDraft.startDate) &&
@@ -254,7 +254,7 @@ const SettingsForm = ({ imported, onImported }: { imported: string | null; onImp
       ...selectedPillars.filter((id) => !pillarDraft.includes(id)),
     ]);
     changed.forEach((id) => togglePillar(id));
-    setPocPlan({ ...planDraft, dashboard: pocPlan.dashboard, detectorActor: pocPlan.detectorActor, accountUuid: pocPlan.accountUuid });
+    setPocPlan({ ...planDraft, dashboard: pocPlan.dashboard, detectorActor: pocPlan.detectorActor, detectorActorName: pocPlan.detectorActorName, accountUuid: pocPlan.accountUuid });
   };
 
   /**

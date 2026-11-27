@@ -39,6 +39,7 @@ import {
   workflowFile,
 } from './pocAutomation';
 import { ANOMALY_SETTINGS_LINK, OPENPIPELINE_LINK, deleteSettingsObject, unrouteFromPipeline } from './pocSettings';
+import { guardianLink } from './pocGuardians';
 
 /**
  * 3.6.9 — the PoC Builder's SLO kit, its problem-triage workflow kit and the clean-up at the end of the PoC. Each writes
@@ -619,7 +620,7 @@ export const WorkflowKit = () => {
 /** Everything this PoC created, as rows of the register and of the clean-up. */
 export interface CreatedItem {
   key: string;
-  type: 'dashboard' | 'notebook' | 'launchpad' | 'slo' | 'monitor' | 'browserMonitor' | 'detector' | 'pipeline';
+  type: 'dashboard' | 'notebook' | 'launchpad' | 'slo' | 'monitor' | 'browserMonitor' | 'detector' | 'pipeline' | 'guardian';
   ref: PocDashboardRef;
   link: string | null;
 }
@@ -646,6 +647,8 @@ export function createdItems(plan: PocPlan, docLink: (id: string) => string | nu
   // 3.7.4: the anomaly detectors and the OpenPipeline pipeline (settings objects).
   for (const detector of plan.detectors ?? []) items.push({ key: `det-${detector.id}`, type: 'detector', ref: detector, link: ANOMALY_SETTINGS_LINK });
   if (plan.pipeline) items.push({ key: 'pipeline', type: 'pipeline', ref: plan.pipeline, link: OPENPIPELINE_LINK });
+  // 3.8.3: the Site Reliability Guardians (settings objects of the Site Reliability Guardian app).
+  for (const guardian of plan.guardians ?? []) items.push({ key: `grd-${guardian.id}`, type: 'guardian', ref: guardian, link: guardianLink(guardian.id) });
   return items;
 }
 
@@ -665,13 +668,16 @@ export function withoutItems(plan: PocPlan, removed: ReadonlySet<string>): PocPl
   if (detectors.length === 0) delete next.detectors;
   else next.detectors = detectors;
   if (removed.has('pipeline')) delete next.pipeline;
+  const guardians = (plan.guardians ?? []).filter((guardian) => !removed.has(`grd-${guardian.id}`));
+  if (guardians.length === 0) delete next.guardians;
+  else next.guardians = guardians;
   return next;
 }
 
 const removeItem = (item: CreatedItem): Promise<void> => {
   if (item.type === 'slo') return deleteSlo(item.ref.id);
   if (item.type === 'monitor' || item.type === 'browserMonitor') return deleteHttpMonitor(item.ref.id);
-  if (item.type === 'detector') return deleteSettingsObject(item.ref.id);
+  if (item.type === 'detector' || item.type === 'guardian') return deleteSettingsObject(item.ref.id);
   // 3.7.6: the route that sends sources to the pipeline leaves the logs routing first, then the pipeline itself.
   if (item.type === 'pipeline') return unrouteFromPipeline(item.ref.id).then(() => deleteSettingsObject(item.ref.id));
   return deletePocDocument(item.ref.id);
