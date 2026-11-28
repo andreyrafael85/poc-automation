@@ -170,7 +170,7 @@ describe('the detectors’ service user (3.8.2)', () => {
 
 describe('What’s new (3.8.2)', () => {
   it('keeps 3.8.2 among the ten', () => {
-    expect(WHATS_NEW[1]).toEqual({ key: 'help.whatsNew.i124', published: '2026-11-27' }); // 3.8.3 opens it now
+    expect(WHATS_NEW[2]).toEqual({ key: 'help.whatsNew.i124', published: '2026-11-27' }); // 3.8.4 and 3.8.3 open it now
     expect(WHATS_NEW).toHaveLength(10);
     expect(entryFor('help.whatsNew.i124').en.startsWith('3.8.2 — ')).toBe(true);
     expect(entryFor('help.whatsNew.i124')['pt-BR'].startsWith('3.8.2 — ')).toBe(true);

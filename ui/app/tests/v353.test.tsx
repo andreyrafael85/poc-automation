@@ -111,7 +111,8 @@ describe('What’s new', () => {
     expect(WHATS_NEW.some((entry) => entry.key === 'help.whatsNew.i95')).toBe(false);
     for (const { key, published } of WHATS_NEW) {
       expect(published).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-      expect(entryFor(key)?.en).toMatch(/^\d+\.\d+\.\d+ — /);
+      // 3.8.4: a fix of a validated release is x.y.z-n.
+      expect(entryFor(key)?.en).toMatch(/^\d+\.\d+\.\d+(-\d+)? — /);
     }
     const days = WHATS_NEW.map((entry) => entry.published);
     expect([...days].sort().reverse()).toEqual(days);

@@ -25,7 +25,7 @@ describe('the name and the address', () => {
     const manifest = JSON.parse(read('app.config.json')) as { app: { id: string; name: string; version: string } };
     expect(manifest.app.name).toBe('PoC Automation 3.0');
     expect(manifest.app.id).toBe('my.poc.automation');
-    expect(manifest.app.version).toMatch(/^3\.[45678]\.\d+$/);
+    expect(manifest.app.version).toMatch(/^3\.[45678]\.\d+(-\d+)?$/);
     // The platform refuses a manifest whose description passes 80 characters (the first 3.4.15 deploy was refused).
     expect((JSON.parse(read('app.config.json')) as { app: { description: string } }).app.description.length).toBeLessThanOrEqual(80);
     expect(APP_DISPLAY_NAME).toBe('PoC Automation 3.0');

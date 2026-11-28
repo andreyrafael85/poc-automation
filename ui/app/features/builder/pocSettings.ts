@@ -45,6 +45,19 @@ export async function createSettingsObject(schemaId: string, value: unknown): Pr
   return id;
 }
 
+/**
+ * 3.8.4: replaces the value of a settings object this PoC created (`PUT …/settings/objects/{id}`, under
+ * `settings:objects:write`); without an update token the last write wins, which is what "Update" on the PoC's own object means.
+ */
+export async function updateSettingsObject(id: string, value: unknown): Promise<void> {
+  await httpClient.send({
+    url: `${SETTINGS_API}/${encodeURIComponent(id)}`,
+    method: 'PUT',
+    body: { value },
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
 /** Removes a settings object this PoC created. */
 export async function deleteSettingsObject(id: string): Promise<void> {
   await httpClient.send({ url: `${SETTINGS_API}/${encodeURIComponent(id)}`, method: 'DELETE' });
@@ -90,25 +103,29 @@ export function serviceFilter(serviceIds: readonly string[]): string {
  */
 export const DETECTOR_MIN_REQUESTS = 10;
 
-/** The detector's query: one series per service. */
+/**
+ * The detector's query: one series per service, at one-minute samples. 3.8.4 (the fix of 3.8.3 — the owner's validation of 3.8.3: the p90
+ * detector failed with "Query does not return 1-minutes interval. Include 'interval:1m' into the query"): the interval is
+ * explicit — the detector reads its own window, where a two-metric series may come at a coarser step.
+ */
 export function detectorQuery(kind: DetectorKind, serviceIds: readonly string[]): string {
   const filter = serviceFilter(serviceIds);
   const floor = DETECTOR_MIN_REQUESTS;
   if (kind === 'failureRate') {
     return [
-      `timeseries {f = sum(dt.service.request.failure_count), r = sum(dt.service.request.count)}, by: {dt.entity.service}${filter}`,
+      `timeseries {f = sum(dt.service.request.failure_count), r = sum(dt.service.request.count)}, by: {dt.entity.service}, interval: 1m${filter}`,
       `| fieldsAdd failureRate = iCollectArray(if(r[] >= ${floor}, 100 * f[] / r[]))`,
       '| fields timeframe, interval, dt.entity.service, failureRate',
     ].join('\n');
   }
   if (kind === 'responseTime') {
     return [
-      `timeseries {t = percentile(dt.service.request.response_time, 90), r = sum(dt.service.request.count)}, by: {dt.entity.service}${filter}`,
+      `timeseries {t = percentile(dt.service.request.response_time, 90), r = sum(dt.service.request.count)}, by: {dt.entity.service}, interval: 1m${filter}`,
       `| fieldsAdd p90 = iCollectArray(if(r[] >= ${floor}, t[]))`,
       '| fields timeframe, interval, dt.entity.service, p90',
     ].join('\n');
   }
-  return [`timeseries requests = sum(dt.service.request.count), by: {dt.entity.service}${filter}`, `| filter arrayAvg(requests) >= ${floor}`].join('\n');
+  return [`timeseries requests = sum(dt.service.request.count), by: {dt.entity.service}, interval: 1m${filter}`, `| filter arrayAvg(requests) >= ${floor}`].join('\n');
 }
 
 /**

@@ -1,5 +1,26 @@
 # Changelog
 
+## 3.8.4 — the fix of 3.8.3
+
+**Anomaly detectors**
+
+- The detectors' queries ask for one-minute samples (`interval: 1m`): the platform requires them, and the response-time
+  (p90) detector was refused without it.
+
+**Site Reliability Guardians**
+
+- The infrastructure guardian reads the mean over every host — CPU, memory and disk use (container mounts left out) —,
+  as the services guardian reads every service, with lines to match (CPU 80 % / 70 %, memory and disk 85 % / 75 %).
+- "Update" rewrites the guardians already created with the current objectives, keeping their validation history.
+- The Guardian tab explains the Site Reliability Guardian app's own "Automate": it creates a different workflow, started
+  by a deployment event (`guardian.validation.triggered`, with the guardian's tag and the window to validate), which
+  stops when run on demand; for daily runs use the PoC Builder's validation workflow.
+
+**The service user in Settings → PoC plan**
+
+- Five of the service users you may use are offered, those already running detectors first (was twelve).
+- The id checked is always the one saved, whatever was chosen before, and the panel says so with its name.
+
 ## 3.8.3 — Site Reliability Guardians, the token security agent, sturdier anomaly detectors
 
 **The Guardian tab on the PoC Builder**

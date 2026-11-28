@@ -4,7 +4,7 @@
 
 ### All in One — run a Dynatrace proof of concept end to end, from one app
 
-![Version](https://img.shields.io/badge/version-3.8.3-1496ff)
+![Version](https://img.shields.io/badge/version-3.8.4-1496ff)
 ![Dynatrace AppEngine](https://img.shields.io/badge/Dynatrace-AppEngine-6f2da8)
 ![Strato](https://img.shields.io/badge/Strato%20Design%20System-3.18-00a1b2)
 ![React](https://img.shields.io/badge/React-18-61dafb)
@@ -27,14 +27,14 @@ evidence class, the exact query and the time it was read — nothing estimated, 
 </p>
 <p align="center"><em>The Overview — stage 1 of 7 (fictitious company, synthetic data).</em></p>
 
-> **What's new in 3.8.3** — the PoC Builder gains a **Guardian** tab: five **Site Reliability Guardians** — the
-> PoC's SLOs, infrastructure performance, services, applications and security (vulnerabilities) —, each created on the
-> SE's click after a confirmation, kept in the Register and removed by the clean-up, and a validation workflow that runs
-> them every day, handed to the Workflows app. A **token security agent** joins the Workflows tab: a daily workflow that
-> audits the environment's access tokens and credential vault (metadata only), says what to disable or rotate and adds
-> Dynatrace Assist's reading. The anomaly detectors get sturdier rules and events that name the service's problem;
-> Settings shows the service users **by name** with the **least policy** they need; and the capacity workflows always
-> raise a predictive event, titled and described for the customer.
+> **What's new in 3.8.4** — the fix of 3.8.3: the anomaly detectors' queries ask for **one-minute samples** (the
+> response-time detector was refused without them); the infrastructure guardian reads the **mean over every host**, and
+> **"Update"** rewrites the guardians already created; the Guardian tab explains the Site Reliability Guardian app's own
+> **"Automate"** (a workflow started by a deployment event); and Settings offers the **top five** service users and always
+> saves the id you check, saying so with its name.
+>
+> **In 3.8.3** the PoC Builder gained the **Guardian** tab (five Site Reliability Guardians and a daily validation
+> workflow) and a **token security agent** (a daily audit of the access tokens and the credential vault).
 >
 > Earlier releases: see the git history of this repository.
 
@@ -95,8 +95,8 @@ Portuguese).
 | **Workflows** | A problem-triage workflow and a weekly PoC summary, handed to the Workflows app ready to save. Both run the app's own workflow actions, add a Dynatrace Assist reading and send a formal Markdown e-mail; the weekly run also writes a notebook with the week's charts. **Predictive capacity**: four daily Dynatrace Intelligence forecasts (host disk, host memory, host CPU, Kubernetes memory against its limit) that e-mail and raise a predictive event only when the forecast reaches its line. **Token security agent**: a daily audit of the access tokens and the credential vault (metadata only) with what to disable or rotate and Dynatrace Assist's reading |
 | **Synthetic** | **Browser monitors** (a real browser: load times, Core Web Vitals, a screenshot on failure) and **HTTP monitors** of the customer's addresses |
 | **OpenPipeline** | A logs pipeline that gives a level to records written without one, the route that sends the sources the SE ticks to it, and a check of what went through |
-| **Anomaly detection** | Detectors on the golden signals (failure rate, response time p90, traffic drop) — one per signal over the services ticked, or one per signal and per service — with a request floor so quiet services do not alert, created by the app and run by the **service user** set in Settings → PoC plan (shown by name, with the least policy it needs; the Builder checks it again when it opens and shows "Ready"); or opened in the **Anomaly Detection app** with the event already filled in |
-| **Guardian** | Five **Site Reliability Guardians** — the PoC's SLOs, infrastructure performance, services, applications, security (vulnerabilities) — and a daily validation workflow handed to the Workflows app |
+| **Anomaly detection** | Detectors on the golden signals (failure rate, response time p90, traffic drop), read at one-minute samples — one per signal over the services ticked, or one per signal and per service — with a request floor so quiet services do not alert, created by the app and run by the **service user** set in Settings → PoC plan (the top five offered by name, with the least policy it needs; the Builder checks it again when it opens and shows "Ready"); or opened in the **Anomaly Detection app** with the event already filled in |
+| **Guardian** | Five **Site Reliability Guardians** — the PoC's SLOs, infrastructure performance (the mean over every host), services, applications, security (vulnerabilities) — with "Update" for the ones already created, and a daily validation workflow handed to the Workflows app |
 | **Register** | What the PoC created, with links, and the clean-up |
 
 ### Workflow actions
@@ -249,11 +249,11 @@ user's own permissions.
 
 ## Quality
 
-| Gate | Command | Result for 3.8.3 |
+| Gate | Command | Result for 3.8.4 |
 | --- | --- | --- |
 | Types (UI and workflow actions) | `npm run typecheck` | clean |
 | Lint | `npm run lint` | clean |
-| Unit and component tests | `npm test` | **2,119 passed**, 0 skipped, 150 test files |
+| Unit and component tests | `npm test` | **2,122 passed**, 0 skipped, 150 test files |
 | Query catalog | `npm run docs:catalog` | 128 queries, regenerated |
 | AppEngine analysis | `npm run analyze` | part of `scripts/release-gates.sh` |
 | Delivery build | `npm run build -- --optimize --enable-code-splitting` | part of `scripts/release-gates.sh` |

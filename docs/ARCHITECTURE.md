@@ -1,6 +1,6 @@
 # Architecture
 
-> **App:** PoC Automation 3.0 · **id:** `my.poc.automation` · **platform:** Dynatrace AppEngine · **release:** 3.8.3
+> **App:** PoC Automation 3.0 · **id:** `my.poc.automation` · **platform:** Dynatrace AppEngine · **release:** 3.8.4
 >
 > The code is the source of truth. This document describes how the app is built and the rules it keeps.
 
@@ -419,7 +419,10 @@ objective — the guardian's SLO reference takes only classic SLO metric keys), 
 applications and security (the last 2 hours of vulnerability reports). Each objective has a comparison, a failing line
 and a warning. Created on the SE's click after a confirmation (`settings:objects:write`), kept in the Register and
 removed by the clean-up. The validation workflow runs the platform's validation action for each guardian every day;
-the results stay in the Site Reliability Guardian app.
+the results stay in the Site Reliability Guardian app. Since 3.8.4 the infrastructure guardian reads the mean over every
+host (CPU, memory, disk), "Update" rewrites a guardian already created in place (`PUT …/settings/objects/{id}`, keeping
+its validation history), and the tab notes that the Site Reliability Guardian app's own "Automate" creates a different
+workflow, started by a deployment event (`guardian.validation.triggered`), which has no timeframe when run on demand.
 
 Not written by the app, workflows are in neither the Register nor the clean-up.
 
@@ -449,7 +452,8 @@ overwritten. The clean-up removes the route first, then the pipeline.
 **Anomaly detection.** One detector per golden signal: failure rate (static threshold above 5 % for 3 of 5 minutes),
 response time p90 (auto-adaptive, above, 5 of 10 minutes) and a traffic drop (auto-adaptive, below, 10 of 15 minutes).
 Since 3.8.3 a minute counts only with at least 10 requests and the traffic detector watches only services that average
-that many a minute, so quiet services do not alert; the events name the service's problem, not the PoC. With no service ticked, a
+that many a minute, so quiet services do not alert; the events name the service's problem, not the PoC. Since 3.8.4
+the queries ask for one-minute samples (`interval: 1m`), which the platform requires of a detector's query. With no service ticked, a
 detector watches every service; the SE may also create one detector per signal and per service ticked. A detector
 runs its query on behalf of an actor, and the platform takes a **service user** as that actor (a person's own account
 is refused). Since 3.8.1 that service user is set in **Settings → PoC plan** (`ServiceUserPicker`), a step of the
@@ -458,7 +462,8 @@ detectors on the environment (offered once the platform accepts them) or pastes 
 the settings service checks it with a `validateOnly` call (nothing written) before it is saved with the PoC. The kit
 only reads it and can check it again; creating a service user stays in Account Management. Since 3.8.3 Settings lists
 the service users the signed-in person may use by name (the IAM service, under `iam:service-users:use`), saves the
-name with the id, and shows the least policy a detector's actor needs, ready to paste in Account Management. The
+name with the id, and shows the least policy a detector's actor needs, ready to paste in Account Management. Since
+3.8.4 it offers the top five (those already running detectors first) and always saves the id checked, naming it. The
 detectors are created only on the SE's click after a confirmation, kept in the Register and removed by the clean-up.
 A detector can also be opened in the **Anomaly Detection app** through its documented intent, with its event already
 filled in, and saved there by the SE (then it is not in the Register). The kit links to Settings → all the alerts.

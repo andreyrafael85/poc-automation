@@ -84,9 +84,10 @@ const OPEN_VULNERABILITIES = [
 
 /** The lines each guardian starts with — a starting point the SE tunes in the Site Reliability Guardian app. */
 export const GUARDIAN_LINES = {
-  hostCpu: { target: 90, warning: 80 },
-  hostMemory: { target: 90, warning: 80 },
-  disk: { target: 95, warning: 90 },
+  // 3.8.4 (the owner: "devemos criar para todos os hosts, tipo analisar a média de todos"): the mean over every host.
+  hostCpu: { target: 80, warning: 70 },
+  hostMemory: { target: 85, warning: 75 },
+  disk: { target: 85, warning: 75 },
   failureRate: { target: 5, warning: 2 },
   responseTimeUs: { target: 1_000_000, warning: 800_000 },
   lcpMs: { target: 4000, warning: 2500 },
@@ -113,9 +114,9 @@ export function guardianSpecs(kind: GuardianKind, context: { slos: readonly PocS
   }
   if (kind === 'infra') {
     return [
-      { key: 'hostCpu', dql: 'timeseries cpu = avg(dt.host.cpu.usage), by: { dt.entity.host }\n| summarize busiest = max(arrayAvg(cpu))', op: AT_MOST, ...L.hostCpu, unit: PERCENT },
-      { key: 'hostMemory', dql: 'timeseries mem = avg(dt.host.memory.usage), by: { dt.entity.host }\n| summarize busiest = max(arrayAvg(mem))', op: AT_MOST, ...L.hostMemory, unit: PERCENT },
-      { key: 'disk', dql: `timeseries used = avg(dt.host.disk.used.percent), by: { dt.entity.host, dt.entity.disk }\n${DISK_FILTER}\n| summarize fullest = max(arrayAvg(used))`, op: AT_MOST, ...L.disk, unit: PERCENT },
+      { key: 'hostCpu', dql: 'timeseries cpu = avg(dt.host.cpu.usage)\n| fields cpu = arrayAvg(cpu)', op: AT_MOST, ...L.hostCpu, unit: PERCENT },
+      { key: 'hostMemory', dql: 'timeseries mem = avg(dt.host.memory.usage)\n| fields mem = arrayAvg(mem)', op: AT_MOST, ...L.hostMemory, unit: PERCENT },
+      { key: 'disk', dql: `timeseries used = avg(dt.host.disk.used.percent), by: { dt.entity.host, dt.entity.disk }\n${DISK_FILTER}\n| summarize used = avg(arrayAvg(used))`, op: AT_MOST, ...L.disk, unit: PERCENT },
     ];
   }
   if (kind === 'services') {

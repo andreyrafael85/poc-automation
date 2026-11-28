@@ -236,7 +236,8 @@ describe('an SE or partner working in English', () => {
 
 describe('What’s new', () => {
   it('keeps 3.7.4 among the ten releases', () => {
-    expect(WHATS_NEW).toContainEqual({ key: 'help.whatsNew.i116', published: '2026-11-23' });
+    // 3.8.4: i116 left the ten What's new shows (the entry stays in its fragment).
+    expect(WHATS_NEW).not.toContainEqual({ key: 'help.whatsNew.i116', published: '2026-11-23' });
     expect(WHATS_NEW.length).toBe(10);
     expect(entryFor('help.whatsNew.i116').en.startsWith('3.7.4 — ')).toBe(true);
   });

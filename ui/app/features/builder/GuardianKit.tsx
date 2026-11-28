@@ -26,7 +26,7 @@ import {
   type GuardianKind,
   type GuardianWords,
 } from './pocGuardians';
-import { createSettingsObject, refusalOf, responseBodyOf } from './pocSettings';
+import { createSettingsObject, refusalOf, responseBodyOf, updateSettingsObject } from './pocSettings';
 
 /**
  * 3.8.3 — the PoC Builder's "Guardian" tab (the owner, 2026-11-27): five Site Reliability Guardians — the PoC's SLOs,
@@ -60,6 +60,7 @@ export const GuardianKit = () => {
   const [kinds, setKinds] = useState<Set<GuardianKind>>(new Set(GUARDIAN_KINDS));
   const [picked, setPicked] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState<Busy>({ kind: 'idle' });
+  const [updating, setUpdating] = useState<Busy>({ kind: 'idle' });
   const [shared, setShared] = useState(true);
   const [opened, setOpened] = useState(false);
 
@@ -109,6 +110,30 @@ export const GuardianKit = () => {
     }
     if (made.length > 0) setPocPlan({ ...pocPlan, guardians: [...existing, ...made] });
     setBusy({ kind: 'done', ok: made.length, failed, reason });
+  };
+
+  // 3.8.4: "Update" rewrites the guardians already created with the current objectives (e.g. the infrastructure guardian's
+  // mean over every host), keeping their ids, the register and their validation history.
+  const toUpdate = existing.filter((guardian) => (GUARDIAN_KINDS as readonly string[]).includes(guardian.kind));
+  const update = async () => {
+    setUpdating({ kind: 'busy' });
+    let ok = 0;
+    let failed = 0;
+    let reason: string | null = null;
+    for (const guardian of toUpdate) {
+      const kind = guardian.kind as GuardianKind;
+      const value = buildGuardian(kind, context, words(kind));
+      if (value === null) continue;
+      try {
+        await updateSettingsObject(guardian.id, value);
+        ok += 1;
+      } catch (error) {
+        failed += 1;
+        const refusal = refusalOf(await responseBodyOf(error), '');
+        reason = refusal === '' ? t(failureKey(error)) : refusal;
+      }
+    }
+    setUpdating({ kind: 'done', ok, failed, reason });
   };
 
   const workflow = () =>
@@ -234,6 +259,17 @@ export const GuardianKit = () => {
           </Cluster>
         )}
         <Result busy={busy} />
+        {canCreate && toUpdate.length > 0 && (
+          <Stack gap="tight">
+            <Cluster>
+              <Button onClick={() => void update()} disabled={updating.kind === 'busy'} data-testid="builder-guardian-update">
+                {t('grd.update', { n: formatNumber(toUpdate.length) })}
+              </Button>
+            </Cluster>
+            <Text className="pvs-caption">{t('grd.update.what')}</Text>
+            <Result busy={updating} />
+          </Stack>
+        )}
 
         <Stack gap="tight">
           <Heading level={5} as="h3">
@@ -260,6 +296,10 @@ export const GuardianKit = () => {
             </Button>
           </Cluster>
           {existing.length === 0 && <Text className="pvs-caption">{t('grd.wf.needs')}</Text>}
+          {/* 3.8.4 (the owner: "Automate" in the guardian app failed with "Undefined variables: timeframe.to"). */}
+          <Text className="pvs-caption" data-testid="builder-guardian-automate">
+            {t('grd.automate')}
+          </Text>
           {opened && (
             <MessageContainer variant="primary">
               <MessageContainer.Title>{t('builder.wf.opened.title')}</MessageContainer.Title>

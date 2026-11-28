@@ -109,7 +109,7 @@ describe('AI Observability (3.8.0)', () => {
 
 describe('What’s new (3.8.0)', () => {
   it('opens on 3.8.0 and keeps ten', () => {
-    expect(WHATS_NEW[3]).toEqual({ key: 'help.whatsNew.i122', published: '2026-11-26' }); // 3.8.3, 3.8.2 and 3.8.1 open it now
+    expect(WHATS_NEW[4]).toEqual({ key: 'help.whatsNew.i122', published: '2026-11-26' }); // 3.8.4, 3.8.3, 3.8.2 and 3.8.1 open it now
     expect(WHATS_NEW).toHaveLength(10);
     expect(entryFor('help.whatsNew.i122').en.startsWith('3.8.0 — ')).toBe(true);
     expect(entryFor('help.whatsNew.i122')['pt-BR'].startsWith('3.8.0 — ')).toBe(true);

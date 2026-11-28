@@ -24,8 +24,8 @@ export const v383Strings = {
   },
   'grd.kind.infra': { en: 'Infrastructure performance', 'pt-BR': 'Desempenho da infraestrutura' },
   'grd.kind.infra.what': {
-    en: 'The busiest host’s CPU and memory and the fullest disk (container mounts left out).',
-    'pt-BR': 'A CPU e a memória do host mais ocupado e o disco mais cheio (montagens de contêiner de fora).',
+    en: 'The mean CPU, memory and disk use over every host (container mounts left out), as the services guardian reads every service.',
+    'pt-BR': 'O uso médio de CPU, memória e disco de todos os hosts (montagens de contêiner de fora), como o guardian de serviços lê todos os serviços.',
   },
   'grd.kind.services': { en: 'Services', 'pt-BR': 'Serviços' },
   'grd.kind.services.what': {
@@ -44,12 +44,12 @@ export const v383Strings = {
   },
 
   'grd.obj.slo.desc': { en: 'The SLO’s own indicator, over the guardian’s window.', 'pt-BR': 'O indicador da própria SLO, na janela do guardian.' },
-  'grd.obj.hostCpu': { en: 'Busiest host’s CPU', 'pt-BR': 'CPU do host mais ocupado' },
-  'grd.obj.hostCpu.desc': { en: 'The mean CPU use of the host that used most, over the window.', 'pt-BR': 'O uso médio de CPU do host que mais usou, na janela.' },
-  'grd.obj.hostMemory': { en: 'Busiest host’s memory', 'pt-BR': 'Memória do host mais ocupado' },
-  'grd.obj.hostMemory.desc': { en: 'The mean memory use of the host that used most, over the window.', 'pt-BR': 'O uso médio de memória do host que mais usou, na janela.' },
-  'grd.obj.disk': { en: 'Fullest disk', 'pt-BR': 'Disco mais cheio' },
-  'grd.obj.disk.desc': { en: 'The mean used space of the fullest disk, over the window.', 'pt-BR': 'O espaço usado médio do disco mais cheio, na janela.' },
+  'grd.obj.hostCpu': { en: 'Hosts’ CPU (mean)', 'pt-BR': 'CPU dos hosts (média)' },
+  'grd.obj.hostCpu.desc': { en: 'The mean CPU use over every host, over the window.', 'pt-BR': 'O uso médio de CPU de todos os hosts, na janela.' },
+  'grd.obj.hostMemory': { en: 'Hosts’ memory (mean)', 'pt-BR': 'Memória dos hosts (média)' },
+  'grd.obj.hostMemory.desc': { en: 'The mean memory use over every host, over the window.', 'pt-BR': 'O uso médio de memória de todos os hosts, na janela.' },
+  'grd.obj.disk': { en: 'Hosts’ disks (mean)', 'pt-BR': 'Discos dos hosts (média)' },
+  'grd.obj.disk.desc': { en: 'The mean used space over every host’s disks, over the window.', 'pt-BR': 'O espaço usado médio de todos os discos dos hosts, na janela.' },
   'grd.obj.failureRate': { en: 'Failure rate', 'pt-BR': 'Taxa de falha' },
   'grd.obj.failureRate.desc': { en: 'Failed requests as a share of all requests.', 'pt-BR': 'As requisições com falha como parcela de todas.' },
   'grd.obj.responseTime': { en: 'Response time (p90)', 'pt-BR': 'Tempo de resposta (p90)' },
@@ -250,6 +250,22 @@ export const v383Strings = {
   'tok.action.rotate': { en: 'Set an expiry and rotate', 'pt-BR': 'Definir validade e rotacionar' },
   'tok.action.review': { en: 'Review', 'pt-BR': 'Revisar' },
 
+  // ------------------------------------------------------------------ 3.8.4, the fix of 3.8.3 (the owner's validation of 3.8.3)
+  'su.result.saved': { en: 'Saved: the detectors run as {who}.', 'pt-BR': 'Gravado: os detectores rodam como {who}.' },
+  'grd.update': { en: 'Update {n} guardian(s)', 'pt-BR': 'Atualizar {n} guardian(s)' },
+  'grd.update.what': {
+    en: 'Rewrites the guardians already created with the objectives above, keeping their validation history.',
+    'pt-BR': 'Regrava os guardians já criados com os objetivos acima, mantendo o histórico de validações.',
+  },
+  'grd.automate': {
+    en: '“Automate” in the Site Reliability Guardian app creates a different workflow: it starts on a deployment event (event type guardian.validation.triggered, with the guardian’s tag and the window to validate) and reads that event’s timeframe — run on demand it has no event and stops with “Undefined variables: timeframe.to”. For daily runs use the workflow above; for a deployment, send that event from the pipeline.',
+    'pt-BR': '“Automate” no app Site Reliability Guardian cria outro workflow: ele começa num evento de deploy (tipo guardian.validation.triggered, com a tag do guardian e a janela a validar) e lê a janela desse evento — rodado sob demanda, não há evento e ele para com “Undefined variables: timeframe.to”. Para a rotina diária use o workflow acima; para um deploy, envie esse evento pelo pipeline.',
+  },
+
+  'help.whatsNew.i126': {
+    en: '3.8.4 — Fixes from the validation of 3.8.3: the anomaly detectors ask for one-minute samples (the p90 detector failed without it); the infrastructure guardian reads the mean over every host, and “Update” rewrites the guardians already created; the guardian kit explains the Site Reliability Guardian app’s “Automate” (a deployment-event workflow); Settings offers the top five service users and saves the id you check, whatever was chosen before, saying so with its name.',
+    'pt-BR': '3.8.4 — Correções da validação da 3.8.3: os detectores de anomalia pedem amostras de um minuto (o de p90 falhava sem isso); o guardian de infraestrutura lê a média de todos os hosts, e “Atualizar” regrava os guardians já criados; o kit de guardians explica o “Automate” do app Site Reliability Guardian (um workflow de evento de deploy); as Configurações oferecem os cinco principais usuários de serviço e gravam o id que você confere, seja qual for o escolhido antes, dizendo isso com o nome.',
+  },
   'help.whatsNew.i125': {
     en: '3.8.3 — The PoC Builder gains a Guardian tab: five Site Reliability Guardians — the PoC’s SLOs, infrastructure performance, services, applications and security (vulnerabilities) —, each created on your click after a confirmation, kept in the Register and removed by the clean-up, and a validation workflow that runs them every day, handed to Workflows. Also: the anomaly detectors’ events name the service’s problem (no longer the PoC), Settings shows the service users by name and the least policy they need, and the capacity workflows always raise a predictive event, titled and described for the customer. And a token security agent: a daily workflow that audits the environment’s access tokens and credential vault and says what to disable, with Dynatrace Assist’s reading.',
     'pt-BR': '3.8.3 — O PoC Builder ganha a aba Guardian: cinco Site Reliability Guardians — as SLOs da PoC, o desempenho da infraestrutura, os serviços, as aplicações e a segurança (vulnerabilidades) —, cada um criado no seu clique depois de uma confirmação, guardado no Registro e removido pela limpeza, e um workflow de validação que os roda todo dia, entregue ao Workflows. E mais: os eventos dos detectores de anomalia nomeiam o problema do serviço (não mais a PoC), as Configurações mostram os usuários de serviço pelo nome e a política mínima de que precisam, e os workflows de capacidade sempre geram um evento preditivo, com título e descrição para o cliente. E um agente de segurança de tokens: um workflow diário que audita os tokens de acesso e o cofre de credenciais do ambiente e diz o que desativar, com a leitura do Dynatrace Assist.',

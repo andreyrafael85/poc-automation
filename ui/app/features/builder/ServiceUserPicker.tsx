@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { Button } from '@dynatrace/strato-components/buttons';
-import { CodeSnippet } from '@dynatrace/strato-components/content';
+import { CodeSnippet, MessageContainer } from '@dynatrace/strato-components/content';
 import { TextInput } from '@dynatrace/strato-components/forms';
 import { Heading, Link, Paragraph, Text } from '@dynatrace/strato-components/typography';
 import { ExternalLinkIcon } from '@dynatrace/strato-icons';
@@ -47,8 +47,8 @@ export function actorLabel(id: string, name: string | undefined): string {
   return name !== undefined && name.trim() !== '' ? `${name.trim()} (${id})` : id;
 }
 
-/** 3.8.3: how many of the service users the person may use are offered. */
-const USERS_SHOWN = 12;
+/** 3.8.4 (the owner: "vamos deixar apenas um top 5"): how many of the service users the person may use are offered — those already running detectors first. */
+export const USERS_SHOWN = 5;
 
 /** How many of the tenant's detector actors are checked (each check writes nothing). */
 const ACTORS_CHECKED = 8;
@@ -67,6 +67,8 @@ export const ServiceUserPicker = ({ onSaved }: { onSaved?: (patch: Partial<PocPl
   // 3.8.3: the offers — the service users this person may use, by name (the IAM service), the ones already running detectors
   // first; when the IAM service does not answer, the actors of the tenant's detectors the platform accepts (as in 3.8.1).
   const [actors, setActors] = useState<(DetectorActor & { name: string })[] | null>(null);
+  // Every service user this person may use, by id — to name an id pasted below, beyond the five offered.
+  const [names, setNames] = useState<Map<string, string>>(new Map());
   const [check, setCheck] = useState<{ state: 'checking' | 'ok' | 'refused'; reason?: string } | null>(null);
 
   const save = (patch: Partial<PocPlan>) => {
@@ -85,7 +87,10 @@ export const ServiceUserPicker = ({ onSaved }: { onSaved?: (patch: Partial<PocPl
           .map((user) => ({ id: user.id, name: user.name, detectors: runs.get(user.id)?.detectors ?? 0, example: runs.get(user.id)?.example ?? '' }))
           .sort((a, b) => b.detectors - a.detectors || a.name.localeCompare(b.name))
           .slice(0, USERS_SHOWN);
-        if (live) setActors(offers);
+        if (live) {
+          setActors(offers);
+          setNames(new Map(users.map((user) => [user.id, user.name])));
+        }
         return;
       }
       // Only the service users the platform accepts for this person are offered.
@@ -107,10 +112,13 @@ export const ServiceUserPicker = ({ onSaved }: { onSaved?: (patch: Partial<PocPl
     setCheck({ state: 'checking' });
     const refusal = await checkActor(actor);
     if (refusal === null) {
-      setCheck({ state: 'ok' });
-      const name = actors?.find((offer) => offer.id === actor)?.name ?? '';
+      // 3.8.4 (the owner: an id pasted after a suggestion was chosen "não gravou"): the id checked is the one saved, whatever
+      // was chosen before, and the panel says so in words with its name and id.
+      const name = names.get(actor) ?? actors?.find((offer) => offer.id === actor)?.name ?? '';
       save({ detectorActor: actor, detectorActorName: name === '' ? undefined : name });
-    } else setCheck({ state: 'refused', reason: refusalWords(refusal, t) });
+      setCheck({ state: 'ok', reason: actorLabel(actor, name) });
+      setTyped('');
+    } else setCheck({ state: 'refused', reason: `${refusalWords(refusal, t)} (${actor})` });
   };
 
   const accountValid = ACCOUNT_UUID.test(account.trim());
@@ -229,13 +237,17 @@ export const ServiceUserPicker = ({ onSaved }: { onSaved?: (patch: Partial<PocPl
                 </Button>
               </Cluster>
               {check !== null && (
-                <Text className="pvs-caption" data-testid="builder-ad-actor-result" data-state={check.state}>
-                  {check.state === 'checking'
-                    ? t('builder.ad.actor.checking')
-                    : check.state === 'ok'
-                      ? t('builder.ad.actor.ok')
-                      : t('builder.ad.actor.refused', { reason: check.reason ?? '' })}
-                </Text>
+                <div data-testid="builder-ad-actor-result" data-state={check.state}>
+                  {check.state === 'checking' ? (
+                    <Text className="pvs-caption">{t('builder.ad.actor.checking')}</Text>
+                  ) : (
+                    <MessageContainer variant={check.state === 'ok' ? 'success' : 'critical'}>
+                      <MessageContainer.Description>
+                        {check.state === 'ok' ? t('su.result.saved', { who: check.reason ?? '' }) : t('builder.ad.actor.refused', { reason: check.reason ?? '' })}
+                      </MessageContainer.Description>
+                    </MessageContainer>
+                  )}
+                </div>
               )}
             </Stack>
           </>

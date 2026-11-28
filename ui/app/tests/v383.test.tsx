@@ -14,7 +14,7 @@ import {
   guardianSpecs,
   type GuardianWords,
 } from '../features/builder/pocGuardians';
-import { actorLabel } from '../features/builder/ServiceUserPicker';
+import { USERS_SHOWN, actorLabel } from '../features/builder/ServiceUserPicker';
 import { buildCapacityWorkflow, eventScript, type CapacityWords } from '../features/builder/pocCapacity';
 import { DETECTOR_ACTOR_POLICY, DETECTOR_MIN_REQUESTS, PROBE_WORDS, buildDetector, detectorQuery, serviceUsersOf } from '../features/builder/pocSettings';
 import { tokenWords } from '../features/builder/TokenKit';
@@ -271,9 +271,43 @@ describe('the token security agent (3.8.3)', () => {
   });
 });
 
+describe('from the owner’s validation of 3.8.3 (3.8.4)', () => {
+  it('asks the detectors’ queries for one-minute samples (the p90 detector failed without it)', () => {
+    for (const kind of ['failureRate', 'responseTime', 'traffic'] as const) expect(detectorQuery(kind, [])).toContain('by: {dt.entity.service}, interval: 1m');
+    expect(detectorQuery('responseTime', [`SERVICE-${'0A'.repeat(8)}`])).toContain('interval: 1m, filter: { in(dt.entity.service, array(');
+  });
+
+  it('reads the infrastructure guardian as the mean over every host, as the services guardian reads every service', () => {
+    const specs = guardianSpecs('infra', context());
+    expect(specs.map((spec) => spec.dql)).toEqual([
+      'timeseries cpu = avg(dt.host.cpu.usage)\n| fields cpu = arrayAvg(cpu)',
+      'timeseries mem = avg(dt.host.memory.usage)\n| fields mem = arrayAvg(mem)',
+      expect.stringContaining('| summarize used = avg(arrayAvg(used))'),
+    ]);
+    expect(specs.map((spec) => [spec.target, spec.warning])).toEqual([
+      [80, 70],
+      [85, 75],
+      [85, 75],
+    ]);
+  });
+
+  it('offers the top five service users, saves the id checked whatever was chosen before, and updates the guardians in place', () => {
+    expect(USERS_SHOWN).toBe(5);
+    const picker = read('features/builder/ServiceUserPicker.tsx');
+    expect(picker).toContain("setCheck({ state: 'ok', reason: actorLabel(actor, name) })");
+    expect(picker).toContain('names.get(actor)');
+    const kit = read('features/builder/GuardianKit.tsx');
+    expect(kit).toContain('updateSettingsObject(guardian.id, value)');
+    expect(kit).toContain('data-testid="builder-guardian-automate"');
+    expect(translate('grd.automate', 'en')).toContain('guardian.validation.triggered');
+  });
+});
+
 describe('What’s new (3.8.3)', () => {
-  it('opens on 3.8.3 and keeps ten', () => {
-    expect(WHATS_NEW[0]).toEqual({ key: 'help.whatsNew.i125', published: '2026-11-27' });
+  it('keeps 3.8.3 second, under 3.8.4, and ten in all', () => {
+    expect(WHATS_NEW[0]).toEqual({ key: 'help.whatsNew.i126', published: '2026-11-28' });
+    expect(entryFor('help.whatsNew.i126').en.startsWith('3.8.4 — ')).toBe(true);
+    expect(WHATS_NEW[1]).toEqual({ key: 'help.whatsNew.i125', published: '2026-11-27' });
     expect(WHATS_NEW).toHaveLength(10);
     expect(entryFor('help.whatsNew.i125').en.startsWith('3.8.3 — ')).toBe(true);
     expect(entryFor('help.whatsNew.i125')['pt-BR'].startsWith('3.8.3 — ')).toBe(true);

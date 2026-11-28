@@ -118,7 +118,7 @@ describe('the menu in nine stages, and the Roadmap as the 30-60-90 action plan',
 
 describe('What’s new', () => {
   it('keeps 3.7.9 among the ten, after 3.8.0', () => {
-    expect(WHATS_NEW[4]?.key).toBe('help.whatsNew.i121'); // 3.8.3: after 3.8.3, 3.8.2, 3.8.1 and 3.8.0
+    expect(WHATS_NEW[5]?.key).toBe('help.whatsNew.i121'); // 3.8.4: after 3.8.4, 3.8.3, 3.8.2, 3.8.1 and 3.8.0
     expect(WHATS_NEW).toHaveLength(10);
     expect(entryFor('help.whatsNew.i121').en).toMatch(/^3\.7\.9 — /);
   });
